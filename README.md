@@ -10,6 +10,7 @@
 
 #  REGOLE DI BUON USO GITHUB
 
-  Prima fai PULL, poi lavori.
-  Descrivi la COMMIT con un senso.
-  Modificare possibilmente solo la propria parte di lavoro, cosi da rendere più facile il MERGE dei file.
+  1. Prima fai PULL, poi lavori.
+  2. Descrivi la COMMIT con un senso.
+  3. Modificare possibilmente solo la propria parte di lavoro, cosi da
+     rendere più facile il MERGE dei file.
