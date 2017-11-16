@@ -1,7 +1,5 @@
-# parkidle
-
 # ParkIdle:
-  your favourite park finder
+# your favourite park finder!
  
 # predict.io API GitHub reference
   https://github.com/predict-io/
