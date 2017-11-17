@@ -31,5 +31,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-base:9.4.0'
     compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'io.predict:predict-io:3.2.1'
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-beta.5@aar') {
+        transitive=true
+    }
     testCompile 'junit:junit:4.12'
 }

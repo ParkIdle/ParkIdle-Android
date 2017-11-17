@@ -23,7 +23,7 @@ import io.predict.PredictIOStatus;
  * Created by simonestaffa on 16/11/17.
  */
 
-public class PIOManager extends Application implements PredictIOListener {
+public class PIOManager extends Application implements PredictIOListener{
 
     private PredictIOStatus PIOStatus;
     private PredictIO.PIOActivationListener PIOActivationListenerInstance;
@@ -65,68 +65,8 @@ public class PIOManager extends Application implements PredictIOListener {
         }catch(Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
-
-        /**
-         * This method returns predict.io's status, PredictIOStatus (i.e. if it is active or not).
-         *
-         * @return PredictIOStatus which represents the current predict.io state.
-         * ACTIVE: predict.io is in a working/running state.
-         * LOCATION_DISABLED: predict.io is not in a working state, GPS is disabled from location settings.
-         * AIRPLANE_MODE_ENABLED: predict.io is not in a working state, Airplane mode is enabled in settings.
-         * INSUFFICIENT_PERMISSION: predict.io has not been authorized by user to use location services at any time.
-         * IN_ACTIVE: predict.io has not been started. It is in inactive state.
-         */
-        PIOStatus = predictIO.getStatus();
-
-        /**
-         * Use this method to get unique id(Identifier) assigned to each device by predict.io
-         *
-         * @return UUID
-         */
-        deviceIdentifier = predictIO.getDeviceIdentifier();
-
-        /**
-         * Enable/disable searching for parking
-         *
-         * @param enabled
-         */
-        predictIO.enableSearchingInPerimeter(true);
-
-        /**
-         * Use this method to verify if predict.io searching in perimeter is enabled or not
-         *
-         * @return true if search is enabled otherwise false
-         */
-        searchInPerimeter = predictIO.isSearchingInPerimeterEnabled();
-
-        /**
-         * This method returns home zone detected by predict.io
-         *
-         * @return PIOZone, user’s home zone detected by predict.io (or null if not detected yet)
-         */
-        homeZone = predictIO.getHomeZone();
-        workZone = predictIO.getWorkZone();
-
-        /**
-         * Clear historic zone data used to predict different zones like home or work zones
-         */
-        predictIO.clearZoneHistory();
-
-        /**
-         * Set a webhook url where all the detected events can then be forwarded along with the custom parameters.
-         * This webhook will not support additional authentication. So any additional validation of legitimate requests must take place beforehand.
-         *
-         * @param url to receive detected events
-         */
-        predictIO.setWebhookURL(myServerURL);
-        /**
-         * Set custom parameters which can then be sent to a user defined webhook url
-         *
-         * @param key   string key
-         * @param value string value
-         */
-        //void setCustomParameter(String key, String value)
     }
+
 
     /**
      ****************************************
