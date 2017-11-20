@@ -27,7 +27,21 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.*;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Date;
 import java.util.List;
+
+import io.predict.PIOTripSegment;
+import io.predict.PIOZone;
+import io.predict.TransportationMode;
 
 public class MainActivity extends AppCompatActivity {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
@@ -59,27 +73,40 @@ public class MainActivity extends AppCompatActivity {
             mLastLocation = getLastLocation();
         }
         mapView = (MapView) findViewById(R.id.mapView);
-            mapView.onCreate(savedInstanceState);
-            mapView.getMapAsync(new OnMapReadyCallback() {
+        mapView.onCreate(savedInstanceState);
+        mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
-                // Customize map with markers, polylines, etc.
+            // Customize map with markers, polylines, etc.
 
-                CameraPosition position = new CameraPosition.Builder()
-                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
-                        .bearing(0)
-                        .tilt(0) // Set the camera tilt to 20 degrees
-                        .build(); // Builds the CameraPosition object from the builder
-                mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                        .title("ME"));
-                mapboxMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), 7000);
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(0)
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mapboxMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                    .title("ME"));
+            mapboxMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), 7000);
             }
         });
+        pioManager = new PIOManager();
+        //postExample();
 
-
+        /*pioManager.departed(new PIOTripSegment(
+                pioManager.getDeviceIdentifier(),
+                new Date(),
+                mLastLocation,
+                null,
+                null,
+                TransportationMode.CAR,
+                new PIOZone(PIOZone.PIOZoneType.OTHER,new com.google.android.gms.maps.model.LatLng(41.0345,19.034),5),
+                null,
+                true
+                )
+        );*/
     }
 
     @Override
@@ -205,6 +232,38 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
 
         return bestLocation;
+    }
+
+    public void postExample(){
+        try {
+            URL url = new URL(PIOManager.myServerURL);
+            String type = "application/json";
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", type);
+            httpURLConnection.connect();
+            String lat = Double.toString(mLastLocation.getLatitude());
+            String longi = Double.toString(mLastLocation.getLongitude());
+            String time = Long.toString(mLastLocation.getTime());
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("LOCALIZATION","Mine");
+            jsonObject.put("LAT",lat);
+            jsonObject.put("LONG",longi);
+            jsonObject.put("TIME",time);
+
+
+            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+            wr.writeBytes(jsonObject.toString());
+            wr.flush();
+            wr.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -5,6 +5,17 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
+
 import io.predict.PIOTripSegment;
 import io.predict.PIOZone;
 import io.predict.PredictIO;
@@ -23,7 +34,7 @@ public class PIOManager extends Application implements PredictIOListener{
     private Boolean searchInPerimeter;
     private PIOZone homeZone;
     private PIOZone workZone;
-    private String myServerURL = "https://requestb.in/zub294zu";
+    public static String myServerURL = "https://requestb.in/zub294zu";
 
     public void onCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
@@ -82,7 +93,36 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void departed(PIOTripSegment pioTripSegment) {
+        try {
+            URL url = new URL(myServerURL);
+            String type = "application/json";
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", type);
+            httpURLConnection.connect();
 
+            JSONObject jsonObject = new JSONObject();
+            String lat = Double.toString(pioTripSegment.departureLocation.getLatitude());
+            String longi = Double.toString(pioTripSegment.departureLocation.getLongitude());
+            String time = Long.toString(pioTripSegment.departureLocation.getTime());
+            jsonObject.put("DEPARTURE","Test");
+            jsonObject.put("LAT",lat);
+            jsonObject.put("LONG",longi);
+            jsonObject.put("TIME",time);
+
+
+            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+            wr.writeBytes(jsonObject.toString());
+            wr.flush();
+            wr.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -102,7 +142,35 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void arrived(PIOTripSegment pioTripSegment) {
+        try {
+            URL url = new URL(myServerURL);
+            String type = "application/json";
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setDoOutput(true);
+            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestProperty("Content-Type", type);
+            httpURLConnection.connect();
 
+            JSONObject jsonObject = new JSONObject();
+            String lat = Double.toString(pioTripSegment.arrivalLocation.getLatitude());
+            String longi = Double.toString(pioTripSegment.arrivalLocation.getLongitude());
+            String time = Long.toString(pioTripSegment.arrivalLocation.getTime());
+            jsonObject.put("ARRIVAL","Test");
+            jsonObject.put("LAT",lat);
+            jsonObject.put("LONG",longi);
+            jsonObject.put("TIME",time);
+
+            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+            wr.writeBytes(jsonObject.toString());
+            wr.flush();
+            wr.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -226,4 +294,7 @@ public class PIOManager extends Application implements PredictIOListener{
 
     }
 
+    public String getDeviceIdentifier(){
+        return deviceIdentifier;
+    }
 }
