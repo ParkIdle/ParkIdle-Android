@@ -34,7 +34,7 @@ dependencies {
     compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-beta.5@aar') {
         transitive=true
     }
-    compile 'com.rabbitmq:amqp-client:5.0.0'
+    //compile 'com.rabbitmq:amqp-client:5.0.0'
     testCompile 'junit:junit:4.12'
 
 }

@@ -6,32 +6,37 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresPermission;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 
-import io.predict.PredictIO;
-import io.predict.PredictIOListener;
-import io.predict.PredictIOStatus;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity{
-
+public class MainActivity extends AppCompatActivity {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
+    private static final int PLAY_SERVICES_REQUEST = 2;
+    private static final String TAG = "Main";
     private PIOManager pioManager;
     private MapView mapView;
-    private Location lastLocation;
+    private Location mLastLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,20 +55,31 @@ public class MainActivity extends AppCompatActivity{
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
             return;
         }
+        else{
+            mLastLocation = getLastLocation();
+        }
         mapView = (MapView) findViewById(R.id.mapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.getMapAsync(new OnMapReadyCallback() {
+            mapView.onCreate(savedInstanceState);
+            mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 // Customize map with markers, polylines, etc.
 
                 CameraPosition position = new CameraPosition.Builder()
-                        .target(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(10) // Sets the zoom to level 10
-                        .tilt(20) // Set the camera tilt to 20 degrees
+                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 10
+                        .bearing(0)
+                        .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
+                mapboxMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .title("ME"));
+                mapboxMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 7000);
             }
         });
+
+
     }
 
     @Override
@@ -73,12 +89,11 @@ public class MainActivity extends AppCompatActivity{
             case ACCESS_FINE_LOCATION_PERMISSION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted.
-                    showSettingsAlert();
+                    getLastLocation();
                     Toast.makeText(this, "GPS permission successfully granted!", Toast.LENGTH_LONG).show();
                 } else {
                     // User refused to grant permission. You can add AlertDialog here
                     Toast.makeText(this, "GPS permission not granted. Please allow GPS using to use this app.", Toast.LENGTH_LONG).show();
-
                 }
             }
         }
@@ -158,8 +173,38 @@ public class MainActivity extends AppCompatActivity{
         mapView.onSaveInstanceState(outState);
     }
 
-    /*public Location getLastLocation(){
+    public Location getLastLocation(){
+        // Acquire a reference to the system Location Manager
+        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
 
-    }*/
+        // Define a listener that responds to location updates
+        LocationListener locationListener = new LocationListener() {
+            public void onLocationChanged(Location location) {
+                // Called when a new location is found by the network location provider.
+                //makeUseOfNewLocation(location);
+            }
+
+            public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+            public void onProviderEnabled(String provider) {}
+
+            public void onProviderDisabled(String provider) {}
+        };
+        List<String> providers = locationManager.getProviders(true);
+        Location bestLocation = null;
+        for(String provider : providers){
+            Toast.makeText(this, provider, Toast.LENGTH_LONG).show();
+            locationManager.requestLocationUpdates(provider, 3500, 10, locationListener);
+            Location l = locationManager.getLastKnownLocation(provider);
+            if(l == null) continue;
+            if(bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()){
+                // Found best last known location: %s", l);
+                bestLocation = l;
+            }
+        }
+        Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+
+        return bestLocation;
+    }
 
 }

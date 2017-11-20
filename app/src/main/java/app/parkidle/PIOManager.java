@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.IntentFilter;
 import android.location.Location;
 import android.widget.Toast;
+
 import io.predict.PIOTripSegment;
 import io.predict.PIOZone;
 import io.predict.PredictIO;
@@ -22,7 +23,7 @@ public class PIOManager extends Application implements PredictIOListener{
     private Boolean searchInPerimeter;
     private PIOZone homeZone;
     private PIOZone workZone;
-    private String myServerURL;
+    private String myServerURL = "https://requestb.in/zub294zu";
 
     public void onCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
@@ -30,6 +31,7 @@ public class PIOManager extends Application implements PredictIOListener{
         predictIO.setAppOnCreate(this);
         predictIO.setListener(this);
         PIOActivationListenerInstance = predictIO.getActivationListener();
+        predictIO.setWebhookURL(myServerURL);
 
         // set this to get event callbacks in broadcast receiver
         IntentFilter intentFilter = new IntentFilter();
@@ -56,6 +58,7 @@ public class PIOManager extends Application implements PredictIOListener{
         }catch(Exception e){
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_LONG).show();
         }
+
     }
 
 
