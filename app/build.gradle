@@ -31,9 +31,15 @@ dependencies {
     compile 'com.google.android.gms:play-services-base:9.4.0'
     compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'io.predict:predict-io:3.2.1'
-    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-beta.5@aar') {
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0@aar') {
         transitive=true
     }
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.7.0'
+
+    compile ('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.7.0') {
+        transitive = true
+    }
+    compile 'com.mapzen.android:lost:3.0.2'
     //compile 'com.rabbitmq:amqp-client:5.0.0'
     testCompile 'junit:junit:4.12'
 

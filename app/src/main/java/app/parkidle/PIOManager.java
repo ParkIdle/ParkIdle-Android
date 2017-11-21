@@ -93,7 +93,7 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void departed(PIOTripSegment pioTripSegment) {
-        try {
+        /*try {
             URL url = new URL(myServerURL);
             String type = "application/json";
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -122,7 +122,7 @@ public class PIOManager extends Application implements PredictIOListener{
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /**
@@ -142,7 +142,7 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void arrived(PIOTripSegment pioTripSegment) {
-        try {
+       /* try {
             URL url = new URL(myServerURL);
             String type = "application/json";
             HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -170,7 +170,7 @@ public class PIOManager extends Application implements PredictIOListener{
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     /**
