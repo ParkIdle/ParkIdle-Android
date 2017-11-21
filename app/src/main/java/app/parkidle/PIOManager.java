@@ -5,6 +5,11 @@ import android.content.IntentFilter;
 import android.location.Location;
 import android.widget.Toast;
 
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,6 +40,12 @@ public class PIOManager extends Application implements PredictIOListener{
     private PIOZone homeZone;
     private PIOZone workZone;
     public static String myServerURL = "https://requestb.in/zub294zu";
+
+    private MapboxMap mapboxMap;
+
+    public PIOManager(MapboxMap mapboxMap){
+        this.mapboxMap = mapboxMap;
+    }
 
     public void onCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
@@ -93,6 +104,14 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void departed(PIOTripSegment pioTripSegment) {
+
+        // manda segnale al server, faremo una funzione di ascolto per i client che
+        // in ricezione di un evento departed, aggiungerà sulla mappa un marker
+
+        // aggiungo un marker alla mia posizione quando parto (metodo di test)
+        Marker d = mapboxMap.addMarker(new MarkerOptions()
+                .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
+                .title("FREE PARKING SPOT"));
         /*try {
             URL url = new URL(myServerURL);
             String type = "application/json";
@@ -142,6 +161,11 @@ public class PIOManager extends Application implements PredictIOListener{
      */
     @Override
     public void arrived(PIOTripSegment pioTripSegment) {
+
+        // aggiungo un marker alla mia posizione quando arrivo (metodo di test)
+        Marker d = mapboxMap.addMarker(new MarkerOptions()
+                .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
+                .title("SOMEBODY PARKED HERE"));
        /* try {
             URL url = new URL(myServerURL);
             String type = "application/json";

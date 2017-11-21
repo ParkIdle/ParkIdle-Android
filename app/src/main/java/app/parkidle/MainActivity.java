@@ -110,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //creo un PIOManager che gestisce l'ascolto degli eventi predict.io
-        pioManager = new PIOManager();
+        pioManager = new PIOManager(mMap);
         //postExample();
     }
 
