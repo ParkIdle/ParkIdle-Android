@@ -36,7 +36,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.*;
 
+import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -48,7 +50,8 @@ import io.predict.PIOTripSegment;
 import io.predict.PIOZone;
 import io.predict.TransportationMode;
 
-public class MainActivity extends AppCompatActivity {
+public class
+MainActivity extends AppCompatActivity {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
     private PIOManager pioManager;
@@ -245,6 +248,27 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        try{
+            FileWriter log = new FileWriter("log.txt");
+            Double latitudine = bestLocation.getLatitude();
+            Double longitudine = bestLocation.getLongitude();
+            String lat = latitudine.toString();
+            String lon = longitudine.toString();
+            for(int i = 0; i < lat.length(); i++){
+                log.write(lat.charAt(i));
+            }
+            for(int j = 0; j < lon.length(); j++){
+                log.write(lon.charAt(j));
+            }
+            String stringa_finale = "ho finito di annotare le coordinate";
+            for(int x = 0; x < stringa_finale.length(); x++) {
+                log.write(stringa_finale.charAt(x));
+            }
+            log.close();
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
 
         return bestLocation;
     }
@@ -304,5 +328,6 @@ public class MainActivity extends AppCompatActivity {
 
         });
     }
+
 
 }
