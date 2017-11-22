@@ -48,16 +48,18 @@ import java.util.List;
 
 import io.predict.PIOTripSegment;
 import io.predict.PIOZone;
+import io.predict.PredictIO;
+import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
 public class
 MainActivity extends AppCompatActivity {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
+    public static MapboxMap mMap;
     private PIOManager pioManager;
     private MapView mapView;
     private Location mLastLocation;
-    private MapboxMap mMap;
     private Marker me;
 
 
@@ -78,8 +80,7 @@ MainActivity extends AppCompatActivity {
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
             return;
-        }
-        else{
+        } else {
             //se ho gia i permessi posso chiedere di localizzarmi
             mLastLocation = getLastLocation();
         }
@@ -108,13 +109,15 @@ MainActivity extends AppCompatActivity {
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
                 mMap = mapboxMap;
-                }
+            }
 
         });
 
-        //creo un PIOManager che gestisce l'ascolto degli eventi predict.io
-        pioManager = new PIOManager(mMap);
-        //postExample();
+        activatePredictIOTracker();
+        checkPredictIOStatus();
+        PIOManager p = new PIOManager();
+        PredictIO.getInstance(this).setListener(p.getmPredictIOListener());
+
     }
 
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
@@ -122,7 +125,7 @@ MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         //faccio uno switch sul requestCode per vedere se corrisponde al mio int assegnato per il dato permeso
-        switch(requestCode) {
+        switch (requestCode) {
             case ACCESS_FINE_LOCATION_PERMISSION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted.
@@ -142,7 +145,7 @@ MainActivity extends AppCompatActivity {
      * Function to show settings alert dialog
      * On pressing Settings button will lauch Settings Options
      * */
-    public void showSettingsAlert(){
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getApplicationContext());
 
         // Setting Dialog Title
@@ -171,7 +174,7 @@ MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
         mapView.onStart();
     }
@@ -212,7 +215,7 @@ MainActivity extends AppCompatActivity {
         mapView.onSaveInstanceState(outState);
     }
 
-    public Location getLastLocation(){
+    public Location getLastLocation() {
         // Acquire a reference to the system Location Manager
         LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
 
@@ -237,76 +240,22 @@ MainActivity extends AppCompatActivity {
         //lista dei possibili providers a cui affidarsi per la localizzazione (NETWORK,GPS,PASSIVE)
         List<String> providers = locationManager.getProviders(true);
         Location bestLocation = null;
-        for(String provider : providers){
+        for (String provider : providers) {
             //Toast.makeText(this, provider, Toast.LENGTH_LONG).show();
             locationManager.requestLocationUpdates(provider, 3500, 10, locationListener);
             Location l = locationManager.getLastKnownLocation(provider);
-            if(l == null) continue;
-            if(bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()){
+            if (l == null) continue;
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
                 // Found best last known location: %s", l);
                 bestLocation = l;
             }
         }
         Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
-        try{
-            FileWriter log = new FileWriter("log.txt");
-            Double latitudine = bestLocation.getLatitude();
-            Double longitudine = bestLocation.getLongitude();
-            String lat = latitudine.toString();
-            String lon = longitudine.toString();
-            for(int i = 0; i < lat.length(); i++){
-                log.write(lat.charAt(i));
-            }
-            for(int j = 0; j < lon.length(); j++){
-                log.write(lon.charAt(j));
-            }
-            String stringa_finale = "ho finito di annotare le coordinate";
-            for(int x = 0; x < stringa_finale.length(); x++) {
-                log.write(stringa_finale.charAt(x));
-            }
-            log.close();
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-
         return bestLocation;
     }
 
-    public void postExample(){
-        try {
-            URL url = new URL(PIOManager.myServerURL);
-            String type = "application/json";
-            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setRequestProperty("Content-Type", type);
-            httpURLConnection.connect();
-            String lat = Double.toString(mLastLocation.getLatitude());
-            String longi = Double.toString(mLastLocation.getLongitude());
-            String time = Long.toString(mLastLocation.getTime());
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("LOCALIZATION","Mine");
-            jsonObject.put("LAT",lat);
-            jsonObject.put("LONG",longi);
-            jsonObject.put("TIME",time);
-
-
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            wr.writeBytes(jsonObject.toString());
-            wr.flush();
-            wr.close();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     //questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
-    public void drawMarker(Location location){
+    public void drawMarker(Location location) {
         mLastLocation = location;
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -329,5 +278,66 @@ MainActivity extends AppCompatActivity {
         });
     }
 
+    public void checkPredictIOStatus() {
+        String message;
+        switch (PredictIO.getInstance(getApplication()).getStatus()) {
+            case ACTIVE:
+                message = "'predict.io' tracker is in working state.";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                break;
+            case LOCATION_DISABLED:
+                message = "'predict.io' tracker is not in running state. GPS is disabled.";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                break;
+            case AIRPLANE_MODE_ENABLED:
+                message = "'predict.io' tracker is not in running state. Airplane mode is enabled.";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                break;
+            case INSUFFICIENT_PERMISSION:
+                message = "'predict.io' tracker is not in running state. Location permission is not granted.";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                break;
+            default:
+            case IN_ACTIVE:
+                message = "'predict.io' tracker is in in-active state.";
+                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                break;
+        }
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
 
+    public void activatePredictIOTracker() {
+        //Get PredictIO instance
+        final PredictIO predictIO = PredictIO.getInstance(getApplication());
+        //Set modes
+        predictIO.enableSearchingInPerimeter(true);
+
+        //Validate tracker not already running
+        if (predictIO.getStatus() == PredictIOStatus.ACTIVE) {
+            return;
+        }
+
+        //All validations cleared, start tracker
+        try {
+            //noinspection ResourceType
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            predictIO.start(new PredictIO.PIOActivationListener() {
+                @Override
+                public void onActivated() {
+
+                }
+
+                @Override
+                public void onActivationFailed(int error) {
+
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
+    }
 }
