@@ -15,11 +15,13 @@ import android.location.LocationManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
@@ -72,7 +74,8 @@ MainActivity extends AppCompatActivity {
     private Marker me;
     //private MQTTSubscribe myMQTTSubscribe;
     private Icon mIcon;
-
+    private Boolean isCameraFollowing;
+    private FloatingActionButton ftb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +98,15 @@ MainActivity extends AppCompatActivity {
 
         //se ho gia i permessi posso chiedere di localizzarmi
         mLastLocation = getLastLocation();
+        isCameraFollowing = true;
+        ftb = findViewById(R.id.center_camera);
 
+        ftb.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                recenterCamera();
+            }
+        });
         mIcon = IconFactory.getInstance(this).fromResource(R.drawable.map_marker_dark);
         //mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
@@ -122,16 +133,16 @@ MainActivity extends AppCompatActivity {
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
-                mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                mapboxMap.setOnScrollListener(new MapboxMap.OnScrollListener() {
                     @Override
-                    public void onMapClick(@NonNull LatLng point) {
-
-                        // When the user clicks on the map, we want to animate the marker to that
-                        // location.
-                        ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
-                                new LatLngEvaluator(), me.getPosition(), point);
-                        markerAnimator.setDuration(2000);
-                        markerAnimator.start();
+                    public void onScroll() {
+                        isCameraFollowing = false;
+                    }
+                });
+                mapboxMap.setOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        isCameraFollowing = false;
                     }
                 });
             }
@@ -295,21 +306,23 @@ MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
 
-                // Customize map with markers, polylines, etc.
-                //Camera Position definisce la posizione della telecamera
-                CameraPosition position = new CameraPosition.Builder()
-                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
-                        .bearing(0)
-                        .tilt(0) // Set the camera tilt to 20 degrees
-                        .build(); // Builds the CameraPosition object from the builder
+                if (isCameraFollowing){
+                    // Customize map with markers, polylines, etc.
+                    //Camera Position definisce la posizione della telecamera
+                    CameraPosition position = new CameraPosition.Builder()
+                            .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                            .zoom(17) // Sets the zoom to level 10
+                            .bearing(0)
+                            .tilt(0) // Set the camera tilt to 20 degrees
+                            .build(); // Builds the CameraPosition object from the builder
+                    mapboxMap.animateCamera(CameraUpdateFactory
+                            .newCameraPosition(position), null);
+                }
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
 
                 //controllare lo spostamento della mappa
-
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-                mapboxMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), null);
+
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
                         new LatLngEvaluator(), me.getPosition(), new LatLng(mLastLocation.getLatitude(),mLastLocation.getAltitude()));
                 markerAnimator.setDuration(2000);
@@ -375,6 +388,20 @@ MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
+    }
+
+    private void recenterCamera(){
+        if(!isCameraFollowing){
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(0)
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), null);
+            isCameraFollowing = true;
+        }
     }
 
 }
