@@ -56,6 +56,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -158,6 +159,11 @@ MainActivity extends AppCompatActivity {
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
+        Test t1 = new Test(this,mLastLocation);
+        Thread t = new Thread(t1);
+        t.start();
+        Toast.makeText(this, "TEST RUN", Toast.LENGTH_SHORT).show();
+
 
     }
 
