@@ -14,13 +14,17 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -70,6 +74,46 @@ public class PIOManager extends Application{
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
                         .title("You departed from here"));
+
+            /*try {
+                URL url = new URL("http://10.0.2.2:3000/users/user");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+
+                JSONObject jsonParam = new JSONObject();
+                jsonParam.put("name",this.mName);
+                os.write(jsonParam.getBytes());
+                os.flush();
+
+                BufferedReader br = new BufferedReader(new InputStreamReader(
+                        (conn.getInputStream())));
+
+                String output;
+                StringBuilder response = new StringBuilder();
+                while ((output = br.readLine()) != null) {
+                    response.append(output);
+                    response.append('\r');
+                }
+                mes = response.toString();
+                conn.disconnect();
+
+                if (mes!=null && !mes.isEmpty()){
+                    return true;
+                }else {
+                    return false;
+                }
+
+            }catch(ProtocolException e){
+                e.printStackTrace();
+            }catch(IOException e){
+                e.printStackTrace();
+            }catch(MalformedURLException e){
+                e.printStackTrace();
+            }*/
         }
 
         @Override

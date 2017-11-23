@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    compileSdkVersion 27
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "app.parkidle"
@@ -25,7 +25,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support:appcompat-v7:27.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.google.android.gms:play-services-location:9.4.0'
     compile 'com.google.android.gms:play-services-base:9.4.0'
@@ -40,9 +40,8 @@ dependencies {
     }
     compile 'com.mapzen.android:lost:3.0.2'
     //compile 'com.rabbitmq:amqp-client:5.0.0'
-
     //MQTT Lib
-    compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2'
-    compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.0.2'
+    //compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.0.2'
+    //compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.0.2'
     testCompile 'junit:junit:4.12'
 }
