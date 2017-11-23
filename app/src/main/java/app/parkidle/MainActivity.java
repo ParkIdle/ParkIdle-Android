@@ -33,6 +33,8 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.constants.MyBearingTracking;
+import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
@@ -77,14 +79,16 @@ MainActivity extends AppCompatActivity {
     private Icon mIcon;
     private Boolean isCameraFollowing;
     private FloatingActionButton ftb;
-    public static Icon icona_parcheggio;
+    public static Icon icona_parcheggio_libero;
+    public static Icon icona_whereiparked;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Icon icona_parcheggio= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
+        Icon icona_parcheggio_libero= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
+        Icon icona_whereiparked= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         MapboxNavigation navigation = new MapboxNavigation(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -123,8 +127,8 @@ MainActivity extends AppCompatActivity {
                 //Camera Position definisce la posizione della telecamera
                 CameraPosition position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
-                        .bearing(0)
+                        .zoom(17) // Sets the zoom to level 17
+                        .bearing(MyBearingTracking.COMPASS)//non funziona, ho provato altri 300 metodi deprecati ma non va
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
@@ -148,6 +152,7 @@ MainActivity extends AppCompatActivity {
                         isCameraFollowing = false;
                     }
                 });
+
             }
 
         });

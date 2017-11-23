@@ -38,7 +38,9 @@ import io.predict.PredictIO;
 import io.predict.PredictIOListener;
 import io.predict.PredictIOStatus;
 
-import static app.parkidle.MainActivity.icona_parcheggio;
+
+import static app.parkidle.MainActivity.icona_parcheggio_libero;
+import static app.parkidle.MainActivity.icona_whereiparked;
 
 /**
  * Created by simonestaffa on 16/11/17.
@@ -46,7 +48,7 @@ import static app.parkidle.MainActivity.icona_parcheggio;
 
 public class PIOManager extends Application{
 
-    public static final String myServerURL = "https://requestb.in/z06i3hz0";
+    public static final String myServerURL = "https://requestb.in/1amp6dc1";
 
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
@@ -73,7 +75,7 @@ public class PIOManager extends Application{
 
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
-                        .title("You departed from here").setIcon(icona_parcheggio));
+                        .title("You departed from here").setIcon(icona_parcheggio_libero));
 
             try {
                 URL url = new URL(myServerURL);
@@ -123,7 +125,7 @@ public class PIOManager extends Application{
         public void arrived(PIOTripSegment pioTripSegment) {
             Marker m1 = MainActivity.mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
-                    .title("You arrived here"));
+                    .title("You parked here").setIcon(icona_whereiparked));
 
             try {
                 URL url = new URL(myServerURL);
