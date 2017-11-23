@@ -1,19 +1,19 @@
 package app.parkidle;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+/*import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.MqttMessage;*/
 
 import io.predict.PredictIO;
 
 /**
  * Created by simonestaffa on 23/11/17.
  */
-
+/*
 public class MQTTSubscribe implements MqttCallback{
-    MqttClient client;
+    /*MqttClient client;
     private final String myMQTTPublisher = "";
     private final String deviceIdentifier;
     public MQTTSubscribe(String deviceIdentifier) {
@@ -53,4 +53,4 @@ public class MQTTSubscribe implements MqttCallback{
 
     }
 
-}
+}*/

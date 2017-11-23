@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +27,8 @@ import android.widget.Toast;
 
 import com.amazonaws.http.HttpClient;
 import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
@@ -70,12 +74,15 @@ MainActivity extends AppCompatActivity {
     private MapView mapView;
     private Location mLastLocation;
     private Marker me;
-    private MQTTSubscribe myMQTTSubscribe;
+    //private MQTTSubscribe myMQTTSubscribe;
+    private Icon mIcon;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -87,13 +94,14 @@ MainActivity extends AppCompatActivity {
 
         //controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
+
         //se ho gia i permessi posso chiedere di localizzarmi
         mLastLocation = getLastLocation();
 
+        mIcon = IconFactory.getInstance(this).fromResource(R.drawable.map_marker_dark);
         //mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
         //creo la mappa
@@ -114,7 +122,9 @@ MainActivity extends AppCompatActivity {
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
                 me = mapboxMap.addMarker(new MarkerOptions()
                         .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                        .title("You"));
+                        .title("You")
+                        .setIcon(mIcon));
+
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
                 mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
@@ -137,7 +147,7 @@ MainActivity extends AppCompatActivity {
         checkPredictIOStatus();
         PIOManager p = new PIOManager();
         PredictIO.getInstance(this).setListener(p.getmPredictIOListener());
-        PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
+        //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
 
