@@ -11,6 +11,7 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,13 +42,7 @@ import io.predict.PredictIOStatus;
 
 public class PIOManager extends Application{
 
-    /*private Application mApplication;
-
-
-
-    public PIOManager(Application application){
-        this.mApplication = application;
-    }*/
+    public static final String myServerURL = "https://requestb.in/z06i3hz0";
 
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
@@ -75,8 +70,8 @@ public class PIOManager extends Application{
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
                         .title("You departed from here"));
 
-            /*try {
-                URL url = new URL("http://10.0.2.2:3000/users/user");
+            try {
+                URL url = new URL(myServerURL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
@@ -85,25 +80,28 @@ public class PIOManager extends Application{
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("{ event", departed);
-                os.write(jsonParam.getBytes());
-                os.flush();
+                try {
+                    jsonParam.put("UUID",pioTripSegment.UUID);
+                    jsonParam.put("event", PredictIO.DEPARTED_EVENT);
+                    jsonParam.put("time", pioTripSegment.departureTime);
+                    jsonParam.put("latitude", pioTripSegment.departureLocation.getLatitude());
+                    jsonParam.put("longitude", pioTripSegment.departureLocation.getLongitude());
+                    jsonParam.put("zone", pioTripSegment.departureZone);
+
+                    os.write(jsonParam.toString().getBytes("utf-8"));
+                    os.flush();
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
 
                 conn.disconnect();
 
-                if (mes!=null && !mes.isEmpty()){
-                    return true;
-                }else {
-                    return false;
-                }
 
             }catch(ProtocolException e){
                 e.printStackTrace();
             }catch(IOException e){
                 e.printStackTrace();
-            }catch(MalformedURLException e){
-                e.printStackTrace();
-            }*/
+            }
         }
 
         @Override
@@ -121,6 +119,37 @@ public class PIOManager extends Application{
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
                     .title("You arrived here"));
+
+            try {
+                URL url = new URL(myServerURL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setDoOutput(true);
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
+
+                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
+
+                JSONObject jsonParam = new JSONObject();
+                try {
+                    jsonParam.put("UUID",pioTripSegment.UUID);
+                    jsonParam.put("event", PredictIO.ARRIVED_EVENT);
+                    jsonParam.put("time", pioTripSegment.arrivalTime);
+                    jsonParam.put("latitude", pioTripSegment.arrivalLocation.getLatitude());
+                    jsonParam.put("longitude", pioTripSegment.arrivalLocation.getLongitude());
+                    jsonParam.put("zone", pioTripSegment.arrivalZone);
+
+                    os.write(jsonParam.toString().getBytes("utf-8"));
+                    os.flush();
+                }catch(JSONException e){
+                    e.printStackTrace();
+                }
+                conn.disconnect();
+
+            }catch(ProtocolException e){
+                e.printStackTrace();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
         }
 
         @Override
