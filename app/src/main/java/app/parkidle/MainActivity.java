@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -76,13 +77,14 @@ MainActivity extends AppCompatActivity {
     private Icon mIcon;
     private Boolean isCameraFollowing;
     private FloatingActionButton ftb;
+    public static Icon icona_parcheggio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        Icon icona_parcheggio= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         MapboxNavigation navigation = new MapboxNavigation(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -126,10 +128,11 @@ MainActivity extends AppCompatActivity {
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
+                Icon icona= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
                 me = mapboxMap.addMarker(new MarkerOptions()
                         .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                         .title("You")
-                        .setIcon(mIcon));
+                        .setIcon(icona));
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
@@ -321,6 +324,7 @@ MainActivity extends AppCompatActivity {
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
 
                 //controllare lo spostamento della mappa
+
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
 
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",

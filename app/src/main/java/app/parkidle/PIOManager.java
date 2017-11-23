@@ -6,6 +6,8 @@ import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -35,6 +37,8 @@ import io.predict.PIOZone;
 import io.predict.PredictIO;
 import io.predict.PredictIOListener;
 import io.predict.PredictIOStatus;
+
+import static app.parkidle.MainActivity.icona_parcheggio;
 
 /**
  * Created by simonestaffa on 16/11/17.
@@ -66,9 +70,10 @@ public class PIOManager extends Application{
     private PredictIOListener mPredictIOListener = new PredictIOListener() {
         @Override
         public void departed(PIOTripSegment pioTripSegment) {
+
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
-                        .title("You departed from here"));
+                        .title("You departed from here").setIcon(icona_parcheggio));
 
             try {
                 URL url = new URL(myServerURL);

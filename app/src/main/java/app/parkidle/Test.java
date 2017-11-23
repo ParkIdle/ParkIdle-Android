@@ -57,7 +57,8 @@ public class Test implements Runnable {
             }
         });
         try {
-            URL url = new URL(PIOManager.myServerURL);
+            //URL url = new URL(PIOManager.myServerURL);
+            URL url = new URL("https://requestb.in/1amp6dc1");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
@@ -70,7 +71,7 @@ public class Test implements Runnable {
             JSONObject jsonParam = new JSONObject();
             try {
                 jsonParam.put("UUID", "1234");
-                jsonParam.put("event", "TEST");
+                jsonParam.put("event", "OPENING-APP");
                 jsonParam.put("time", mLastLocation.getTime());
                 jsonParam.put("latitude", mLastLocation.getLatitude());
                 jsonParam.put("longitude", mLastLocation.getLongitude());
