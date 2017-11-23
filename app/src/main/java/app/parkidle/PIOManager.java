@@ -118,7 +118,7 @@ public class PIOManager extends Application{
 
         @Override
         public void arrived(PIOTripSegment pioTripSegment) {
-            Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
+            Marker m1 = MainActivity.mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
                     .title("You arrived here"));
         }
@@ -140,7 +140,7 @@ public class PIOManager extends Application{
 
         @Override
         public void detectedTransportationMode(PIOTripSegment pioTripSegment) {
-
+            Toast.makeText(PIOManager.this, (pioTripSegment.transportationMode.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
         }
 
         @Override

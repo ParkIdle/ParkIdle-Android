@@ -23,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.amazonaws.http.HttpClient;
@@ -82,6 +83,7 @@ MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
@@ -111,6 +113,10 @@ MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 mMap = mapboxMap;
+                IconFactory iconFactory = IconFactory.getInstance(MainActivity.this);
+                Icon icon = iconFactory.fromResource(R.drawable.map_marker_light);
+                Marker casa = mapboxMap.addMarker(new MarkerOptions().position(new LatLng(41.8829025,12.5674648)).title("casa mia").setIcon(icon));
+
                 // Customize map with markers, polylines, etc.
                 //Camera Position definisce la posizione della telecamera
                 CameraPosition position = new CameraPosition.Builder()
@@ -147,6 +153,8 @@ MainActivity extends AppCompatActivity {
         checkPredictIOStatus();
         PIOManager p = new PIOManager();
         PredictIO.getInstance(this).setListener(p.getmPredictIOListener());
+
+
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
