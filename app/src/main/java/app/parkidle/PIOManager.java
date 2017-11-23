@@ -85,20 +85,10 @@ public class PIOManager extends Application{
                 DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
                 JSONObject jsonParam = new JSONObject();
-                jsonParam.put("name",this.mName);
+                jsonParam.put("{ event", departed);
                 os.write(jsonParam.getBytes());
                 os.flush();
 
-                BufferedReader br = new BufferedReader(new InputStreamReader(
-                        (conn.getInputStream())));
-
-                String output;
-                StringBuilder response = new StringBuilder();
-                while ((output = br.readLine()) != null) {
-                    response.append(output);
-                    response.append('\r');
-                }
-                mes = response.toString();
                 conn.disconnect();
 
                 if (mes!=null && !mes.isEmpty()){
