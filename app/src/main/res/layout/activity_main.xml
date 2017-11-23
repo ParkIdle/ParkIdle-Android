@@ -17,9 +17,19 @@
         mapbox:mapbox_styleUrl="mapbox://styles/mapbox/streets-v10"
         mapbox:mapbox_cameraZoomMax="30"
         mapbox:mapbox_cameraZoomMin="1"
-        mapbox:mapbox_uiRotateGestures="false">
+        mapbox:mapbox_uiRotateGestures="false" >
 
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/center_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:clickable="true"
+            android:onClick="recenterCamera"
+            mapbox:fabSize="mini"
+            mapbox:srcCompat="@drawable/mapbox_user_puck_icon" />
     </com.mapbox.mapboxsdk.maps.MapView>
+
 
 
 

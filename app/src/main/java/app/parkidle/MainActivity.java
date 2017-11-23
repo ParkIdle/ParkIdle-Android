@@ -9,24 +9,22 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
-import android.widget.Switch;
 import android.widget.Toast;
 
-import com.amazonaws.http.HttpClient;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -44,8 +42,6 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
 
 
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.*;
@@ -78,12 +74,12 @@ MainActivity extends AppCompatActivity {
     private Marker me;
     //private MQTTSubscribe myMQTTSubscribe;
     private Icon mIcon;
-
+    private Boolean isCameraFollowing;
+    private FloatingActionButton ftb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -93,7 +89,6 @@ MainActivity extends AppCompatActivity {
         LocationEngine locationEngine = LostLocationEngine.getLocationEngine(this);
         navigation.setLocationEngine(locationEngine);
         setContentView(R.layout.activity_main);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -103,7 +98,15 @@ MainActivity extends AppCompatActivity {
 
         //se ho gia i permessi posso chiedere di localizzarmi
         mLastLocation = getLastLocation();
+        isCameraFollowing = true;
+        ftb = findViewById(R.id.center_camera);
 
+        ftb.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Code here executes on main thread after user presses button
+                recenterCamera();
+            }
+        });
         mIcon = IconFactory.getInstance(this).fromResource(R.drawable.map_marker_dark);
         //mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
@@ -114,10 +117,6 @@ MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
                 mMap = mapboxMap;
-                IconFactory iconFactory = IconFactory.getInstance(MainActivity.this);
-                Icon icon = iconFactory.fromResource(R.drawable.map_marker_light);
-                Marker casa = mapboxMap.addMarker(new MarkerOptions().position(new LatLng(41.8829025,12.5674648)).title("casa mia").setIcon(icon));
-
                 // Customize map with markers, polylines, etc.
                 //Camera Position definisce la posizione della telecamera
                 CameraPosition position = new CameraPosition.Builder()
@@ -134,16 +133,16 @@ MainActivity extends AppCompatActivity {
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
-                mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                mapboxMap.setOnScrollListener(new MapboxMap.OnScrollListener() {
                     @Override
-                    public void onMapClick(@NonNull LatLng point) {
-
-                        // When the user clicks on the map, we want to animate the marker to that
-                        // location.
-                        ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
-                                new LatLngEvaluator(), me.getPosition(), point);
-                        markerAnimator.setDuration(2000);
-                        markerAnimator.start();
+                    public void onScroll() {
+                        isCameraFollowing = false;
+                    }
+                });
+                mapboxMap.setOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        isCameraFollowing = false;
                     }
                 });
             }
@@ -154,8 +153,6 @@ MainActivity extends AppCompatActivity {
         checkPredictIOStatus();
         PIOManager p = new PIOManager();
         PredictIO.getInstance(this).setListener(p.getmPredictIOListener());
-
-
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
@@ -300,7 +297,6 @@ MainActivity extends AppCompatActivity {
         }
         Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
         return bestLocation;
-
     }
 
     //questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
@@ -310,21 +306,22 @@ MainActivity extends AppCompatActivity {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
 
-                // Customize map with markers, polylines, etc.
-                //Camera Position definisce la posizione della telecamera
-                CameraPosition position = new CameraPosition.Builder()
-                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
-                        .bearing(0)
-                        .tilt(0) // Set the camera tilt to 20 degrees
-                        .build(); // Builds the CameraPosition object from the builder
+                if (isCameraFollowing){
+                    // Customize map with markers, polylines, etc.
+                    //Camera Position definisce la posizione della telecamera
+                    CameraPosition position = new CameraPosition.Builder()
+                            .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                            .zoom(17) // Sets the zoom to level 10
+                            .bearing(0)
+                            .tilt(0) // Set the camera tilt to 20 degrees
+                            .build(); // Builds the CameraPosition object from the builder
+                    mapboxMap.animateCamera(CameraUpdateFactory
+                            .newCameraPosition(position), null);
+                }
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
 
                 //controllare lo spostamento della mappa
-
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-                mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),200);//animateCamera(CameraUpdateFactory
-                        //.newCameraPosition(position), null);
 
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
                         new LatLngEvaluator(), me.getPosition(), new LatLng(mLastLocation.getLatitude(),mLastLocation.getAltitude()));
@@ -391,6 +388,20 @@ MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
+    }
+
+    private void recenterCamera(){
+        if(!isCameraFollowing){
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(0)
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), null);
+            isCameraFollowing = true;
+        }
     }
 
 }
