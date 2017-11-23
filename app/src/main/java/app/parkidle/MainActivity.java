@@ -1,6 +1,9 @@
 package app.parkidle;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -61,6 +64,7 @@ MainActivity extends AppCompatActivity {
     private MapView mapView;
     private Location mLastLocation;
     private Marker me;
+    private MQTTSubscribe myMQTTSubscribe;
 
 
     @Override
@@ -79,11 +83,9 @@ MainActivity extends AppCompatActivity {
 
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
-            return;
-        } else {
-            //se ho gia i permessi posso chiedere di localizzarmi
-            mLastLocation = getLastLocation();
         }
+        //se ho gia i permessi posso chiedere di localizzarmi
+        mLastLocation = getLastLocation();
 
         //mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
@@ -93,7 +95,7 @@ MainActivity extends AppCompatActivity {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
-
+                mMap = mapboxMap;
                 // Customize map with markers, polylines, etc.
                 //Camera Position definisce la posizione della telecamera
                 CameraPosition position = new CameraPosition.Builder()
@@ -108,7 +110,18 @@ MainActivity extends AppCompatActivity {
                         .title("You"));
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
-                mMap = mapboxMap;
+                mapboxMap.setOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(@NonNull LatLng point) {
+
+                        // When the user clicks on the map, we want to animate the marker to that
+                        // location.
+                        ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
+                                new LatLngEvaluator(), me.getPosition(), point);
+                        markerAnimator.setDuration(2000);
+                        markerAnimator.start();
+                    }
+                });
             }
 
         });
@@ -117,6 +130,9 @@ MainActivity extends AppCompatActivity {
         checkPredictIOStatus();
         PIOManager p = new PIOManager();
         PredictIO.getInstance(this).setListener(p.getmPredictIOListener());
+        PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
+
+        //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
 
     }
 
@@ -130,7 +146,7 @@ MainActivity extends AppCompatActivity {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted.
                     // ora posso chiedere di nuovo la localizzazione
-                    getLastLocation();
+                    mLastLocation = getLastLocation();
                     //Toast.makeText(this, "GPS permission successfully granted!", Toast.LENGTH_LONG).show();
                 } else {
                     // User refused to grant permission. You can add AlertDialog here
@@ -226,6 +242,7 @@ MainActivity extends AppCompatActivity {
                 //makeUseOfNewLocation(location);
                 //update my position
                 drawMarker(location);
+
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -255,7 +272,7 @@ MainActivity extends AppCompatActivity {
     }
 
     //questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
-    public void drawMarker(Location location) {
+    public void drawMarker(final Location location) {
         mLastLocation = location;
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
@@ -270,9 +287,16 @@ MainActivity extends AppCompatActivity {
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
+
+                //controllare lo spostamento della mappa
+
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-                mapboxMap.moveCamera(CameraUpdateFactory
+                mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), null);
+                /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
+                        new LatLngEvaluator(), me.getPosition(), new LatLng(mLastLocation.getLatitude(),mLastLocation.getAltitude()));
+                markerAnimator.setDuration(2000);
+                markerAnimator.start();*/
             }
 
         });
@@ -283,24 +307,19 @@ MainActivity extends AppCompatActivity {
         switch (PredictIO.getInstance(getApplication()).getStatus()) {
             case ACTIVE:
                 message = "'predict.io' tracker is in working state.";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 break;
             case LOCATION_DISABLED:
                 message = "'predict.io' tracker is not in running state. GPS is disabled.";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 break;
             case AIRPLANE_MODE_ENABLED:
                 message = "'predict.io' tracker is not in running state. Airplane mode is enabled.";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 break;
             case INSUFFICIENT_PERMISSION:
                 message = "'predict.io' tracker is not in running state. Location permission is not granted.";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 break;
             default:
             case IN_ACTIVE:
                 message = "'predict.io' tracker is in in-active state.";
-                Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 break;
         }
         Toast.makeText(this, message, Toast.LENGTH_LONG).show();
@@ -326,12 +345,12 @@ MainActivity extends AppCompatActivity {
             predictIO.start(new PredictIO.PIOActivationListener() {
                 @Override
                 public void onActivated() {
-
+                    Toast.makeText(MainActivity.this, "Activated listener", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onActivationFailed(int error) {
-
+                    Toast.makeText(MainActivity.this, "Activation failed!" , Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
@@ -339,5 +358,21 @@ MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
+    }
+
+}
+
+class LatLngEvaluator implements TypeEvaluator<LatLng> {
+    // Method is used to interpolate the marker animation.
+
+    private LatLng latLng = new LatLng();
+
+    @Override
+    public LatLng evaluate(float fraction, LatLng startValue, LatLng endValue) {
+        latLng.setLatitude(startValue.getLatitude()
+                + ((endValue.getLatitude() - startValue.getLatitude()) * fraction));
+        latLng.setLongitude(startValue.getLongitude()
+                + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
+        return latLng;
     }
 }

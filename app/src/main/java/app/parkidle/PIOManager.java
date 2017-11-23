@@ -70,7 +70,6 @@ public class PIOManager extends Application{
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
                         .title("You departed from here"));
-
         }
 
         @Override
