@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Camera;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -298,8 +299,9 @@ MainActivity extends AppCompatActivity {
                 //controllare lo spostamento della mappa
 
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
-                mapboxMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), null);
+                mapboxMap.easeCamera(CameraUpdateFactory.newCameraPosition(position),200);//animateCamera(CameraUpdateFactory
+                        //.newCameraPosition(position), null);
+
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
                         new LatLngEvaluator(), me.getPosition(), new LatLng(mLastLocation.getLatitude(),mLastLocation.getAltitude()));
                 markerAnimator.setDuration(2000);
