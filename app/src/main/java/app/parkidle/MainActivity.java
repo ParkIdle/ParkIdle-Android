@@ -126,10 +126,10 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
-        /*Test t1 = new Test(this,mLastLocation);
+        Test t1 = new Test(this,mLastLocation,"APP-OPENING");
         Thread t = new Thread(t1);
         t.start();
-        Toast.makeText(this, "TEST RUN", Toast.LENGTH_SHORT).show();*/
+        Toast.makeText(this, "Opening-Sending position", Toast.LENGTH_SHORT).show();
 
 
     }
@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             }
         }
     }
+
     public void onSensorChanged(SensorEvent event) {
         degree = Math.round(event.values[0]);
         drawMarker(mLastLocation);
@@ -172,6 +173,8 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         mapView.onResume();
 
         mLastLocation = getLastLocation();
+        activatePredictIOTracker();
+
     }
 
     @Override

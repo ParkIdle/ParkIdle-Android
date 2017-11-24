@@ -65,6 +65,11 @@ public class PIOManager extends Application{
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
                         .title("You departed from here").setIcon(icona_parcheggio_libero));
 
+            Test t1 = new Test(PIOManager.this, pioTripSegment.departureLocation,"DEPARTURE");
+            Thread t = new Thread(t1);
+            t.start();
+            Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
+            /*
             try {
                 URL url = new URL(myServerURL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -96,7 +101,7 @@ public class PIOManager extends Application{
                 e.printStackTrace();
             }catch(IOException e){
                 e.printStackTrace();
-            }
+            }*/
         }
 
         @Override
@@ -115,7 +120,12 @@ public class PIOManager extends Application{
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
                     .title("You parked here").setIcon(icona_whereiparked));
 
-            try {
+            Test t1 = new Test(PIOManager.this, pioTripSegment.departureLocation,"ARRIVED");
+            Thread t = new Thread(t1);
+            t.start();
+            Toast.makeText(PIOManager.this, "Parked - Sending position", Toast.LENGTH_SHORT).show();
+
+            /*try {
                 URL url = new URL(myServerURL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoOutput(true);
@@ -144,7 +154,7 @@ public class PIOManager extends Application{
                 e.printStackTrace();
             }catch(IOException e){
                 e.printStackTrace();
-            }
+            }*/
         }
 
         @Override

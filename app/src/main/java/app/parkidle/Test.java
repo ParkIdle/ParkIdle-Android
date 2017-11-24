@@ -35,13 +35,15 @@ import retrofit2.http.HTTP;
 
 public class Test implements Runnable {
 
-    private Location mLastLocation;
+    private final Location mLastLocation;
+    private final String event;
     private Context context;
     private Handler mHandler;
 
-    public Test(Context context, Location location){
-        mLastLocation = location;
+    public Test(Context context, Location location, String event){
+        this.mLastLocation = location;
         this.context = context;
+        this.event=event;
 
     }
 
@@ -53,9 +55,10 @@ public class Test implements Runnable {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, "isRunning", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, " Test isRunning", Toast.LENGTH_LONG).show();
             }
         });
+
         try {
             //URL url = new URL(PIOManager.myServerURL);
             URL url = new URL("https://requestb.in/1amp6dc1");
@@ -69,9 +72,10 @@ public class Test implements Runnable {
             DataOutputStream os = new DataOutputStream(conn.getOutputStream());
 
             JSONObject jsonParam = new JSONObject();
+
             try {
                 jsonParam.put("UUID", "1234");
-                jsonParam.put("event", "OPENING-APP");
+                jsonParam.put("event", event);
                 jsonParam.put("time", mLastLocation.getTime());
                 jsonParam.put("latitude", mLastLocation.getLatitude());
                 jsonParam.put("longitude", mLastLocation.getLongitude());
