@@ -8,7 +8,12 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -32,11 +37,14 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
+import com.mapbox.mapboxsdk.constants.MyBearingTracking;
+import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.style.light.Position;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -45,7 +53,7 @@ import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
 public class
-MainActivity extends AppCompatActivity {
+MainActivity extends AppCompatActivity  implements SensorEventListener {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
     public static MapboxMap mMap;
@@ -57,20 +65,31 @@ MainActivity extends AppCompatActivity {
     private Icon mIcon;
     private Boolean isCameraFollowing;
     private FloatingActionButton ftb;
+    public static Icon icona_parcheggio_libero;
+    public static Icon icona_whereiparked;
+    private SensorManager mSensorManager;
+    private float degree;
+    public CameraPosition position;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        Icon icona_parcheggio_libero= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
+        Icon icona_whereiparked= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         MapboxNavigation navigation = new MapboxNavigation(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         LocationEngine locationEngine = LostLocationEngine.getLocationEngine(this);
         navigation.setLocationEngine(locationEngine);
         setContentView(R.layout.activity_main);
+
+        //sensori android
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
 
         //controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -101,17 +120,18 @@ MainActivity extends AppCompatActivity {
                 mMap = mapboxMap;
                 // Customize map with markers, polylines, etc.
                 //Camera Position definisce la posizione della telecamera
-                CameraPosition position = new CameraPosition.Builder()
+                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
-                        .bearing(0)
+                        .zoom(17) // Sets the zoom to level 17
+                        .bearing(degree)//non funziona, ho provato altri 300 metodi deprecati ma non va
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
+                Icon icona= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
                 me = mapboxMap.addMarker(new MarkerOptions()
                         .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                         .title("You")
-                        .setIcon(mIcon));
+                        .setIcon(icona));
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 7000);
@@ -127,6 +147,7 @@ MainActivity extends AppCompatActivity {
                         isCameraFollowing = false;
                     }
                 });
+
             }
 
         });
@@ -145,7 +166,6 @@ MainActivity extends AppCompatActivity {
 
 
     }
-
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
@@ -208,14 +228,22 @@ MainActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
         mapView.onResume();
     }
+    public void onSensorChanged(SensorEvent event) {
+        degree = Math.round(event.values[0]);
+        drawMarker(mLastLocation);
+    }
 
-    @Override
+
+        @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
-    }
+        mSensorManager.unregisterListener(this);
+
+        }
 
     @Override
     public void onStop() {
@@ -291,10 +319,10 @@ MainActivity extends AppCompatActivity {
                 if (isCameraFollowing){
                     // Customize map with markers, polylines, etc.
                     //Camera Position definisce la posizione della telecamera
-                    CameraPosition position = new CameraPosition.Builder()
+                            position = new CameraPosition.Builder()
                             .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                             .zoom(17) // Sets the zoom to level 10
-                            .bearing(0)
+                            .bearing(degree)
                             .tilt(0) // Set the camera tilt to 20 degrees
                             .build(); // Builds the CameraPosition object from the builder
                     mapboxMap.animateCamera(CameraUpdateFactory
@@ -303,6 +331,7 @@ MainActivity extends AppCompatActivity {
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
 
                 //controllare lo spostamento della mappa
+
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
 
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
@@ -386,6 +415,10 @@ MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
 }
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {

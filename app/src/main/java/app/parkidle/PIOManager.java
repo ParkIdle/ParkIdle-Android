@@ -6,6 +6,8 @@ import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.mapbox.mapboxsdk.annotations.Icon;
+import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
@@ -36,14 +38,18 @@ import io.predict.PredictIO;
 import io.predict.PredictIOListener;
 import io.predict.PredictIOStatus;
 
+
+import static app.parkidle.MainActivity.icona_parcheggio_libero;
+import static app.parkidle.MainActivity.icona_whereiparked;
+
 /**
  * Created by simonestaffa on 16/11/17.
  */
 
 public class PIOManager extends Application{
 
-    public static final String myServerURL = "https://requestb.in/z06i3hz0"; //172.31.10.199
-
+    public static final String myServerURL = "https://requestb.in/1amp6dc1";
+    
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
         PredictIO predictIO = PredictIO.getInstance(this);
@@ -66,9 +72,10 @@ public class PIOManager extends Application{
     private PredictIOListener mPredictIOListener = new PredictIOListener() {
         @Override
         public void departed(PIOTripSegment pioTripSegment) {
+
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
-                        .title("You departed from here"));
+                        .title("You departed from here").setIcon(icona_parcheggio_libero));
 
             try {
                 URL url = new URL(myServerURL);
@@ -116,9 +123,9 @@ public class PIOManager extends Application{
 
         @Override
         public void arrived(PIOTripSegment pioTripSegment) {
-            Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
+            Marker m1 = MainActivity.mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
-                    .title("You arrived here"));
+                    .title("You parked here").setIcon(icona_whereiparked));
 
             try {
                 URL url = new URL(myServerURL);
@@ -169,7 +176,7 @@ public class PIOManager extends Application{
 
         @Override
         public void detectedTransportationMode(PIOTripSegment pioTripSegment) {
-
+            Toast.makeText(PIOManager.this, (pioTripSegment.transportationMode.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
         }
 
         @Override
