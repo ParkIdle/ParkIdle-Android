@@ -6,37 +6,25 @@ import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.mapbox.mapboxsdk.annotations.Icon;
-import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+
 import java.net.ProtocolException;
 import java.net.URL;
 
-import javax.net.ssl.HttpsURLConnection;
 
 import io.predict.PIOTripSegment;
-import io.predict.PIOZone;
 import io.predict.PredictIO;
 import io.predict.PredictIOListener;
-import io.predict.PredictIOStatus;
+
 
 
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
@@ -49,7 +37,7 @@ import static app.parkidle.MainActivity.icona_whereiparked;
 public class PIOManager extends Application{
 
     public static final String myServerURL = "https://requestb.in/1amp6dc1";
-    
+
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
         PredictIO predictIO = PredictIO.getInstance(this);

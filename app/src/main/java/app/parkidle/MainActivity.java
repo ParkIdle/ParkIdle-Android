@@ -17,15 +17,11 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -37,14 +33,10 @@ import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.constants.MyBearingTracking;
-import com.mapbox.mapboxsdk.constants.MyLocationTracking;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.style.light.Position;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
@@ -63,14 +55,15 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     private Marker me;
     //private MQTTSubscribe myMQTTSubscribe;
     private Icon mIcon;
-    private Boolean isCameraFollowing;
+    private boolean isCameraFollowing;
+    private boolean isGpsEnabled;
     private FloatingActionButton ftb;
     public static Icon icona_parcheggio_libero;
     public static Icon icona_whereiparked;
     private SensorManager mSensorManager;
     private float degree;
     public CameraPosition position;
-
+    private LocationManager locationManager;
 
 
     @Override
@@ -78,8 +71,8 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Icon icona_parcheggio_libero= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
-        Icon icona_whereiparked= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
+        Icon icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
+        Icon icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         MapboxNavigation navigation = new MapboxNavigation(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -98,6 +91,8 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         }
 
         //se ho gia i permessi posso chiedere di localizzarmi
+        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        checkGPSEnabled(locationManager);
         mLastLocation = getLastLocation();
         isCameraFollowing = true;
         ftb = findViewById(R.id.center_camera);
@@ -113,44 +108,8 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         mapView = (MapView) findViewById(R.id.mapView);
         //creo la mappa
         mapView.onCreate(savedInstanceState);
-        //prendo la mappa
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(MapboxMap mapboxMap) {
-                mMap = mapboxMap;
-                // Customize map with markers, polylines, etc.
-                //Camera Position definisce la posizione della telecamera
-                 position = new CameraPosition.Builder()
-                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 17
-                        .bearing(degree)//non funziona, ho provato altri 300 metodi deprecati ma non va
-                        .tilt(0) // Set the camera tilt to 20 degrees
-                        .build(); // Builds the CameraPosition object from the builder
-                //add marker aggiunge un marker sulla mappa con data posizione e titolo
-                Icon icona= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
-                me = mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                        .title("You")
-                        .setIcon(icona));
-
-                mapboxMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), 7000);
-                mapboxMap.setOnScrollListener(new MapboxMap.OnScrollListener() {
-                    @Override
-                    public void onScroll() {
-                        isCameraFollowing = false;
-                    }
-                });
-                mapboxMap.setOnFlingListener(new MapboxMap.OnFlingListener() {
-                    @Override
-                    public void onFling() {
-                        isCameraFollowing = false;
-                    }
-                });
-
-            }
-
-        });
+        //preparo la mappa
+        prepareMap(mapView);
 
         activatePredictIOTracker();
         checkPredictIOStatus();
@@ -159,10 +118,10 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
-        Test t1 = new Test(this,mLastLocation);
+        /*Test t1 = new Test(this,mLastLocation);
         Thread t = new Thread(t1);
         t.start();
-        Toast.makeText(this, "TEST RUN", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "TEST RUN", Toast.LENGTH_SHORT).show();*/
 
 
     }
@@ -186,37 +145,9 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
             }
         }
     }
-
-    /**
-     * Function to show settings alert dialog
-     * On pressing Settings button will lauch Settings Options
-     * */
-    public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getApplicationContext());
-
-        // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
-
-        // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
-        // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                getApplicationContext().startActivity(intent);
-            }
-        });
-
-        // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        // Showing Alert Message
-        alertDialog.show();
+    public void onSensorChanged(SensorEvent event) {
+        degree = Math.round(event.values[0]);
+        drawMarker(mLastLocation);
     }
 
     @Override
@@ -231,13 +162,8 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
         mapView.onResume();
     }
-    public void onSensorChanged(SensorEvent event) {
-        degree = Math.round(event.values[0]);
-        drawMarker(mLastLocation);
-    }
 
-
-        @Override
+    @Override
     public void onPause() {
         super.onPause();
         mapView.onPause();
@@ -271,8 +197,7 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
 
     public Location getLastLocation() {
         // Acquire a reference to the system Location Manager
-        LocationManager locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-
+        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
         // Define a listener that responds to location updates
         LocationListener locationListener = new LocationListener() {
             public void onLocationChanged(Location location) {
@@ -280,16 +205,20 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
                 //makeUseOfNewLocation(location);
                 //update my position
                 drawMarker(location);
-
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
+                activatePredictIOTracker();
+                checkPredictIOStatus();
+                drawMarker(getLastLocation());
             }
 
             public void onProviderEnabled(String provider) {
+                Toast.makeText(getBaseContext(), "onProviderDisabled", Toast.LENGTH_SHORT).show();
             }
 
             public void onProviderDisabled(String provider) {
+                Toast.makeText(getBaseContext(), "onProviderDisabled", Toast.LENGTH_SHORT).show();
             }
         };
         //lista dei possibili providers a cui affidarsi per la localizzazione (NETWORK,GPS,PASSIVE)
@@ -305,21 +234,25 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
                 bestLocation = l;
             }
         }
-        Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
         return bestLocation;
     }
 
     //questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
     public void drawMarker(final Location location) {
+        if(location == null){
+            //Toast.makeText(this, "You have to enable GPS to use the app", Toast.LENGTH_SHORT).show();
+            return;
+        }
         mLastLocation = location;
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(MapboxMap mapboxMap) {
 
-                if (isCameraFollowing){
+                if (isCameraFollowing) {
                     // Customize map with markers, polylines, etc.
                     //Camera Position definisce la posizione della telecamera
-                            position = new CameraPosition.Builder()
+                    position = new CameraPosition.Builder()
                             .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                             .zoom(17) // Sets the zoom to level 10
                             .bearing(degree)
@@ -329,7 +262,6 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
                             .newCameraPosition(position), null);
                 }
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
-
                 //controllare lo spostamento della mappa
 
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
@@ -402,6 +334,8 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     }
 
     private void recenterCamera(){
+        mLastLocation = getLastLocation();
+        prepareMap(mapView);
         if(!isCameraFollowing){
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
@@ -418,6 +352,73 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+    public void checkGPSEnabled(LocationManager locationManager) {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            buildAlertMessage();
+        }
+    }
+
+    private void buildAlertMessage() {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                isGpsEnabled = true;
+                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                                isGpsEnabled = false;
+                                dialog.cancel();
+                            }
+                        });
+
+        final AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void prepareMap(MapView mapView){
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(MapboxMap mapboxMap) {
+                mMap = mapboxMap;
+                // Customize map with markers, polylines, etc.
+                //Camera Position definisce la posizione della telecamera
+                position = new CameraPosition.Builder()
+                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 17
+                        .bearing(degree)//non funziona, ho provato altri 300 metodi deprecati ma non va
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                //add marker aggiunge un marker sulla mappa con data posizione e titolo
+                Icon icona= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
+                me = mapboxMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .title("You")
+                        .setIcon(icona));
+
+                mapboxMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 7000);
+                mapboxMap.setOnScrollListener(new MapboxMap.OnScrollListener() {
+                    @Override
+                    public void onScroll() {
+                        isCameraFollowing = false;
+                    }
+                });
+                mapboxMap.setOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        isCameraFollowing = false;
+                    }
+                });
+
+            }
+
+        });
     }
 }
 
