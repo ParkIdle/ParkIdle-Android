@@ -40,28 +40,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.location.LostLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
-
-
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.*;
-
-import java.io.BufferedInputStream;
-import java.io.DataOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
-import java.net.URL;
-import java.util.Date;
 import java.util.List;
-
-import io.predict.PIOTripSegment;
-import io.predict.PIOZone;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
-import io.predict.TransportationMode;
 
 public class
 MainActivity extends AppCompatActivity {
@@ -76,6 +57,7 @@ MainActivity extends AppCompatActivity {
     private Icon mIcon;
     private Boolean isCameraFollowing;
     private FloatingActionButton ftb;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

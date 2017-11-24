@@ -42,7 +42,7 @@ import io.predict.PredictIOStatus;
 
 public class PIOManager extends Application{
 
-    public static final String myServerURL = "https://requestb.in/z06i3hz0";
+    public static final String myServerURL = "https://requestb.in/z06i3hz0"; //172.31.10.199
 
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
