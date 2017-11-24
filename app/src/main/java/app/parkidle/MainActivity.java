@@ -1,11 +1,8 @@
 package app.parkidle;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
-import android.animation.ValueAnimator;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -26,6 +23,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
@@ -38,20 +36,24 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.location.LostLocationEngine;
+import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
+import com.mapbox.services.android.navigation.ui.v5.NavigationView;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewListener;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.telemetry.location.LocationEngine;
+
 import java.util.List;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
-public class
-MainActivity extends AppCompatActivity  implements SensorEventListener {
+public class MainActivity extends AppCompatActivity  implements SensorEventListener{
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
     public static MapboxMap mMap;
     private PIOManager pioManager;
     private MapView mapView;
-    private Location mLastLocation;
+
     private Marker me;
     private Icon icona;
     //private MQTTSubscribe myMQTTSubscribe;
@@ -63,8 +65,9 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     public static Icon icona_whereiparked;
     private SensorManager mSensorManager;
     private float degree;
-    public CameraPosition position;
+    private CameraPosition position;
     private LocationManager locationManager;
+    private Location mLastLocation;
 
 
     @Override
@@ -72,8 +75,7 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        Icon icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
-        Icon icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
+
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         MapboxNavigation navigation = new MapboxNavigation(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -82,7 +84,10 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         setContentView(R.layout.activity_main);
 
         //icona
-        icona= IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
+        icona = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
+        icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking);
+        icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car);
+
         //sensori android
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
@@ -157,6 +162,7 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     public void onStart() {
         super.onStart();
         mapView.onStart();
+
     }
 
     @Override
@@ -164,6 +170,7 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
         super.onResume();
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
         mapView.onResume();
+
         mLastLocation = getLastLocation();
     }
 
@@ -171,6 +178,7 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     public void onPause() {
         super.onPause();
         mapView.onPause();
+
         mSensorManager.unregisterListener(this);
 
     }
@@ -179,12 +187,14 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
     public void onStop() {
         super.onStop();
         mapView.onStop();
+
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+
     }
 
     @Override
@@ -432,11 +442,27 @@ MainActivity extends AppCompatActivity  implements SensorEventListener {
                                 .setIcon(icona_parcheggio_libero));
                     }
                 });
+                mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(@NonNull Marker marker) {
+                        //if(marker.getIcon() == icona_parcheggio_libero
+                            startNav(Point.fromLngLat(
+                                    marker.getPosition().getLongitude(),
+                                    marker.getPosition().getLatitude()));
+                            return true;
+                    }
+                });
 
             }
 
         });
     }
+
+    private void startNav(Point destination){
+        Point origin = Point.fromLngLat(mLastLocation.getLongitude(),mLastLocation.getLatitude());
+        NavigationLauncher.startNavigation(this, origin, destination, null, false);
+    }
+
 }
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {
