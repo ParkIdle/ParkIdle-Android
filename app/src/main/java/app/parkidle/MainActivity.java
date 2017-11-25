@@ -44,7 +44,7 @@ import java.util.List;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
-public class MainActivity extends AppCompatActivity  implements SensorEventListener{
+public class MainActivity extends AppCompatActivity  implements SensorEventListener {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
 
@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
     //sensori
+
     private SensorManager mSensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
