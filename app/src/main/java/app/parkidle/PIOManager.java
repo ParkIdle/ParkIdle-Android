@@ -24,7 +24,7 @@ import java.net.URL;
 import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOListener;
-
+import io.predict.TransportationMode;
 
 
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
@@ -38,12 +38,14 @@ public class PIOManager extends Application{
 
     public static final String myServerURL = "https://requestb.in/1amp6dc1";
 
+    private TransportationMode mTrasportationMode;
+
     public void onApplicationCreate(){
         // The following code sample instantiate predict.io SDK and sets the callbacks:
         PredictIO predictIO = PredictIO.getInstance(this);
         predictIO.setAppOnCreate(this);
         predictIO.setListener(mPredictIOListener);
-        Toast.makeText(this, "PIOManager onApplicationCreate()", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "PIOManager onApplicationCreate()", Toast.LENGTH_SHORT).show();
     }
 
     public PredictIOListener getmPredictIOListener(){
@@ -60,48 +62,15 @@ public class PIOManager extends Application{
     private PredictIOListener mPredictIOListener = new PredictIOListener() {
         @Override
         public void departed(PIOTripSegment pioTripSegment) {
-
             Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
                         .title("You departed from here").setIcon(icona_parcheggio_libero));
 
-            Test t1 = new Test(PIOManager.this, pioTripSegment.departureLocation,"DEPARTURE");
-            Thread t = new Thread(t1);
+            PIOEventHandler peh = new PIOEventHandler(pioTripSegment, PredictIO.DEPARTED_EVENT);
+            Thread t = new Thread(peh);
             t.start();
             Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
-            /*
-            try {
-                URL url = new URL(myServerURL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
 
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-
-                JSONObject jsonParam = new JSONObject();
-                try {
-                    jsonParam.put("UUID",pioTripSegment.UUID);
-                    jsonParam.put("event", PredictIO.DEPARTED_EVENT);
-                    jsonParam.put("time", pioTripSegment.departureTime);
-                    jsonParam.put("latitude", pioTripSegment.departureLocation.getLatitude());
-                    jsonParam.put("longitude", pioTripSegment.departureLocation.getLongitude());
-                    jsonParam.put("zone", pioTripSegment.departureZone);
-
-                    os.write(jsonParam.toString().getBytes("utf-8"));
-                    os.flush();
-                }catch(JSONException e){
-                    e.printStackTrace();
-                }
-
-                conn.disconnect();
-
-
-            }catch(ProtocolException e){
-                e.printStackTrace();
-            }catch(IOException e){
-                e.printStackTrace();
-            }*/
         }
 
         @Override
@@ -120,41 +89,9 @@ public class PIOManager extends Application{
                     .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
                     .title("You parked here").setIcon(icona_whereiparked));
 
-            Test t1 = new Test(PIOManager.this, pioTripSegment.departureLocation,"ARRIVED");
-            Thread t = new Thread(t1);
+            PIOEventHandler peh = new PIOEventHandler(pioTripSegment, PredictIO.ARRIVED_EVENT);
+            Thread t = new Thread(peh);
             t.start();
-            Toast.makeText(PIOManager.this, "Parked - Sending position", Toast.LENGTH_SHORT).show();
-
-            /*try {
-                URL url = new URL(myServerURL);
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setDoOutput(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
-
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-
-                JSONObject jsonParam = new JSONObject();
-                try {
-                    jsonParam.put("UUID",pioTripSegment.UUID);
-                    jsonParam.put("event", PredictIO.ARRIVED_EVENT);
-                    jsonParam.put("time", pioTripSegment.arrivalTime);
-                    jsonParam.put("latitude", pioTripSegment.arrivalLocation.getLatitude());
-                    jsonParam.put("longitude", pioTripSegment.arrivalLocation.getLongitude());
-                    jsonParam.put("zone", pioTripSegment.arrivalZone);
-
-                    os.write(jsonParam.toString().getBytes("utf-8"));
-                    os.flush();
-                }catch(JSONException e){
-                    e.printStackTrace();
-                }
-                conn.disconnect();
-
-            }catch(ProtocolException e){
-                e.printStackTrace();
-            }catch(IOException e){
-                e.printStackTrace();
-            }*/
         }
 
         @Override
@@ -174,7 +111,8 @@ public class PIOManager extends Application{
 
         @Override
         public void detectedTransportationMode(PIOTripSegment pioTripSegment) {
-            Toast.makeText(PIOManager.this, (pioTripSegment.transportationMode.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(PIOManager.this, (pioTripSegment.transportationMode.getClass().getSimpleName()), Toast.LENGTH_SHORT).show();
+
         }
 
         @Override
