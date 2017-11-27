@@ -1,6 +1,7 @@
 package app.parkidle;
 
 import android.location.Location;
+import android.os.Looper;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -37,9 +38,10 @@ public class PIOEventHandler implements Runnable{
 
     @Override
     public void run() {
+        Looper.prepare();
         try {
-            //URL url = new URL(PIOManager.myServerURL);
-            URL url = new URL("https://requestb.in/1amp6dc1");
+            URL url = new URL(PIOManager.myServerURL);
+            //URL url = new URL("https://localhost:3000");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
@@ -62,6 +64,7 @@ public class PIOEventHandler implements Runnable{
         }catch(IOException e){
             e.printStackTrace();
         }
+        Looper.loop();
     }
 
 

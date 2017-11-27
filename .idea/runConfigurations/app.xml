@@ -46,6 +46,7 @@
     <method>
       <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       <option name="com.android.instantApps.provision.BeforeRunTask" enabled="true" clearCache="false" clearProvisionedDevices="false" myTimestamp="1511789873046" />
+>>>>>>> 0b464d7294cfa8ad0f47c2196b28b5b6f6a76355
     </method>
   </configuration>
 </component>

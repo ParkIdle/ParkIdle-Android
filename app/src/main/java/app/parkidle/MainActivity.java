@@ -15,6 +15,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,8 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
+
+import com.mapbox.directions.v5.models.DirectionsRoute;
 
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -32,21 +35,28 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.services.android.location.LostLocationEngine;
+
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
+import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 
 import java.util.List;
+
+import io.predict.PIOTripSegment;
+import io.predict.PIOZone;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
+import io.predict.TransportationMode;
+
 
 public class MainActivity extends AppCompatActivity  implements SensorEventListener {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
+
+    public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
 
     // map stuff
     public static MapboxMap mMap; // riferimento statico alla mappa richiamabile in tutte le classi
@@ -71,7 +81,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     private boolean isGpsEnabled;
 
     // icons
-    private Icon mIcon; // il mio locator
+    public static Icon mIcon; // il mio locator
     public static Icon icona_parcheggio_libero; // parcheggio libero (segna eventi departed)
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
 
@@ -99,8 +109,8 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
 
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
-        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        //accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        //magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
 
 
@@ -143,7 +153,6 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
-
 
     }
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
@@ -200,7 +209,6 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         mapView.onResume();
         activatePredictIOTracker();
         mLastLocation = getLastLocation();
-
     }
 
     @Override
@@ -250,17 +258,17 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
-                activatePredictIOTracker();
+                /*activatePredictIOTracker();
                 checkPredictIOStatus();
-                drawMarker(getLastLocation());
+                drawMarker(getLastLocation());*/
             }
 
             public void onProviderEnabled(String provider) {
-                Toast.makeText(getBaseContext(), "onProviderDisabled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), "onProviderEnabled", Toast.LENGTH_SHORT).show();
             }
 
             public void onProviderDisabled(String provider) {
-                Toast.makeText(getBaseContext(), "onProviderDisabled", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getBaseContext(), "onProviderDisabled", Toast.LENGTH_SHORT).show();
             }
         };
         // lista dei possibili providers a cui affidarsi per la localizzazione (NETWORK,GPS,PASSIVE)
@@ -276,10 +284,10 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                 bestLocation = l;
             }
         }
-        //Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
-        Test t1= new Test(MainActivity.this, bestLocation,"App opened");
+        //*/Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        /*Test t1= new Test(MainActivity.this, bestLocation,"App opened");
         Thread t= new Thread(t1);
-        t.start();
+        t.start();*/
 
         return bestLocation;
     }
@@ -301,7 +309,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                     position = new CameraPosition.Builder()
                             .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                             .zoom(17) // Sets the zoom to level 10
-                            .bearing(azimut) // degree
+                            .bearing(0) // degree - azimut
                             .tilt(0) // Set the camera tilt to 20 degrees
                             .build(); // Builds the CameraPosition object from the builder
                     mapboxMap.animateCamera(CameraUpdateFactory
@@ -346,7 +354,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                 message = "'predict.io' tracker is in in-active state.";
                 break;
         }
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        //Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     public void activatePredictIOTracker() {
@@ -369,12 +377,12 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             predictIO.start(new PredictIO.PIOActivationListener() {
                 @Override
                 public void onActivated() {
-                    Toast.makeText(MainActivity.this, "Activated listener", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Activated listener", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onActivationFailed(int error) {
-                    Toast.makeText(MainActivity.this, "Activation failed!" , Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Activation failed!" , Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
@@ -389,7 +397,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                     .zoom(17) // Sets the zoom to level 10
-                    .bearing(azimut) // degree
+                    .bearing(0) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
@@ -440,7 +448,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
-                        .bearing(azimut)//non funziona, ho provato altri 300 metodi deprecati ma non va
+                        .bearing(0)//non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
@@ -479,7 +487,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                             destination = Point.fromLngLat(
                                     marker.getPosition().getLongitude(),
                                     marker.getPosition().getLatitude());
-                            //startMyNavigation();
+                            launchNavigation();
                         }
                         return true;
                     }
@@ -493,7 +501,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     // faccio partire la navigazione (DA GESTIRE IN UN'ACTIVITY A PARTE)
     private void startNav(Point destination){
         Point origin = Point.fromLngLat(mLastLocation.getLongitude(),mLastLocation.getLatitude());
-        NavigationLauncher.startNavigation(this, origin, destination, null, false);
+        //NavigationLauncher.startNavigation(this, origin, destination, null, false);
     }
 
     public static Point getOrigin(){
@@ -504,10 +512,45 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         return destination;
     }
 
-    /*private void startMyNavigation(){
-        Intent i = new Intent(this, MyNavigationActivity.class);
-        startActivity(i);
-    }*/
+    private void launchNavigation() {
+        NavigationViewOptions options = new NavigationViewOptions() {
+            @Nullable
+            @Override
+            public DirectionsRoute directionsRoute() {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public Point origin() {
+                return getOrigin();
+            }
+
+            @Nullable
+            @Override
+            public Point destination() {
+                return getDestination();
+            }
+
+            @Nullable
+            @Override
+            public String awsPoolId() {
+                return null;
+            }
+
+            @Override
+            public int unitType() {
+                return 1;
+            }
+
+            @Override
+            public boolean shouldSimulateRoute() {
+                return false;
+            }
+        };
+
+        NavigationLauncher.startNavigation(this, options);
+    }
 
 }
 

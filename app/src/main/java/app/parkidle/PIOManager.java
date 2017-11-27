@@ -36,7 +36,7 @@ import static app.parkidle.MainActivity.icona_whereiparked;
 
 public class PIOManager extends Application{
 
-    public static final String myServerURL = "https://requestb.in/1amp6dc1";
+    public static final String myServerURL = "https://requestb.in/wfoypqwf";
 
     private TransportationMode mTrasportationMode;
 
@@ -70,7 +70,6 @@ public class PIOManager extends Application{
             Thread t = new Thread(peh);
             t.start();
             Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
-
         }
 
         @Override
