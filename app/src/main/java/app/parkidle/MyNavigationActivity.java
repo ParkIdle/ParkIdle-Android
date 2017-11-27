@@ -330,5 +330,6 @@ public class MyNavigationActivity extends Activity implements OnMapReadyCallback
             }
         }
     }
+
 }
 

@@ -17,7 +17,6 @@ import android.location.LocationManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -26,40 +25,24 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.mapbox.directions.v5.models.DirectionsRoute;
-import com.mapbox.directions.v5.models.RouteLeg;
-import com.mapbox.directions.v5.models.RouteOptions;
-import com.mapbox.geojson.LineString;
+
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
-import com.mapbox.mapboxsdk.annotations.MarkerViewOptions;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
-import com.mapbox.mapboxsdk.exceptions.InvalidLatLngBoundsException;
 import com.mapbox.mapboxsdk.geometry.LatLng;
-import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerMode;
-import com.mapbox.mapboxsdk.plugins.locationlayer.LocationLayerPlugin;
-import com.mapbox.services.Constants;
-import com.mapbox.services.android.location.LostLocationEngine;
+
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
-import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
-import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.telemetry.location.LocationEngine;
-import com.mapbox.services.android.telemetry.location.LocationEngineListener;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import io.predict.PIOTripSegment;
@@ -68,7 +51,6 @@ import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
-import static com.mapbox.services.android.telemetry.location.LocationEnginePriority.HIGH_ACCURACY;
 
 public class MainActivity extends AppCompatActivity  implements SensorEventListener {
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
@@ -85,9 +67,14 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
+    //sensori
 
     private SensorManager mSensorManager;
-    private float degree;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
+    private float[] mGravity;
+    private float[] mGeomagnetic;
+    private float azimut=0;;
 
     // status boolean
     private boolean isCameraFollowing;
@@ -119,7 +106,13 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking_spot);
 
         // sensori android
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
+
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        //accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        //magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -183,24 +176,37 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         }
     }
 
-    public void onSensorChanged(SensorEvent event) {
-        degree = Math.round(event.values[0]);
-        drawMarker(mLastLocation);
+
+    public void onSensorChanged(SensorEvent event) {/*
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+            mGravity = event.values;
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+            mGeomagnetic = event.values;
+        if (mGravity != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                azimut = orientation[0]; // orientation contains: azimut, pitch and roll
+                drawMarker(mLastLocation);
+            }
+        }*/
     }
 
     @Override
     public void onStart() {
         super.onStart();
         mapView.onStart();
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        //mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION),SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
         mapView.onResume();
-
         activatePredictIOTracker();
         mLastLocation = getLastLocation();
     }
@@ -270,7 +276,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         Location bestLocation = null;
         for (String provider : providers) {
             //Toast.makeText(this, provider, Toast.LENGTH_LONG).show();
-            locationManager.requestLocationUpdates(provider, 3500, 10, locationListener);
+            locationManager.requestLocationUpdates(provider, 500, 10, locationListener);
             Location l = locationManager.getLastKnownLocation(provider);
             if (l == null) continue;
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
@@ -278,7 +284,11 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                 bestLocation = l;
             }
         }
-        //Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        //*/Toast.makeText(this, bestLocation.getLatitude() + "," + bestLocation.getLongitude(), Toast.LENGTH_LONG).show();
+        /*Test t1= new Test(MainActivity.this, bestLocation,"App opened");
+        Thread t= new Thread(t1);
+        t.start();*/
+
         return bestLocation;
     }
 
@@ -299,7 +309,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                     position = new CameraPosition.Builder()
                             .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                             .zoom(17) // Sets the zoom to level 10
-                            .bearing(0) // degree
+                            .bearing(0) // degree - azimut
                             .tilt(0) // Set the camera tilt to 20 degrees
                             .build(); // Builds the CameraPosition object from the builder
                     mapboxMap.animateCamera(CameraUpdateFactory
@@ -387,7 +397,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                     .zoom(17) // Sets the zoom to level 10
-                    .bearing(0) // degree
+                    .bearing(0) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
@@ -438,7 +448,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
-                        .bearing(0)//non funziona, ho provato altri 300 metodi deprecati ma non va
+                        .bearing(0)//non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 //add marker aggiunge un marker sulla mappa con data posizione e titolo
