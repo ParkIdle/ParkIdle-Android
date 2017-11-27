@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://C:\Users\Alessio\Desktop\parkidle\ParkIdle.iml" filepath="C:\Users\Alessio\Desktop\parkidle\ParkIdle.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\Alessio\Desktop\parkidle\app\app.iml" filepath="C:\Users\Alessio\Desktop\parkidle\app\app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parkidle.iml" filepath="$PROJECT_DIR$/parkidle.iml" />
       <module fileurl="file://$PROJECT_DIR$/parkidle.iml" filepath="$PROJECT_DIR$/parkidle.iml" />
     </modules>
   </component>
