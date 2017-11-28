@@ -3,4 +3,6 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="parkIdleGreen">#85bd41</color>
+    <color name="parkIdleGrey">#231F20</color>
 </resources>

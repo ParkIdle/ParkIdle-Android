@@ -24,15 +24,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:clickable="true"
             android:layout_marginBottom="15dp"
             android:layout_marginRight="13dp"
+            android:clickable="true"
             android:onClick="recenterCamera"
+            mapbox:backgroundTint="#85bd41"
             mapbox:fabSize="mini"
-            mapbox:srcCompat="@drawable/mapbox_user_puck_icon" />
+            mapbox:rippleColor="@color/cardview_dark_background"
+            mapbox:srcCompat="@drawable/marcatore_ricentro" />
     </com.mapbox.mapboxsdk.maps.MapView>
-
-
-
 
 </RelativeLayout>

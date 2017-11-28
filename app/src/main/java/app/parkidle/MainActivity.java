@@ -67,8 +67,8 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
-    //sensori
 
+    // sensori
     private SensorManager mSensorManager;
     private Sensor accelerometer;
     private Sensor magnetometer;
@@ -101,17 +101,14 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         setContentView(R.layout.activity_main);
 
         // icona
-        mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.locator);
+        mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
         icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking_spot);
 
         // sensori android
-
-
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         //accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
 
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
