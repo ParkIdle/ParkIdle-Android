@@ -18,8 +18,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
@@ -53,6 +57,8 @@ import io.predict.TransportationMode;
 
 
 public class MainActivity extends AppCompatActivity  implements SensorEventListener {
+    private DrawerLayout menuDrawerLayout;
+    private ActionBarDrawerToggle menuActionBarDrawerToggle;
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
 
@@ -89,11 +95,20 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
 
     //private MQTTSubscribe myMQTTSubscribe;
 
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
+        menuActionBarDrawerToggle = new ActionBarDrawerToggle(this,menuDrawerLayout,R.string.Open,R.string.Close);
+        menuDrawerLayout.addDrawerListener(menuActionBarDrawerToggle);
+        menuActionBarDrawerToggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -153,6 +168,15 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
 
     }
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
+
+    /*public boolean onOptionsItemSelected(MenuItem item){
+        if (menuActionBarDrawerToggle.onOptionsItemSelected(item)){
+            return true;
+        }
+        return true;
+    }
+*/
+
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -549,6 +573,7 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         NavigationLauncher.startNavigation(this, options);
     }
 
+
 }
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {
@@ -564,4 +589,6 @@ class LatLngEvaluator implements TypeEvaluator<LatLng> {
                 + ((endValue.getLongitude() - startValue.getLongitude()) * fraction));
         return latLng;
     }
+
+
 }
