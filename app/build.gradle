@@ -33,11 +33,12 @@ dependencies {
     compile 'com.google.android.gms:play-services-base:9.4.0'
     compile 'com.google.android.gms:play-services-maps:9.4.0'
     compile 'io.predict:predict-io:4.1.1'
-    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0@aar') {
+    // Mapbox SDK dependency
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-SNAPSHOT@aar') {
         transitive = true
     }
-    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.7.0'
-    compile('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.7.1-SNAPSHOT') {
+    compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.7.1'
+    compile('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.7.2-SNAPSHOT') {
         transitive = true
     }
     compile 'com.mapzen.android:lost:3.0.2'

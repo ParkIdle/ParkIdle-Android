@@ -28,8 +28,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.mapbox.directions.v5.models.DirectionsRoute;
-
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.directions.v5.models.RouteLeg;
+import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -43,9 +44,10 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import java.util.List;
 
@@ -92,12 +94,6 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
 
     private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
-
-    //private MQTTSubscribe myMQTTSubscribe;
-
-
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -465,14 +461,14 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
                 // Customize map with markers, polylines, etc.
-                //Camera Position definisce la posizione della telecamera
+                // Camera Position definisce la posizione della telecamera
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
-                        .bearing(0)//non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
+                        .bearing(0)// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
-                //add marker aggiunge un marker sulla mappa con data posizione e titolo
+                // add marker aggiunge un marker sulla mappa con data posizione e titolo
                 me = mapboxMap.addMarker(new MarkerOptions()
                         .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                         .title("You")
@@ -519,12 +515,6 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
         });
     }
 
-    // faccio partire la navigazione (DA GESTIRE IN UN'ACTIVITY A PARTE)
-    private void startNav(Point destination){
-        Point origin = Point.fromLngLat(mLastLocation.getLongitude(),mLastLocation.getLatitude());
-        //NavigationLauncher.startNavigation(this, origin, destination, null, false);
-    }
-
     public static Point getOrigin(){
         return Point.fromLngLat(mLastLocation.getLongitude(),mLastLocation.getLatitude());
     }
@@ -534,10 +524,18 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
     }
 
     private void launchNavigation() {
-        NavigationViewOptions options = new NavigationViewOptions() {
+
+
+        NavigationLauncher.startNavigation(this, new NavigationViewOptions() {
             @Nullable
             @Override
             public DirectionsRoute directionsRoute() {
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public String directionsProfile() {
                 return null;
             }
 
@@ -560,17 +558,17 @@ public class MainActivity extends AppCompatActivity  implements SensorEventListe
             }
 
             @Override
-            public int unitType() {
-                return 1;
+            public MapboxNavigationOptions navigationOptions() {
+                return MapboxNavigationOptions.builder()
+                        .unitType(1)
+                        .build();
             }
 
             @Override
             public boolean shouldSimulateRoute() {
                 return false;
             }
-        };
-
-        NavigationLauncher.startNavigation(this, options);
+        });
     }
 
 

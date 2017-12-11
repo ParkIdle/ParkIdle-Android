@@ -4,15 +4,8 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
-import com.amazonaws.http.HttpClient;
-
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;
 
