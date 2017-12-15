@@ -8,12 +8,28 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:857680111540:android:27d689d63f1b7a06",
+        "mobilesdk_app_id": "1:857680111540:android:74a6db0383ead339",
         "android_client_info": {
-          "package_name": "com.google.samples.quickstart.signin"
+          "package_name": "app.parkidle"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "857680111540-ikig1ja5npmgv33h98imhto2mo5jfgps.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.parkidle",
+            "certificate_hash": "25b55b67d5e44d58946a919bbebf04703e0a7f71"
+          }
+        },
+        {
+          "client_id": "857680111540-churc2c1fofs6gmikalqgkcfoib96bn9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.parkidle",
+            "certificate_hash": "3725dde21880b1cf169c980c0f5cf000eb502981"
+          }
+        },
         {
           "client_id": "857680111540-b81g5usqot58ebdslmotn8ou53n3v926.apps.googleusercontent.com",
           "client_type": 3
@@ -21,14 +37,6 @@
         {
           "client_id": "857680111540-tuusu3fdj28ofe8p9ce8tjffum4m79ju.apps.googleusercontent.com",
           "client_type": 3
-        },
-        {
-          "client_id": "857680111540-u5150h56h3m6hvp04v8qfqb2d694l984.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.google.samples.quickstart.signin",
-            "certificate_hash": "3725dde21880b1cf169c980c0f5cf000eb502981"
-          }
         }
       ],
       "api_key": [

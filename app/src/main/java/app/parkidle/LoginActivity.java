@@ -32,11 +32,16 @@ public class LoginActivity extends AppCompatActivity {
     private final String TAG = "LoginActivity";
     public final static String EXTRA_ACCOUNT = "app.parkidle.account";
     private FirebaseAuth mAuth;
+    private FirebaseApp mApp;
+    private FirebaseUser currentUser;
+    private GoogleSignInAccount currentAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        FirebaseApp.initializeApp(this);
 
         //inizialiting the google options by the id provided from firebase
         // Configure Google Sign In
@@ -46,7 +51,7 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         googleSignIn = GoogleSignIn.getClient(this,google_options);
 
-        FirebaseApp.initializeApp(this);
+
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -68,8 +73,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        currentUser = mAuth.getCurrentUser();
+        currentAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(currentAccount == null){
+            signIn();
+        }else updateUI(currentUser);
     }
 
     private void signIn() {
@@ -90,7 +98,8 @@ public class LoginActivity extends AppCompatActivity {
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Log.w(TAG, "Google sign in failed", e);
+                //Log.w(TAG, "Google sign in failed" + e.getStatusCode());
+                Toast.makeText(this, "Google sign in failed" + e.getStatusCode(), Toast.LENGTH_SHORT).show();
                 // ...
             }
         }
@@ -112,10 +121,10 @@ public class LoginActivity extends AppCompatActivity {
     }*/
 
     private void updateUI(FirebaseUser user){
-        if(user == null){
+        /*if(user == null){
             //Toast.makeText(this, "Account null", Toast.LENGTH_SHORT).show();
             return;
-        }
+        }*/
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(EXTRA_ACCOUNT, new String[]{user.getDisplayName(),user.getEmail(),user.getPhotoUrl().toString()});
         startActivity(intent);
