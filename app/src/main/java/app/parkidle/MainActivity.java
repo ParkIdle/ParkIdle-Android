@@ -30,6 +30,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessagingService;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -65,7 +66,7 @@ import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
 
-public class MainActivity extends AppCompatActivity  implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private DrawerLayout menuDrawerLayout;
     private ActionBarDrawerToggle menuActionBarDrawerToggle;
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
