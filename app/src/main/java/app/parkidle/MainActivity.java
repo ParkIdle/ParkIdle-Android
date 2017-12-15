@@ -172,7 +172,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
-        startMQTT();
+        //startMQTT();
+        Intent i = getIntent();
+        String account = i.getStringExtra(LoginActivity.EXTRA_ACCOUNT);
+        Toast.makeText(this, account, Toast.LENGTH_SHORT).show();
 
     }
     //questo metodo viene chiamato in risposta ad una richiesta di permessi

@@ -6,4 +6,11 @@
     android:layout_height="match_parent"
     tools:context="app.parkidle.LoginActivity">
 
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="253dp"
+        android:layout_height="70dp"
+        tools:layout_editor_absoluteX="66dp"
+        tools:layout_editor_absoluteY="365dp" />
+
 </android.support.constraint.ConstraintLayout>

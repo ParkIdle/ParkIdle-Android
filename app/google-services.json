@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "857680111540",
-    "project_id": "parkidle-186720"
+    "firebase_url": "https://parkidle-186720.firebaseio.com",
+    "project_id": "parkidle-186720",
+    "storage_bucket": "parkidle-186720.appspot.com"
   },
   "client": [
     {
@@ -12,6 +14,10 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "857680111540-b81g5usqot58ebdslmotn8ou53n3v926.apps.googleusercontent.com",
+          "client_type": 3
+        },
         {
           "client_id": "857680111540-tuusu3fdj28ofe8p9ce8tjffum4m79ju.apps.googleusercontent.com",
           "client_type": 3
@@ -35,11 +41,16 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "857680111540-b81g5usqot58ebdslmotn8ou53n3v926.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }
