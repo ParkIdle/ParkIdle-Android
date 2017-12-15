@@ -111,6 +111,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+
+
+
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
         menuActionBarDrawerToggle = new ActionBarDrawerToggle(this,menuDrawerLayout,R.string.Open,R.string.Close);
@@ -139,6 +143,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
+
+
 
         // se ho gia i permessi posso chiedere di localizzarmi
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
@@ -173,9 +179,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
         //startMQTT();
+
+
+        //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
         Intent i = getIntent();
         String account = i.getStringExtra(LoginActivity.EXTRA_ACCOUNT);
         Toast.makeText(this, account, Toast.LENGTH_SHORT).show();
+        Log.w("prova","account"+ account);
+
 
     }
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
