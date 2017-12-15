@@ -23,9 +23,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -50,8 +52,13 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import java.util.List;
 
+import app.parkidle.helper.MQTTHelper;
 import io.predict.PIOTripSegment;
 import io.predict.PIOZone;
 import io.predict.PredictIO;
@@ -76,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
+
+    //MQTT STUFF
+     MQTTHelper mqttHelper;
+     TextView dataReceived;
 
     // sensori
     private SensorManager mSensorManager;
@@ -161,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
-        //myMQTTSubscribe = new MQTTSubscribe(PredictIO.getInstance(this).getDeviceIdentifier());
+        startMQTT();
 
     }
     //questo metodo viene chiamato in risposta ad una richiesta di permessi
@@ -570,6 +581,32 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 return false;
             }
         });
+    }
+
+    private void startMQTT(){
+        mqttHelper = new MQTTHelper(getApplicationContext());
+        mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean reconnect, String serverURI) {
+                Log.w("Mqtt","connection completed with the server!");
+            }
+
+            @Override
+            public void connectionLost(Throwable cause) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                Log.w("Mqtt","message arrived! This is the message:\n"+message.toString());
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
+            }
+        });
+
     }
 
 

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "857680111540",
+    "project_id": "parkidle-186720"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:857680111540:android:27d689d63f1b7a06",
+        "android_client_info": {
+          "package_name": "com.google.samples.quickstart.signin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "857680111540-tuusu3fdj28ofe8p9ce8tjffum4m79ju.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "857680111540-u5150h56h3m6hvp04v8qfqb2d694l984.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.samples.quickstart.signin",
+            "certificate_hash": "3725dde21880b1cf169c980c0f5cf000eb502981"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXLuDarki7D8flsKSB5OoRj1md2bmyfWI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
