@@ -63,7 +63,7 @@
             android:resource="@color/colorAccent" />
 
 
-        <service android:name="org.eclipse.paho.android.service.MqttService" />
+        <!--<service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
         <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
             <intent-filter>
