@@ -44,6 +44,9 @@
             android:name="io.predict.sdk.detection.services.PIOComService"
             android:exported="false" />
 
+
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
         <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
