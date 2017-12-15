@@ -35,7 +35,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:11.4.0'
     compile 'com.google.android.gms:play-services-base:11.4.0'
     compile 'com.google.android.gms:play-services-maps:11.4.0'
-    compile 'io.predict:predict-io:4.1.1'
+    compile 'io.predict:predict-io:5.0.0'
     // Mapbox SDK dependency
     compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-SNAPSHOT@aar') {
         transitive = true
