@@ -65,8 +65,11 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 
 import app.parkidle.helper.MQTTHelper;
@@ -133,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         menuActionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         setContentView(R.layout.activity_main);
         NavigationView drawerNav = (NavigationView)findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
@@ -141,7 +143,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Profile Image nel Menu laterale
         ImageView profile_img = (ImageView)drawerHeader.findViewById(R.id.menu_photo);
         String image_uri = LoginActivity.getGoogleAccount().getPhotoUrl().toString();
-        profile_img.setImageURI(Uri.parse(image_uri));
+        NetworkThreadHelper nth = new NetworkThreadHelper(image_uri);
+        Thread getting_bitmap = new Thread(nth);
+        getting_bitmap.start();
+        try {
+            getting_bitmap.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        profile_img.setImageBitmap(nth.getResult());
 
         // Display Name nel Menu lateralte
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
@@ -153,8 +163,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
-
-
 
         // icona
         mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
@@ -186,7 +194,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 recenterCamera();
             }
         });
-
 
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
