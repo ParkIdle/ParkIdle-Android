@@ -141,25 +141,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         View drawerHeader = drawerNav.getHeaderView(0);
 
         // Profile Image nel Menu laterale
-        ImageView profile_img = (ImageView)drawerHeader.findViewById(R.id.menu_photo);
-        String image_uri = LoginActivity.getGoogleAccount().getPhotoUrl().toString();
-        NetworkThreadHelper nth = new NetworkThreadHelper(image_uri);
-        Thread getting_bitmap = new Thread(nth);
-        getting_bitmap.start();
-        try {
-            getting_bitmap.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        profile_img.setImageBitmap(nth.getResult());
 
-        // Display Name nel Menu lateralte
-        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
-        display_name.setText(LoginActivity.getGoogleAccount().getDisplayName());
-
-        // Email nel Menu laterale
-        TextView email = drawerHeader.findViewById(R.id.menu_email);
-        email.setText(LoginActivity.getGoogleAccount().getEmail());
+        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(drawerHeader);
+        Thread customizerThread = new Thread(customizer);
+        customizerThread.start();
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
