@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/back_login_act"
     tools:context="app.parkidle.LoginActivity">
 
     <com.google.android.gms.common.SignInButton
@@ -11,6 +12,15 @@
         android:layout_width="253dp"
         android:layout_height="70dp"
         tools:layout_editor_absoluteX="66dp"
-        tools:layout_editor_absoluteY="365dp" />
+        tools:layout_editor_absoluteY="327dp" />
+
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/login_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        tools:layout_editor_absoluteX="103dp"
+        tools:layout_editor_absoluteY="438dp" />
 
 </android.support.constraint.ConstraintLayout>
