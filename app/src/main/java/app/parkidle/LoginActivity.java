@@ -34,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseApp mApp;
     private FirebaseUser currentUser;
-    private GoogleSignInAccount currentAccount;
+    private static GoogleSignInAccount currentAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,5 +156,8 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    public static GoogleSignInAccount getGoogleAccount(){
+        return currentAccount;
+    }
 
 }

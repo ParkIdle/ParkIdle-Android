@@ -3,10 +3,14 @@ package app.parkidle;
 import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -14,9 +18,11 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,9 +30,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +65,8 @@ import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 import app.parkidle.helper.MQTTHelper;
@@ -113,6 +124,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+
         // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
         menuActionBarDrawerToggle = new ActionBarDrawerToggle(this,menuDrawerLayout,R.string.Open,R.string.Close);
@@ -120,10 +133,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         menuActionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
+        setContentView(R.layout.activity_main);
+        NavigationView drawerNav = (NavigationView)findViewById(R.id.drawer_navigation);
+        View drawerHeader = drawerNav.getHeaderView(0);
+
+        // Profile Image nel Menu laterale
+        ImageView profile_img = (ImageView)drawerHeader.findViewById(R.id.menu_photo);
+        String image_uri = LoginActivity.getGoogleAccount().getPhotoUrl().toString();
+        profile_img.setImageURI(Uri.parse(image_uri));
+
+        // Display Name nel Menu lateralte
+        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
+        display_name.setText(LoginActivity.getGoogleAccount().getDisplayName());
+
+        // Email nel Menu laterale
+        TextView email = drawerHeader.findViewById(R.id.menu_email);
+        email.setText(LoginActivity.getGoogleAccount().getEmail());
+
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
 
-        setContentView(R.layout.activity_main);
+
 
         // icona
         mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
@@ -179,8 +210,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
         Intent i = getIntent();
         String account = i.getStringExtra(LoginActivity.EXTRA_ACCOUNT);
-        Toast.makeText(this, account, Toast.LENGTH_SHORT).show();
-        Log.w("prova","account"+ account);
+        //Toast.makeText(this, LoginActivity.getGoogleAccount().getPhotoUrl().toString(), Toast.LENGTH_SHORT).show();
+        //Log.w("prova","account"+ account);
 
 
     }

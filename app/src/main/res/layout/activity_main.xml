@@ -3,10 +3,12 @@
     android:id="@+id/drawer_menu"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <android.support.design.widget.NavigationView
+        android:id="@+id/drawer_navigation"
         mapbox:headerLayout="@layout/header"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
@@ -44,7 +46,6 @@
             mapbox:rippleColor="@color/parkIdleGrey"
             mapbox:srcCompat="@drawable/marcatore_ricentro" />
     </com.mapbox.mapboxsdk.maps.MapView>
-
 
 
 </android.support.v4.widget.DrawerLayout>

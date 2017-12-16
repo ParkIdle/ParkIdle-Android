@@ -7,12 +7,14 @@
     android:background="@drawable/header_bg"
     android:padding="20dp">
     <ImageView
+        android:id="@+id/menu_photo"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:src="@drawable/header_profile"
         />
 
     <TextView
+        android:id="@+id/menu_display_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Andrea Misuraca"
@@ -21,6 +23,7 @@
         android:paddingTop="80dp"/>
 
     <TextView
+        android:id="@+id/menu_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="misu.it.official@gmail.com"
