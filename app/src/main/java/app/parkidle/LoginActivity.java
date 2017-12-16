@@ -43,11 +43,11 @@ public class LoginActivity extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
 
+
         //inizialiting the google options by the id provided from firebase
         // Configure Google Sign In
         google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(clientIdByServer)
-                .requestEmail()
                 .build();
         googleSignIn = GoogleSignIn.getClient(this,google_options);
 

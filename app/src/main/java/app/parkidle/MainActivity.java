@@ -111,11 +111,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-
-
-
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
         menuActionBarDrawerToggle = new ActionBarDrawerToggle(this,menuDrawerLayout,R.string.Open,R.string.Close);
         menuDrawerLayout.addDrawerListener(menuActionBarDrawerToggle);
@@ -143,8 +141,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
-
-
 
         // se ho gia i permessi posso chiedere di localizzarmi
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
@@ -180,7 +176,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //startMQTT();
 
-
         //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
         Intent i = getIntent();
         String account = i.getStringExtra(LoginActivity.EXTRA_ACCOUNT);
@@ -189,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     }
-    //questo metodo viene chiamato in risposta ad una richiesta di permessi
+
 
     /*public boolean onOptionsItemSelected(MenuItem item){
         if (menuActionBarDrawerToggle.onOptionsItemSelected(item)){
@@ -455,7 +450,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public void checkGPSEnabled(LocationManager locationManager) {
-        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
     }
@@ -552,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void launchNavigation() {
 
 
-        NavigationLauncher.startNavigation(this, new NavigationViewOptions() {
+        /*NavigationLauncher.startNavigation(this, new NavigationViewOptions() {
             @Nullable
             @Override
             public DirectionsRoute directionsRoute() {
@@ -594,7 +589,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public boolean shouldSimulateRoute() {
                 return false;
             }
-        });
+        });*/
     }
 
     private void startMQTT(){
