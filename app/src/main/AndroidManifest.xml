@@ -68,6 +68,7 @@
         <!--<service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
         <activity android:name=".MainActivity">
+
         </activity>
         <activity
             android:name="com.facebook.FacebookActivity"

@@ -91,6 +91,9 @@ import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
 import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
+import static app.parkidle.LoginActivity.currentUser;
+import static app.parkidle.LoginActivity.isWithFacebook;
+import static app.parkidle.LoginActivity.isWithGoogle;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -647,19 +650,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
     
     private void signOut(){
-        LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()) {
-                    Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
-                    onBackPressed();
-                }else Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
-            }
-        });
+       // if(isWithGoogle())
+            LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()) {
+                        Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
+                        onBackPressed();
+                    }else Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
+                }
+            });
+        //else if(isWithFacebook()){
+            //TODO: ora si slogghiamo con la procedura di facebook
+        }
     }
 
 
-}
+
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {
     // Method is used to interpolate the marker animation.
