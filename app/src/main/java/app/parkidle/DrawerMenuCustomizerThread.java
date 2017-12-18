@@ -40,15 +40,14 @@ public class DrawerMenuCustomizerThread implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
         // getting Google Profile Image
-        String image_uri = LoginActivity.getGoogleAccount().getPhotoUrl().toString();
+        String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
         profile_img.setImageBitmap(getImageBitmap(image_uri));
 
         // Display Name nel Menu laterale
-        display_name.setText(LoginActivity.getGoogleAccount().getDisplayName());
+        display_name.setText(LoginActivity.getUser().getDisplayName());
 
         // Email nel Menu laterale
-        email.setText(LoginActivity.getGoogleAccount().getEmail());
-
+        email.setText(LoginActivity.getUser().getEmail());
     }
 
     private Bitmap getImageBitmap(String url) {

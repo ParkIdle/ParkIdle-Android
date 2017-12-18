@@ -4,10 +4,17 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -20,14 +27,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends AppCompatActivity {
+    private final String OAuthUriFacebook = "https://parkidle-186720.firebaseapp.com/__/auth/handler";
+    private final String idAppFacebook = "156734918407060";
+    private final String appSecretByFacebook = "803ca34aed8c4311022bbb8ba3e2bbbc";
     private final String clientIdByServer = "857680111540-b81g5usqot58ebdslmotn8ou53n3v926.apps.googleusercontent.com";
     private final String clientPasswordByServer = "6MSQmXxyeW-TaccqdbkIngHf";
-    private final int RC_SIGN_IN = 1;
+    private final int RC_SIGN_IN_GOOGLE = 1;
+    private final int RC_SIGN_IN_FACEBOOK = 2;
     private GoogleSignInOptions google_options;
     public static GoogleSignInClient googleSignIn;
     private GoogleSignInAccount account;
@@ -35,9 +47,12 @@ public class LoginActivity extends AppCompatActivity {
     public final static String EXTRA_ACCOUNT = "app.parkidle.account";
     private FirebaseAuth mAuth;
     private FirebaseApp mApp;
-    private FirebaseUser currentUser;
-    private static GoogleSignInAccount currentAccount;
+    public static FirebaseUser currentUser;
+    private GoogleSignInAccount currentAccount;
     public static GoogleApiClient mGoogleApiClient;
+    private CallbackManager mCallbackManager;
+    private static boolean withGoogle;
+    private static boolean withFacebook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +60,30 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         FirebaseApp.initializeApp(this);
+
+        //inizialiting the facebook options by the id provided from firebase
+        mCallbackManager = CallbackManager.Factory.create();
+        LoginButton loginButton = findViewById(R.id.login_button);
+        loginButton.setReadPermissions("email","public_profile");
+        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                handleFacebookAccessToken(loginResult.getAccessToken());
+            }
+
+            @Override
+            public void onCancel() {
+                Log.d(TAG, "facebook:onCancel");
+            }
+
+            @Override
+            public void onError(FacebookException error) {
+                Log.d(TAG, "facebook:onError", error);
+            }
+        });
+
+
 
 
         //inizialiting the google options by the id provided from firebase
@@ -70,14 +109,26 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 switch (v.getId()){
                     case R.id.sign_in_button:
-                        signIn();
+                        signIn_google();
                         break;
-                    // case Tasto Facebook
-                        //continua con altri casi
                 }
             }
         });
-    }
+
+        findViewById(R.id.login_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()){
+                    case R.id.login_button:
+                        //signIn_Facebook();
+                        break;
+                }
+            }
+        });
+
+
+
+    }//qua finisce on create
 
     @Override
     protected void onStart() {
@@ -85,13 +136,14 @@ public class LoginActivity extends AppCompatActivity {
         // Check if user is signed in (non-null) and update UI accordingly.
         currentUser = mAuth.getCurrentUser();
         currentAccount = GoogleSignIn.getLastSignedInAccount(this);
-        if(currentAccount != null)
+        if(currentUser != null)
             updateUI(currentUser);
     }
 
-    private void signIn() {
+    private void signIn_google() {
+
         Intent signInIntent = googleSignIn.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        startActivityForResult(signInIntent, RC_SIGN_IN_GOOGLE);
     }
 
     @Override
@@ -99,7 +151,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_SIGN_IN_GOOGLE) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
@@ -113,6 +165,10 @@ public class LoginActivity extends AppCompatActivity {
                 // ...
             }
         }
+
+        if(requestCode == RC_SIGN_IN_FACEBOOK){
+            mCallbackManager.onActivityResult(RC_SIGN_IN_FACEBOOK,resultCode,data);
+        }
     }
 
 
@@ -122,15 +178,15 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }*/
         Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra(EXTRA_ACCOUNT, new String[]{user.getDisplayName(),user.getEmail(),user.getPhotoUrl().toString()});
         startActivity(intent);
-        onPause();
+        //onPause();
 
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-
+        withGoogle = true;
+        withFacebook = false;
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -154,10 +210,47 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    private void handleFacebookAccessToken(AccessToken token) {
+        Log.d(TAG, "handleFacebookAccessToken:" + token);
+        withFacebook = true;
+        withGoogle = false;
+        AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Sign in success, update UI with the signed-in user's information
+                            Log.d(TAG, "signInWithCredential:success");
+                            FirebaseUser user = mAuth.getCurrentUser();
+                            updateUI(user);
+                        } else {
+                            // If sign in fails, display a message to the user.
+                            Log.w(TAG, "signInWithCredential:failure", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                            updateUI(null);
+                        }
 
-
-    public static GoogleSignInAccount getGoogleAccount(){
-        return currentAccount;
+                        // ...
+                    }
+                });
     }
+
+
+    public static boolean isWithGoogle() {
+
+        return withGoogle;
+    }
+
+    public static boolean isWithFacebook(){
+        return withFacebook;
+    }
+
+    public static FirebaseUser getUser(){
+        return currentUser;
+    }
+
+
 
 }
