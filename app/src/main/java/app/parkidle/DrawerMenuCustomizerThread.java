@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,12 +22,16 @@ import java.net.URLConnection;
 
 public class DrawerMenuCustomizerThread implements Runnable {
 
-    private View drawer;
+    private ImageView profile_img;
+    private TextView display_name;
+    private TextView email;
     private Bitmap imageBitmap;
     private final String TAG = "DrawerMenuCustomizerThread";
 
-    public DrawerMenuCustomizerThread(View drawer){
-        this.drawer = drawer;
+    public DrawerMenuCustomizerThread(ImageView profile_img, TextView display_name, TextView email){
+        this.profile_img = profile_img;
+        this.display_name = display_name;
+        this.email = email;
     }
 
     @Override
@@ -34,17 +40,15 @@ public class DrawerMenuCustomizerThread implements Runnable {
         android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
 
         // getting Google Profile Image
-        ImageView profile_img = (ImageView)drawer.findViewById(R.id.menu_photo);
         String image_uri = LoginActivity.getGoogleAccount().getPhotoUrl().toString();
         profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-        // Display Name nel Menu lateralte
-        TextView display_name = drawer.findViewById(R.id.menu_display_name);
+        // Display Name nel Menu laterale
         display_name.setText(LoginActivity.getGoogleAccount().getDisplayName());
 
         // Email nel Menu laterale
-        TextView email = drawer.findViewById(R.id.menu_email);
         email.setText(LoginActivity.getGoogleAccount().getEmail());
+
     }
 
     private Bitmap getImageBitmap(String url) {

@@ -36,9 +36,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
@@ -79,9 +90,12 @@ import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
+import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
     private DrawerLayout menuDrawerLayout;
+    private ListView mDrawerList;
     private ActionBarDrawerToggle menuActionBarDrawerToggle;
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
@@ -99,8 +113,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Marker me; // ha sempre come riferimento il mio Marker
 
     //MQTT STUFF
-     MQTTHelper mqttHelper;
-     TextView dataReceived;
+    MQTTHelper mqttHelper;
+    TextView dataReceived;
 
     // sensori
     private SensorManager mSensorManager;
@@ -108,7 +122,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private Sensor magnetometer;
     private float[] mGravity;
     private float[] mGeomagnetic;
-    private float azimut=0;;
+    private float azimut = 0;
+    ;
 
     // status boolean
     private boolean isCameraFollowing;
@@ -128,21 +143,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
-
         // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
-        menuActionBarDrawerToggle = new ActionBarDrawerToggle(this,menuDrawerLayout,R.string.Open,R.string.Close);
+        menuActionBarDrawerToggle = new ActionBarDrawerToggle(this, menuDrawerLayout, R.string.Open, R.string.Close);
         menuDrawerLayout.addDrawerListener(menuActionBarDrawerToggle);
         menuActionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+
         setContentView(R.layout.activity_main);
-        NavigationView drawerNav = (NavigationView)findViewById(R.id.drawer_navigation);
+        NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
 
-        // Profile Image nel Menu laterale
 
-        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(drawerHeader);
+        drawerNav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                int id = item.getItemId();
+                Toast.makeText(MainActivity.this, id, Toast.LENGTH_SHORT).show();
+                if(id == R.id.logout)
+                    signOut();
+                return true;
+            }
+        });
+
+
+        // Profile Image nel Menu laterale
+        ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
+        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
+        TextView email = drawerHeader.findViewById(R.id.menu_email);
+        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img,display_name,email);
         Thread customizerThread = new Thread(customizer);
         customizerThread.start();
 
@@ -155,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking_spot);
 
         // sensori android
-        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         //accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         //magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
@@ -176,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ftb.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
+                signOut();
                 recenterCamera();
             }
         });
@@ -201,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
         Intent i = getIntent();
-        String account = i.getStringExtra(LoginActivity.EXTRA_ACCOUNT);
+        String account = i.getStringExtra(EXTRA_ACCOUNT);
         //Toast.makeText(this, LoginActivity.getGoogleAccount().getPhotoUrl().toString(), Toast.LENGTH_SHORT).show();
         //Log.w("prova","account"+ account);
 
@@ -355,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     // questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
     public void drawMarker(final Location location) {
-        if(location == null){
+        if (location == null) {
             //Toast.makeText(this, "You have to enable GPS to use the app", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -378,7 +409,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 //me è un oggetto Marker, il metodo setPosition su un Marker aggiorna la posizione del mio marker
                 //controllare lo spostamento della mappa
-                if(me == null){
+                if (me == null) {
                     me = mapboxMap.addMarker(new MarkerOptions()
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("You")
@@ -453,8 +484,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    private void recenterCamera(){
-        if(!isCameraFollowing){
+    private void recenterCamera() {
+        if (!isCameraFollowing) {
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                     .zoom(17) // Sets the zoom to level 10
@@ -483,23 +514,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                            public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                                isGpsEnabled = true;
-                                startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                            }
-                        })
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
-                                isGpsEnabled = false;
-                                dialog.cancel();
-                            }
-                        });
+                    public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        isGpsEnabled = true;
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
+                        isGpsEnabled = false;
+                        dialog.cancel();
+                    }
+                });
 
         final AlertDialog alert = builder.create();
         alert.show();
     }
 
-    private void prepareMap(MapView mapView){
+    private void prepareMap(MapView mapView) {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
@@ -544,7 +575,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(@NonNull Marker marker) {
-                        if(marker.getIcon() == icona_parcheggio_libero) {
+                        if (marker.getIcon() == icona_parcheggio_libero) {
                             destination = Point.fromLngLat(
                                     marker.getPosition().getLongitude(),
                                     marker.getPosition().getLatitude());
@@ -559,11 +590,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });
     }
 
-    public static Point getOrigin(){
-        return Point.fromLngLat(mLastLocation.getLongitude(),mLastLocation.getLatitude());
+    public static Point getOrigin() {
+        return Point.fromLngLat(mLastLocation.getLongitude(), mLastLocation.getLatitude());
     }
 
-    public static Point getDestination(){
+    public static Point getDestination() {
         return destination;
     }
 
@@ -614,31 +645,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });*/
     }
-
-    private void startMQTT(){
-        mqttHelper = new MQTTHelper(getApplicationContext());
-        mqttHelper.setCallback(new MqttCallbackExtended() {
+    
+    private void signOut(){
+        LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-                Log.w("Mqtt","connection completed with the server!");
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                Log.w("Mqtt","message arrived! This is the message:\n"+message.toString());
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful()) {
+                    Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
+                    onBackPressed();
+                }else Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
 
