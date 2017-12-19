@@ -13,6 +13,9 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -42,6 +45,8 @@ public class LoginActivity extends AppCompatActivity {
     private final int RC_SIGN_IN_FACEBOOK = 2;
     private GoogleSignInOptions google_options;
     public static GoogleSignInClient googleSignIn;
+
+    public static FacebookAuthProvider facebookSignIn;
     private GoogleSignInAccount account;
     private final String TAG = "LoginActivity";
     public final static String EXTRA_ACCOUNT = "app.parkidle.account";
@@ -51,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInAccount currentAccount;
     public static GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
+
     private static boolean withGoogle;
     private static boolean withFacebook;
 
@@ -59,29 +65,38 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+
+
         FirebaseApp.initializeApp(this);
 
         //inizialiting the facebook options by the id provided from firebase
+        Log.w("helper","i'm here dude_main_inizialiting");
+
         mCallbackManager = CallbackManager.Factory.create();
-        LoginButton loginButton = findViewById(R.id.login_button);
+        final LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions("email","public_profile");
+        Log.w("helper","i'm here dude_after inizialiting");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+                Log.w("facebook callback","hey its on success");
                 handleFacebookAccessToken(loginResult.getAccessToken());
+
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
+                Log.w("facebook callback","hey its on cancel");
             }
 
             @Override
             public void onError(FacebookException error) {
-                Log.d(TAG, "facebook:onError", error);
+                Log.w("facebook callback","hey its on error");
             }
+
         });
+
+
 
 
 
@@ -115,16 +130,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.login_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()){
-                    case R.id.login_button:
-                        //signIn_Facebook();
-                        break;
-                }
-            }
-        });
+
+
+
 
 
 
@@ -142,9 +150,10 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signIn_google() {
 
-        Intent signInIntent = googleSignIn.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN_GOOGLE);
+        Intent signInIntent_google = googleSignIn.getSignInIntent();
+        startActivityForResult(signInIntent_google, RC_SIGN_IN_GOOGLE);
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -164,19 +173,19 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Google sign in failed" + e.getStatusCode(), Toast.LENGTH_SHORT).show();
                 // ...
             }
+        }else{
+            mCallbackManager.onActivityResult(requestCode,resultCode,data);
         }
 
-        if(requestCode == RC_SIGN_IN_FACEBOOK){
-            mCallbackManager.onActivityResult(RC_SIGN_IN_FACEBOOK,resultCode,data);
-        }
+
     }
 
 
     private void updateUI(FirebaseUser user){
-        /*if(user == null){
+        //if(user == null){
             //Toast.makeText(this, "Account null", Toast.LENGTH_SHORT).show();
-            return;
-        }*/
+            //return;
+        //}
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         //onPause();

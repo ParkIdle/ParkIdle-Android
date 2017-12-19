@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
                 Toast.makeText(MainActivity.this, id, Toast.LENGTH_SHORT).show();
-                if(id == R.id.logout)
+                if (id == R.id.logout)
                     signOut();
                 return true;
             }
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
         TextView email = drawerHeader.findViewById(R.id.menu_email);
-        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img,display_name,email);
+        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
         Thread customizerThread = new Thread(customizer);
         customizerThread.start();
 
@@ -648,22 +648,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });*/
     }
-    
-    private void signOut(){
-       // if(isWithGoogle())
+
+    private void signOut() {
+        //if (isWithGoogle())
             LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
-                    if(task.isSuccessful()) {
+                    if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
                         onBackPressed();
-                    }else Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
+                    } else
+                        Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
                 }
             });
-        //else if(isWithFacebook()){
+        //else if (isWithFacebook()) {
             //TODO: ora si slogghiamo con la procedura di facebook
-        }
+       // }
     }
+}
 
 
 
