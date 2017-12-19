@@ -40,6 +40,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -51,6 +54,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -94,6 +98,7 @@ import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.isWithFacebook;
 import static app.parkidle.LoginActivity.isWithGoogle;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -114,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
+    private String unitType;
 
     //MQTT STUFF
     MQTTHelper mqttHelper;
@@ -177,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         TextView email = drawerHeader.findViewById(R.id.menu_email);
         DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
         Thread customizerThread = new Thread(customizer);
-        customizerThread.start();
+        //customizerThread.start();
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -209,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ftb.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
-                signOut();
+                //signOut();
                 recenterCamera();
             }
         });
@@ -603,51 +609,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void launchNavigation() {
 
+        this.unitType = DirectionsCriteria.METRIC;
 
-        /*NavigationLauncher.startNavigation(this, new NavigationViewOptions() {
-            @Nullable
-            @Override
-            public DirectionsRoute directionsRoute() {
-                return null;
-            }
+        NavigationViewOptions options = NavigationViewOptions.builder()
+                .origin(getOrigin())
+                .destination(getDestination())
+                .awsPoolId(null)
+                //.unitType(NavigationUnitType.TYPE_METRIC)
+                .shouldSimulateRoute(false)
+                .build();
 
-            @Nullable
-            @Override
-            public String directionsProfile() {
-                return null;
-            }
-
-            @Nullable
-            @Override
-            public Point origin() {
-                return getOrigin();
-            }
-
-            @Nullable
-            @Override
-            public Point destination() {
-                return getDestination();
-            }
-
-            @Nullable
-            @Override
-            public String awsPoolId() {
-                return null;
-            }
-
-            @Override
-            public MapboxNavigationOptions navigationOptions() {
-                return MapboxNavigationOptions.builder()
-                        .unitType(1)
-                        .build();
-            }
-
-            @Override
-            public boolean shouldSimulateRoute() {
-                return false;
-            }
-        });*/
+        NavigationLauncher.startNavigation(this, options);
     }
+
 
     private void signOut() {
         //if (isWithGoogle())
