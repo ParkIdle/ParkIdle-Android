@@ -3,6 +3,8 @@ package app.parkidle;
 import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -75,6 +77,8 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -611,12 +615,35 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         this.unitType = DirectionsCriteria.METRIC;
 
+        /*NavigationNotification mNavNotification = new NavigationNotification() {
+            @Override
+            public Notification getNotification() {
+
+            }
+
+            @Override
+            public int getNotificationId() {
+                return 0;
+            }
+
+            @Override
+            public void updateNotification(RouteProgress routeProgress) {
+
+            }
+        }*/
+
+        MapboxNavigationOptions mNavOptions = MapboxNavigationOptions.builder()
+                .unitType(1)
+                .enableNotification(true)
+                .enableOffRouteDetection(true)
+                .build();
+
         NavigationViewOptions options = NavigationViewOptions.builder()
                 .origin(getOrigin())
                 .destination(getDestination())
                 .awsPoolId(null)
-                //.unitType(NavigationUnitType.TYPE_METRIC)
                 .shouldSimulateRoute(false)
+                .navigationOptions(mNavOptions)
                 .build();
 
         NavigationLauncher.startNavigation(this, options);
