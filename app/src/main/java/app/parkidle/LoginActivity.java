@@ -182,14 +182,15 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void updateUI(FirebaseUser user){
-        //if(user == null){
-            //Toast.makeText(this, "Account null", Toast.LENGTH_SHORT).show();
-            //return;
-        //}
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        //onPause();
-
+        if(user == null){
+            Toast.makeText(this, "Account null", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        else {
+            Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            //onPause();
+        }
     }
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {

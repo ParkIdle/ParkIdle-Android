@@ -190,16 +190,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
-        /*Menu menu = drawerNav.getMenu();
-
-        menuItem_logout.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                Toast.makeText(MainActivity.this, "hey,you pressed there man", Toast.LENGTH_SHORT).show();
-                signOut();
-                return true;
-            }
-        });*/
+        Menu menu = drawerNav.getMenu();
 
 
 
@@ -246,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ftb.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
-                //signOut();
+                signOut();
                 recenterCamera();
                 customizerThread.interrupt();
             }
@@ -546,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
+            //buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
     }
 
@@ -680,6 +671,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void signOut() {
         //if (isWithGoogle())
+        if (LoginActivity.getUser() != null) {
             LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
@@ -691,9 +683,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
                 }
             });
-        //else if (isWithFacebook()) {
+            //else if (isWithFacebook()) {
             //TODO: ora si slogghiamo con la procedura di facebook
-       // }
+            // }
+        }
+        else{
+            Intent i = new Intent(this,LoginActivity.class);
+            startActivity(i);
+        }
     }
 }
 

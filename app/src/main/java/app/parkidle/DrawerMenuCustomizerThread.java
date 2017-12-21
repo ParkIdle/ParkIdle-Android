@@ -41,16 +41,18 @@ public class DrawerMenuCustomizerThread implements Runnable {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             // getting Facebook Profile Image
+            if(LoginActivity.getUser() != null) {
+                String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
+                if (image_uri.contains(".jpg") || image_uri.contains(".png"))
+                    profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-            String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
-            if(image_uri.contains(".jpg") || image_uri.contains(".png"))
-                profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-            // Display Name nel Menu laterale
-            display_name.setText(LoginActivity.getUser().getDisplayName());
+                // Display Name nel Menu laterale
+                display_name.setText(LoginActivity.getUser().getDisplayName());
 
-            // Email nel Menu laterale
-            email.setText(LoginActivity.getUser().getEmail());
+                // Email nel Menu laterale
+                email.setText(LoginActivity.getUser().getEmail());
+            }
 
     }
 
