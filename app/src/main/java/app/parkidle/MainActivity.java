@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -100,8 +101,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private DrawerLayout menuDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle menuActionBarDrawerToggle;
+
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
+
 
     public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
 
@@ -149,7 +152,27 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
         menuActionBarDrawerToggle = new ActionBarDrawerToggle(this, menuDrawerLayout, R.string.Open, R.string.Close);
-        menuDrawerLayout.addDrawerListener(menuActionBarDrawerToggle);
+        menuDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
         menuActionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -157,18 +180,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
         NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
+        /*Menu menu = drawerNav.getMenu();
 
-
-        drawerNav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+        menuItem_logout.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                int id = item.getItemId();
-                Toast.makeText(MainActivity.this, id, Toast.LENGTH_SHORT).show();
-                if (id == R.id.logout)
-                    signOut();
+            public boolean onMenuItemClick(MenuItem item) {
+                Toast.makeText(MainActivity.this, "hey,you pressed there man", Toast.LENGTH_SHORT).show();
+                signOut();
                 return true;
             }
-        });
+        });*/
+
+
+
+
 
 
         // Profile Image nel Menu laterale
@@ -176,8 +201,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
         TextView email = drawerHeader.findViewById(R.id.menu_email);
         DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
-        Thread customizerThread = new Thread(customizer);
+        final Thread customizerThread = new Thread(customizer);
         customizerThread.start();
+
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -211,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // Code here executes on main thread after user presses button
                 signOut();
                 recenterCamera();
+                customizerThread.interrupt();
             }
         });
 
@@ -656,6 +683,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
+
                         onBackPressed();
                     } else
                         Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();

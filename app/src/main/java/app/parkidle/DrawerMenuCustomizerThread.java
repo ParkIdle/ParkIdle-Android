@@ -2,6 +2,7 @@ package app.parkidle;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Process;
 import android.support.design.widget.NavigationView;
 import android.util.Log;
 import android.view.View;
@@ -37,11 +38,13 @@ public class DrawerMenuCustomizerThread implements Runnable {
     @Override
     public void run() {
 
-            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
             // getting Facebook Profile Image
+
             String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
-            profile_img.setImageBitmap(getImageBitmap(image_uri));
+            if(image_uri.contains(".jpg") || image_uri.contains(".png"))
+                profile_img.setImageBitmap(getImageBitmap(image_uri));
 
             // Display Name nel Menu laterale
             display_name.setText(LoginActivity.getUser().getDisplayName());
