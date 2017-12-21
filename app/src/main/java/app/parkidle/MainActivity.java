@@ -3,6 +3,8 @@ package app.parkidle;
 import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.arch.lifecycle.ViewModel;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,6 +43,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -52,6 +57,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
+import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.api.directions.v5.models.RouteLeg;
 import com.mapbox.api.directions.v5.models.RouteOptions;
@@ -72,6 +78,8 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
+import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
@@ -95,6 +103,7 @@ import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.isWithFacebook;
 import static app.parkidle.LoginActivity.isWithGoogle;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -117,6 +126,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
+    private String unitType;
 
     //MQTT STUFF
     MQTTHelper mqttHelper;
@@ -205,6 +215,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         customizerThread.start();
 
 
+
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
 
@@ -235,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ftb.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
-                signOut();
+                //signOut();
                 recenterCamera();
                 customizerThread.interrupt();
             }
@@ -630,51 +641,42 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void launchNavigation() {
 
+        this.unitType = DirectionsCriteria.METRIC;
 
-        /*NavigationLauncher.startNavigation(this, new NavigationViewOptions() {
-            @Nullable
+        /*NavigationNotification mNavNotification = new NavigationNotification() {
             @Override
-            public DirectionsRoute directionsRoute() {
-                return null;
-            }
+            public Notification getNotification() {
 
-            @Nullable
-            @Override
-            public String directionsProfile() {
-                return null;
-            }
-
-            @Nullable
-            @Override
-            public Point origin() {
-                return getOrigin();
-            }
-
-            @Nullable
-            @Override
-            public Point destination() {
-                return getDestination();
-            }
-
-            @Nullable
-            @Override
-            public String awsPoolId() {
-                return null;
             }
 
             @Override
-            public MapboxNavigationOptions navigationOptions() {
-                return MapboxNavigationOptions.builder()
-                        .unitType(1)
-                        .build();
+            public int getNotificationId() {
+                return 0;
             }
 
             @Override
-            public boolean shouldSimulateRoute() {
-                return false;
+            public void updateNotification(RouteProgress routeProgress) {
+
             }
-        });*/
+        }*/
+
+        MapboxNavigationOptions mNavOptions = MapboxNavigationOptions.builder()
+                .unitType(1)
+                .enableNotification(true)
+                .enableOffRouteDetection(true)
+                .build();
+
+        NavigationViewOptions options = NavigationViewOptions.builder()
+                .origin(getOrigin())
+                .destination(getDestination())
+                .awsPoolId(null)
+                .shouldSimulateRoute(false)
+                .navigationOptions(mNavOptions)
+                .build();
+
+        NavigationLauncher.startNavigation(this, options);
     }
+
 
     private void signOut() {
         //if (isWithGoogle())
