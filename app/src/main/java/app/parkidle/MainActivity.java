@@ -238,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
                 signOut();
-                recenterCamera();
+                //recenterCamera();
                 customizerThread.interrupt();
             }
         });
@@ -677,7 +677,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
-
+                        /*Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(i);*/
                         onBackPressed();
                     } else
                         Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
