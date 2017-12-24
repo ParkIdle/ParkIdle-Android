@@ -65,6 +65,7 @@ public class PIOManager extends Application{
             PIOEventHandler peh = new PIOEventHandler(pioTripSegment, PredictIO.DEPARTED_EVENT);
             Thread t = new Thread(peh);
             t.setName("PIOEventHandlerThread");
+            t.setPriority(Thread.NORM_PRIORITY);
             t.start();
 
             //Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();

@@ -49,7 +49,6 @@ public class PIOEventHandler implements Runnable{
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);
             conn.setRequestMethod("POST");
-            //conn.setRequestProperty("USER-AGENT", "Chrome/7.0.517.41");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoInput(true);
 
@@ -112,8 +111,8 @@ public class PIOEventHandler implements Runnable{
                     break;
             }
             jsonParam.put("date", eventDate);
-            jsonParam.put("latitude", 15.00);
-            jsonParam.put("longitude", 12.00);
+            jsonParam.put("latitude", eventLocation.getLatitude());
+            jsonParam.put("longitude", eventLocation.getLongitude());
             //jsonParam.put("zone", eventZone);
         }catch(JSONException e){
             e.printStackTrace();

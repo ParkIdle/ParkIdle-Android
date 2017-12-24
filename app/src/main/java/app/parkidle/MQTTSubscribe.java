@@ -74,12 +74,13 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
 
         PIOEvent pioEvent = parseMqttMessage(message);
         if(pioEvent.getEvent().equals("DEPARTED_EVENT")) {
-            Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
+            final Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioEvent.getLatitude(), pioEvent.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
         }
         else if(pioEvent.getEvent().equals("ARRIVAL_EVENT")){
             // TODO:
+            Log.w(TAG, "Arrival Event just received");
         }
     }
 
