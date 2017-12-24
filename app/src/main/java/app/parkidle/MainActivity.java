@@ -195,9 +195,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
         TextView email = drawerHeader.findViewById(R.id.menu_email);
-        /*DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
+        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
         final Thread customizerThread = new Thread(customizer);
-        customizerThread.start();*/
+        customizerThread.start();
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -230,8 +230,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
                 signOut();
-                recenterCamera();
-                //customizerThread.interrupt();
+
+                //recenterCamera();
+                customizerThread.interrupt();
             }
         });
 
@@ -679,7 +680,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
-
+                        /*Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(i);*/
                         onBackPressed();
                     } else
                         Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
