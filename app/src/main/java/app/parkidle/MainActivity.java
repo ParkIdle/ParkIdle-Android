@@ -90,6 +90,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Date;
 import java.util.List;
 
 import app.parkidle.helper.MQTTHelper;
@@ -129,8 +130,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String unitType;
 
     //MQTT STUFF
-    MQTTHelper mqttHelper;
-    TextView dataReceived;
+    private MQTTSubscribe mMQTTSubscribe;
 
     // sensori
     private SensorManager mSensorManager;
@@ -151,13 +151,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
 
     private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
+    private String deviceIdentifier;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 
         // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
@@ -186,26 +186,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         menuActionBarDrawerToggle.syncState();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         setContentView(R.layout.activity_main);
         NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
         Menu menu = drawerNav.getMenu();
 
-
-
-
-
-
         // Profile Image nel Menu laterale
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
         TextView email = drawerHeader.findViewById(R.id.menu_email);
-        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
+        /*DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
         final Thread customizerThread = new Thread(customizer);
-        customizerThread.start();
-
-
+        customizerThread.start();*/
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -239,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // Code here executes on main thread after user presses button
                 signOut();
                 recenterCamera();
-                customizerThread.interrupt();
+                //customizerThread.interrupt();
             }
         });
 
@@ -257,16 +249,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // attivo il manager di eventi PredictIO
         pioManager = new PIOManager();
         PredictIO.getInstance(this).setListener(pioManager.getmPredictIOListener());
-
+        deviceIdentifier = PredictIO.getInstance(this).getDeviceIdentifier();
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
-        //startMQTT();
+        mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier);
+        Thread mqttThread = new Thread(mMQTTSubscribe);
+        mqttThread.setName("MqttThread");
+        mqttThread.run();
 
-        //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
-        Intent i = getIntent();
-        String account = i.getStringExtra(EXTRA_ACCOUNT);
-        //Toast.makeText(this, LoginActivity.getGoogleAccount().getPhotoUrl().toString(), Toast.LENGTH_SHORT).show();
-        //Log.w("prova","account"+ account);
+        // codice test per la comunicazione
+        /*
+        Date today = new Date();
+        PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
+        PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+        Thread t5 = new Thread(peh);
+        t5.start();
+        try {
+            t5.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
 
 
     }
