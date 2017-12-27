@@ -36,7 +36,7 @@ import static app.parkidle.MainActivity.icona_whereiparked;
 
 public class PIOManager extends Application{
 
-    public static final String myServerURL = "https://requestb.in/wfoypqwf";
+    //public static final String myServerURL = "https://requestb.in/wfoypqwf";
 
     private TransportationMode mTrasportationMode;
 
@@ -62,14 +62,13 @@ public class PIOManager extends Application{
     private PredictIOListener mPredictIOListener = new PredictIOListener() {
         @Override
         public void departed(PIOTripSegment pioTripSegment) {
-            Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(pioTripSegment.departureLocation.getLatitude(), pioTripSegment.departureLocation.getLongitude()))
-                        .title("You departed from here").setIcon(icona_parcheggio_libero));
-
             PIOEventHandler peh = new PIOEventHandler(pioTripSegment, PredictIO.DEPARTED_EVENT);
             Thread t = new Thread(peh);
+            t.setName("PIOEventHandlerThread");
+            t.setPriority(Thread.NORM_PRIORITY);
             t.start();
-            Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
+
+            //Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -84,13 +83,7 @@ public class PIOManager extends Application{
 
         @Override
         public void arrived(PIOTripSegment pioTripSegment) {
-            Marker m1 = MainActivity.mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(pioTripSegment.arrivalLocation.getLatitude(), pioTripSegment.arrivalLocation.getLongitude()))
-                    .title("You parked here").setIcon(icona_whereiparked));
-
-            PIOEventHandler peh = new PIOEventHandler(pioTripSegment, PredictIO.ARRIVED_EVENT);
-            Thread t = new Thread(peh);
-            t.start();
+            // TODO:
         }
 
         @Override

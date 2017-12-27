@@ -65,8 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
-
         FirebaseApp.initializeApp(this);
 
         //inizialiting the facebook options by the id provided from firebase
@@ -129,12 +127,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-
-
-
-
-
-
 
     }//qua finisce on create
 

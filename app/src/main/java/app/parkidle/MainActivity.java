@@ -3,16 +3,10 @@ package app.parkidle;
 import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.arch.lifecycle.ViewModel;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -20,28 +14,25 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
@@ -53,15 +44,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.messaging.FirebaseMessagingService;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
-import com.mapbox.api.directions.v5.models.DirectionsRoute;
-import com.mapbox.api.directions.v5.models.RouteLeg;
-import com.mapbox.api.directions.v5.models.RouteOptions;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -78,34 +64,24 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
-import com.mapbox.services.android.navigation.v5.navigation.notification.NavigationNotification;
-import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
 
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.Date;
 import java.util.List;
 
-import app.parkidle.helper.MQTTHelper;
 import io.predict.PIOTripSegment;
-import io.predict.PIOZone;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
+<<<<<<< HEAD
 import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.isWithFacebook;
 import static app.parkidle.LoginActivity.isWithGoogle;
 import static app.parkidle.LoginActivity.mAuth;
 import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
+=======
+>>>>>>> b962b4bf5ca5dcec346bb0459fd6b70c5c544c94
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -132,8 +108,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String unitType;
 
     //MQTT STUFF
-    MQTTHelper mqttHelper;
-    TextView dataReceived;
+    private MQTTSubscribe mMQTTSubscribe;
 
     // sensori
     private SensorManager mSensorManager;
@@ -154,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
 
     private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
+    private String deviceIdentifier;
+
 
     @Override
     public void onBackPressed() {
@@ -168,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
 
         // Swipe-left Menu
         menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
@@ -195,12 +171,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
         menuActionBarDrawerToggle.syncState();
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
         setContentView(R.layout.activity_main);
+
+
         NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
+
         /*int size_menu = drawerNav.getMenu().size();
         MenuItem logout_menu = (MenuItem) findViewById((R.id.logout));
 
@@ -213,6 +192,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         });*/
 
 
+        Menu menu = drawerNav.getMenu();
+
+
         // Profile Image nel Menu laterale
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
@@ -221,8 +203,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         final Thread customizerThread = new Thread(customizer);
 
         customizerThread.start();
-
-
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -255,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
                 signOut();
+
                 //recenterCamera();
 
             }
@@ -274,16 +255,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // attivo il manager di eventi PredictIO
         pioManager = new PIOManager();
         PredictIO.getInstance(this).setListener(pioManager.getmPredictIOListener());
-
+        deviceIdentifier = PredictIO.getInstance(this).getDeviceIdentifier();
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
-        //startMQTT();
+        // codice test per la comunicazione
 
-        //il log non si vede, serve per prendere i dati dell'account  e metterli nel menu
-        Intent i = getIntent();
-        String account = i.getStringExtra(EXTRA_ACCOUNT);
-        //Toast.makeText(this, LoginActivity.getGoogleAccount().getPhotoUrl().toString(), Toast.LENGTH_SHORT).show();
-        //Log.w("prova","account"+ account);
+
+
 
 
     }
@@ -597,6 +575,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
+                // MqttSubscribe dopo che la mappa viene assegnata in modo
+                // da evitare NullPointerException quando inserisco un marker
+                // di un parcheggio rilevato
+
+                mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier);
+                Thread mqttThread = new Thread(mMQTTSubscribe);
+                mqttThread.setName("MqttThread");
+                mqttThread.setPriority(Thread.NORM_PRIORITY);
+                mqttThread.run();
+
+                // to test MQTT
+                /*Date today = new Date();
+                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
+                PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+                Thread t5 = new Thread(peh);
+                t5.start();*/
+
                 // Customize map with markers, polylines, etc.
                 // Camera Position definisce la posizione della telecamera
                 position = new CameraPosition.Builder()
