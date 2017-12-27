@@ -50,7 +50,7 @@ public class LoginActivity extends AppCompatActivity {
     private GoogleSignInAccount account;
     private final String TAG = "LoginActivity";
     public final static String EXTRA_ACCOUNT = "app.parkidle.account";
-    private FirebaseAuth mAuth;
+    public static FirebaseAuth mAuth;
     private FirebaseApp mApp;
     public static FirebaseUser currentUser;
     private GoogleSignInAccount currentAccount;
@@ -143,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         currentUser = mAuth.getCurrentUser();
-        currentAccount = GoogleSignIn.getLastSignedInAccount(this);
+        //currentAccount = GoogleSignIn.getLastSignedInAccount(this);
         if(currentUser != null)
             updateUI(currentUser);
     }
@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                currentAccount = account;
+                //currentAccount = account;
                 firebaseAuthWithGoogle(account);
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
@@ -189,6 +189,7 @@ public class LoginActivity extends AppCompatActivity {
         else {
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
+            currentUser = user;
             //onPause();
         }
     }
