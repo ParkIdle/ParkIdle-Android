@@ -40,7 +40,7 @@ public class PIOEventHandler implements Runnable{
     }
 
     @Override
-    public void run() {
+    public void run() { // la run crea la connessione con il server e invia la POST
        // Looper.prepare();
         try {
             //URL url = new URL(PIOManager.myServerURL);

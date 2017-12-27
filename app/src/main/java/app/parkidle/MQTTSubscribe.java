@@ -28,7 +28,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
 
     MqttClient client;
     private final String TAG = "MQTTSubscribe";
-    private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663";
+    private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
 
     public MQTTSubscribe(String deviceIdentifier) {
@@ -38,17 +38,17 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     public void subscribe() {
         try {
             Log.w(TAG,"Subscribing....");
-            client = new MqttClient(mMQTTBroker, deviceIdentifier,new MemoryPersistence());
+            client = new MqttClient(mMQTTBroker, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
             options.setUserName("sgmzzqjb");
             options.setPassword("1xCzGYi15ogy".toCharArray());
             Log.w(TAG,"Connecting....");
-            client.connect(options);
+            client.connect(options); // mi connetto al broker
             Log.w(TAG,"Connected$....");
             client.setCallback(this);
-            client.subscribe("server/departed");
-            client.subscribe("server/arrival");
+            client.subscribe("server/departed"); // mi sottoscrivo al topic server/departed
+            client.subscribe("server/arrival"); // same
             Log.w(TAG,"Successfully subscribed");
         } catch (MqttException e) {
             e.printStackTrace();
@@ -56,13 +56,13 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     }
 
     @Override
-    public void connectionLost(Throwable cause) {
-        // TODO Auto-generated method stub
+    public void connectionLost(Throwable cause) { // viene chiamato quando MQTT lancia un eccezione e viene interrotta la connessione
+
         Log.w(TAG,"Connection lost...." + cause.toString());
     }
 
     @Override
-    public void messageArrived(String topic, MqttMessage message)
+    public void messageArrived(String topic, MqttMessage message) // viene chiamato quando arriva un messaggio
             throws Exception {
         Log.w(TAG,"Message arrived....");
         /*if(topic.equals("server/departed")) {
@@ -93,9 +93,9 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     @Override
     public void run() {
         subscribe();
-
     }
 
+    // parsing del messaggio ricevuto
     private PIOEvent parseMqttMessage(MqttMessage message){
         String m = message.toString();
         String[] splitted = m.split(",");
