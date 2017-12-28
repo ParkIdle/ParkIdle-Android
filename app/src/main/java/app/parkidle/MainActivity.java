@@ -32,6 +32,19 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
+
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -60,6 +73,15 @@ import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
+<<<<<<< HEAD
+import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
+import static app.parkidle.LoginActivity.currentUser;
+import static app.parkidle.LoginActivity.isWithFacebook;
+import static app.parkidle.LoginActivity.isWithGoogle;
+import static app.parkidle.LoginActivity.mAuth;
+import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
+=======
+>>>>>>> b962b4bf5ca5dcec346bb0459fd6b70c5c544c94
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -70,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
 
+    public static Thread customizerThread;
 
     public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
 
@@ -110,6 +133,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
 
     @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent i = new Intent(MainActivity.this, LoginActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -148,7 +179,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         View drawerHeader = drawerNav.getHeaderView(0);
+
+        /*int size_menu = drawerNav.getMenu().size();
+        MenuItem logout_menu = (MenuItem) findViewById((R.id.logout));
+
+        logout_menu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                signOut();
+                return true;
+            }
+        });*/
+
+
         Menu menu = drawerNav.getMenu();
+
 
         // Profile Image nel Menu laterale
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
@@ -156,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         TextView email = drawerHeader.findViewById(R.id.menu_email);
         DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
         final Thread customizerThread = new Thread(customizer);
+
         customizerThread.start();
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
@@ -191,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 signOut();
 
                 //recenterCamera();
-                customizerThread.interrupt();
+
             }
         });
 
@@ -272,6 +318,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStart() {
         super.onStart();
         mapView.onStart();
+        if(currentUser != null){
+            return;
+        }else{
+            signOut();
+        }
     }
 
     @Override
@@ -296,6 +347,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStop() {
         super.onStop();
         mapView.onStop();
+        Intent j = new Intent(MainActivity.this, LoginActivity.class);
+        j.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(j);
 
     }
 
@@ -310,6 +364,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onDestroy() {
         super.onDestroy();
         mapView.onDestroy();
+
+        if (customizerThread != null) {
+            customizerThread.interrupt();
+        }
+
     }
 
     @Override
@@ -637,16 +696,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private void signOut() {
         //if (isWithGoogle())
-        if (LoginActivity.getUser() != null) {
-            LoginActivity.googleSignIn.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+        //if (LoginActivity.getUser() != null) {
+        FirebaseAuth istanza = FirebaseAuth.getInstance();
+        istanza.signOut();
+        onBackPressed();
+        currentUser = null;
+        if (customizerThread != null) {
+            customizerThread.interrupt();
+        }
+
+           /* LoginActivity.getUser().get.addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
-                        /*Intent i = new Intent(getApplicationContext(),LoginActivity.class);
-                        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(i);*/
+                        Intent h = new Intent(MainActivity.this,LoginActivity.class);
+                        h.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(h);
                         onBackPressed();
+                        if (customizerThread != null){
+                            customizerThread.interrupt();
+                        }
+
+
                     } else
                         Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
                 }
@@ -654,11 +726,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             //else if (isWithFacebook()) {
             //TODO: ora si slogghiamo con la procedura di facebook
             // }
-        }
-        else{
-            Intent i = new Intent(this,LoginActivity.class);
-            startActivity(i);
-        }
+        }*/
+        //else{
+        //Intent i = new Intent(this,LoginActivity.class);
+        //startActivity(i);
+        //}
+        //}
     }
 }
 

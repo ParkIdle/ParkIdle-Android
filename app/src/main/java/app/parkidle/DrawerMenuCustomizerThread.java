@@ -35,10 +35,13 @@ public class DrawerMenuCustomizerThread implements Runnable {
         this.email = email;
     }
 
+
+
     @Override
     public void run() {
 
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+
 
             // getting Facebook Profile Image
             if(LoginActivity.getUser() != null) {
