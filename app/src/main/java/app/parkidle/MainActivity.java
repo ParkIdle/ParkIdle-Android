@@ -7,6 +7,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.WindowManager;
@@ -65,6 +68,11 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 
@@ -73,21 +81,15 @@ import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
-<<<<<<< HEAD
-import static app.parkidle.LoginActivity.EXTRA_ACCOUNT;
 import static app.parkidle.LoginActivity.currentUser;
-import static app.parkidle.LoginActivity.isWithFacebook;
-import static app.parkidle.LoginActivity.isWithGoogle;
-import static app.parkidle.LoginActivity.mAuth;
-import static com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType.TYPE_METRIC;
-=======
->>>>>>> b962b4bf5ca5dcec346bb0459fd6b70c5c544c94
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
     private DrawerLayout menuDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle menuActionBarDrawerToggle;
+    private Bitmap profileBitmap = null;
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
@@ -117,7 +119,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private float[] mGravity;
     private float[] mGeomagnetic;
     private float azimut = 0;
-    ;
 
     // status boolean
     private boolean isCameraFollowing;
@@ -199,10 +200,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
         TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
         TextView email = drawerHeader.findViewById(R.id.menu_email);
-        DrawerMenuCustomizerThread customizer = new DrawerMenuCustomizerThread(profile_img, display_name, email);
-        final Thread customizerThread = new Thread(customizer);
+        final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
+        if (image_uri.contains(".jpg") || image_uri.contains(".png"))
+            profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-        customizerThread.start();
+
+        // Display Name nel Menu laterale
+        display_name.setText(LoginActivity.getUser().getDisplayName());
+
+        // Email nel Menu laterale
+        email.setText(LoginActivity.getUser().getEmail());
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -732,6 +739,34 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //startActivity(i);
         //}
         //}
+    }
+
+    public Bitmap getImageBitmap(final String uri){
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Bitmap bm = null;
+                try {
+                    URL aURL = new URL(uri);
+                    URLConnection conn = aURL.openConnection();
+                    conn.connect();
+                    InputStream is = conn.getInputStream();
+                    BufferedInputStream bis = new BufferedInputStream(is);
+                    profileBitmap = BitmapFactory.decodeStream(bis);
+                    bis.close();
+                    is.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error getting bitmap", e);
+                }
+            }
+        });
+        t.start();
+        try {
+            t.join(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return profileBitmap;
     }
 }
 
