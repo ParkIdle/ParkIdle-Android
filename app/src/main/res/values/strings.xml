@@ -4,6 +4,6 @@
     <string name="mapbox_token">pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA</string>
     <string name="facebook_app_id">156734918407060</string>
     <string name="fb_login_protocol_scheme">fb156734918407060</string>
-    <string name="Open">Open</string>
-    <string name="Close">Close</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
 </resources>

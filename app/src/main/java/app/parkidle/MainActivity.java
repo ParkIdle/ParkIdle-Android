@@ -5,6 +5,7 @@ import android.animation.TypeEvaluator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -29,8 +30,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AbsListView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -86,9 +90,9 @@ import static app.parkidle.LoginActivity.currentUser;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    private DrawerLayout menuDrawerLayout;
-    private ListView mDrawerList;
-    private ActionBarDrawerToggle menuActionBarDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private NavigationView mDrawerNav;
+    private ActionBarDrawerToggle mActionBarDrawerToggle;
     private Bitmap profileBitmap = null;
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
@@ -108,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
     private String unitType;
+    private String mapStyleJSON;
 
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
@@ -146,70 +151,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        // Swipe-left Menu
-        menuDrawerLayout = new DrawerLayout(this, (AttributeSet) findViewById(R.id.drawer_menu));
-        menuActionBarDrawerToggle = new ActionBarDrawerToggle(this, menuDrawerLayout, R.string.Open, R.string.Close);
-        menuDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
-            @Override
-            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
-
-            }
-
-            @Override
-            public void onDrawerOpened(@NonNull View drawerView) {
-
-            }
-
-            @Override
-            public void onDrawerClosed(@NonNull View drawerView) {
-
-            }
-
-            @Override
-            public void onDrawerStateChanged(int newState) {
-
-            }
-        });
-        menuActionBarDrawerToggle.syncState();
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_main);
-
-
-        NavigationView drawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
-        View drawerHeader = drawerNav.getHeaderView(0);
-
-        /*int size_menu = drawerNav.getMenu().size();
-        MenuItem logout_menu = (MenuItem) findViewById((R.id.logout));
-
-        logout_menu.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                signOut();
-                return true;
-            }
-        });*/
-
-
-        Menu menu = drawerNav.getMenu();
-
-
-        // Profile Image nel Menu laterale
-        ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
-        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
-        TextView email = drawerHeader.findViewById(R.id.menu_email);
-        final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
-        if (image_uri.contains(".jpg") || image_uri.contains(".png"))
-            profile_img.setImageBitmap(getImageBitmap(image_uri));
-
-
-        // Display Name nel Menu laterale
-        display_name.setText(LoginActivity.getUser().getDisplayName());
-
-        // Email nel Menu laterale
-        email.setText(LoginActivity.getUser().getEmail());
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -241,9 +185,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         ftb.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) { // imposto il listener per il tasto
                 // Code here executes on main thread after user presses button
-                signOut();
-
-                //recenterCamera();
+                recenterCamera();
 
             }
         });
@@ -265,22 +207,74 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         deviceIdentifier = PredictIO.getInstance(this).getDeviceIdentifier();
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
 
-        // codice test per la comunicazione
+        // Swipe-left Menu
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
+        mActionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.string.drawer_open, R.string.drawer_close) {
+
+            /** Called when a drawer has settled in a completely closed state. */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                //getActionBar().setTitle("Settings");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /** Called when a drawer has settled in a completely open state. */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                //getActionBar().setTitle("Settings");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        // Set the drawer toggle as the DrawerListener
+        mDrawerLayout.addDrawerListener(mActionBarDrawerToggle);
+
+        // Set the list's click listener
+        mDrawerNav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()){
+                    case R.id.logout:
+                        signOut();
+                        break;
+
+                    // TODO: inserire le funzioni per tutti gli altri tasti qui
+                    // case R.id.bottoneEsempio:
+                    //      buttonStuff....
+                }
+                return true;
+            }
+        });
 
 
+        View drawerHeader = mDrawerNav.getHeaderView(0);
+        // Profile Image nel Menu laterale
+        ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
+        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
+        TextView email = drawerHeader.findViewById(R.id.menu_email);
+        final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
+        if (image_uri.contains(".jpg") || image_uri.contains(".png"))
+            profile_img.setImageBitmap(getImageBitmap(image_uri));
 
+        // Display Name nel Menu laterale
+        display_name.setText(LoginActivity.getUser().getDisplayName());
+
+        // Email nel Menu laterale
+        email.setText(LoginActivity.getUser().getEmail());
 
 
     }
 
-
-    /*public boolean onOptionsItemSelected(MenuItem item){
-        if (menuActionBarDrawerToggle.onOptionsItemSelected(item)){
-            return true;
-        }
-        return true;
+    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // If the nav drawer is open, hide action items related to the content view
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerNav);
+        //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+        return super.onPrepareOptionsMenu(menu);
     }
-*/
 
     @Override
     public void onRequestPermissionsResult(final int requestCode, @NonNull final String[] permissions, @NonNull final int[] grantResults) {
@@ -324,6 +318,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onStart() {
         super.onStart();
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        mapStyleJSON = sharedPreferences.getString("MapJSON","");
         mapView.onStart();
         if(currentUser != null){
             return;
@@ -370,11 +366,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        SharedPreferences.Editor editor = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE).edit();
+        editor.putString("MapJSON", mMap.getStyleJson());
+        editor.commit();
         mapView.onDestroy();
-
-        if (customizerThread != null) {
-            customizerThread.interrupt();
-        }
 
     }
 
@@ -582,6 +577,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
+                // se la mappa ha uno stato salvato lo inserisco
+                if(!mapStyleJSON.equals(""))
+                    mMap.setStyleJson(mapStyleJSON);
+
                 // MqttSubscribe dopo che la mappa viene assegnata in modo
                 // da evitare NullPointerException quando inserisco un marker
                 // di un parcheggio rilevato
@@ -593,11 +592,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mqttThread.run();
 
                 // to test MQTT
-                /*Date today = new Date();
+                Date today = new Date();
                 PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
                 PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
                 Thread t5 = new Thread(peh);
-                t5.start();*/
+                t5.start();
 
                 // Customize map with markers, polylines, etc.
                 // Camera Position definisce la posizione della telecamera

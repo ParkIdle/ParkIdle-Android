@@ -111,8 +111,8 @@ public class PIOEventHandler implements Runnable{
                     break;
             }
             jsonParam.put("date", eventDate);
-            jsonParam.put("latitude", eventLocation.getLatitude());
-            jsonParam.put("longitude", eventLocation.getLongitude());
+            jsonParam.put("latitude", 12.0);
+            jsonParam.put("longitude", 12.9);
             //jsonParam.put("zone", eventZone);
         }catch(JSONException e){
             e.printStackTrace();
