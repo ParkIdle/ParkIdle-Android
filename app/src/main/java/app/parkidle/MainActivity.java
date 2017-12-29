@@ -323,8 +323,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStop() {
         super.onStop();
         mapView.onStop();
-
-
     }
 
     @Override
@@ -338,6 +336,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onDestroy() {
         super.onDestroy();
         SharedPreferences.Editor editor = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE).edit();
+        editor.remove("MapJSON");
         editor.putString("MapJSON", mMap.getStyleJson());
         editor.commit();
         mapView.onDestroy();
@@ -518,7 +517,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            //buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
+            buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
     }
 
@@ -547,10 +546,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
+                if(!mapStyleJSON.equals(""))
+                    mapboxMap.setStyleJson(mapStyleJSON);
                 mMap = mapboxMap;
                 // se la mappa ha uno stato salvato lo inserisco
-                if(!mapStyleJSON.equals(""))
-                    mMap.setStyleJson(mapStyleJSON);
+
 
                 // MqttSubscribe dopo che la mappa viene assegnata in modo
                 // da evitare NullPointerException quando inserisco un marker
@@ -585,19 +585,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 5000);
-                mapboxMap.setOnScrollListener(new MapboxMap.OnScrollListener() {
+                mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
                     @Override
                     public void onScroll() {
                         isCameraFollowing = false;
                     }
                 });
-                mapboxMap.setOnFlingListener(new MapboxMap.OnFlingListener() {
+                mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
                     @Override
                     public void onFling() {
                         isCameraFollowing = false;
                     }
                 });
-                mapboxMap.setOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         mapboxMap.addMarker(new MarkerOptions()
@@ -680,7 +680,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect();
         currentUser = null;
-
+        Intent i = new Intent(MainActivity.this,LoginActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);
         if (customizerThread != null) {
             customizerThread.interrupt();
         }
@@ -689,6 +691,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
+        SharedPreferences.Editor editor = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE).edit();
+        editor.remove("MapJSON");
+        editor.putString("MapJSON", mMap.getStyleJson());
+        editor.commit();
         finishAffinity();
 
     }
