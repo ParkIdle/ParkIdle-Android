@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "857680111540-p5lj8f6a2hmtaig6kfhmm4vdt6rh0u8o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.parkidle",
+            "certificate_hash": "0c09188335cb158efe50116ff778896c1a6acc4c"
+          }
+        },
+        {
           "client_id": "857680111540-ikig1ja5npmgv33h98imhto2mo5jfgps.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

@@ -2,6 +2,7 @@ package app.parkidle;
 
 import android.Manifest;
 import android.animation.TypeEvaluator;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -68,6 +69,7 @@ import io.predict.PredictIOStatus;
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
+import static java.lang.String.valueOf;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -81,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private static final String TAG = "Main";
 
     public static Thread customizerThread;
+
+    private boolean boo;
 
     public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
 
@@ -238,6 +242,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         email.setText(LoginActivity.getUser().getEmail());
 
 
+        //Controllo del Tutorial
+        //TODO: Opzione per rivedere il tutorial al prossimo avvio nelle IMPOSTAZIONI
+
+        SharedPreferences TutorialPreferences = getPreferences(MODE_PRIVATE);
+        boo = TutorialPreferences.getBoolean("done",true);
+        if (boo){
+            SharedPreferences.Editor editor = TutorialPreferences.edit();
+            editor.putBoolean("done",false);
+            editor.commit();
+            Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
+            startActivity(tutorial);
+        }
+
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -349,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mapView.onSaveInstanceState(outState);
     }
 
+    @SuppressLint("MissingPermission")
     public Location getLastLocation() {
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
