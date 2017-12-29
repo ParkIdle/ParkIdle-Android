@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.w("facebook callback","hey its on success");
+                Log.w("FACEBOOK CALLBACK","hey its on success");
                 handleFacebookAccessToken(loginResult.getAccessToken());
 
             }
@@ -89,14 +89,10 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onError(FacebookException error) {
-                Log.w("facebook callback","hey its on error");
+                Log.w("FACEBOOK CALLBACK",error.toString());
             }
 
         });
-
-
-
-
 
 
         //inizialiting the google options by the id provided from firebase

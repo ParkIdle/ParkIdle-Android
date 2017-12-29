@@ -86,6 +86,8 @@ import io.predict.PredictIOStatus;
 import io.predict.TransportationMode;
 
 import static app.parkidle.LoginActivity.currentUser;
+import static app.parkidle.LoginActivity.mAuth;
+import static app.parkidle.LoginActivity.mGoogleApiClient;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -138,13 +140,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private String deviceIdentifier;
 
 
-    @Override
+    /*@Override
     public void onBackPressed() {
         super.onBackPressed();
         Intent i = new Intent(MainActivity.this, LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -350,9 +352,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStop() {
         super.onStop();
         mapView.onStop();
-        Intent j = new Intent(MainActivity.this, LoginActivity.class);
-        j.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(j);
+
 
     }
 
@@ -592,11 +592,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 mqttThread.run();
 
                 // to test MQTT
-                Date today = new Date();
+                /*Date today = new Date();
                 PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
                 PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
                 Thread t5 = new Thread(peh);
-                t5.start();
+                t5.start();*/
 
                 // Customize map with markers, polylines, etc.
                 // Camera Position definisce la posizione della telecamera
@@ -703,42 +703,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private void signOut() {
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
-        FirebaseAuth istanza = FirebaseAuth.getInstance();
-        istanza.signOut();
-        onBackPressed();
+        FirebaseAuth istance = FirebaseAuth.getInstance();
+
+
+        istance.signOut();
+        mAuth.signOut();
+        mGoogleApiClient.clearDefaultAccountAndReconnect();
         currentUser = null;
+        onBackPressed();
+
+
+
         if (customizerThread != null) {
             customizerThread.interrupt();
         }
-
-           /* LoginActivity.getUser().get.addOnCompleteListener(new OnCompleteListener<Void>() {
-                @Override
-                public void onComplete(@NonNull Task<Void> task) {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(MainActivity.this, "Logging out", Toast.LENGTH_SHORT).show();
-                        Intent h = new Intent(MainActivity.this,LoginActivity.class);
-                        h.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(h);
-                        onBackPressed();
-                        if (customizerThread != null){
-                            customizerThread.interrupt();
-                        }
-
-
-                    } else
-                        Toast.makeText(MainActivity.this, "disable to log out", Toast.LENGTH_SHORT).show();
-                }
-            });
-            //else if (isWithFacebook()) {
-            //TODO: ora si slogghiamo con la procedura di facebook
-            // }
-        }*/
-        //else{
-        //Intent i = new Intent(this,LoginActivity.class);
-        //startActivity(i);
-        //}
-        //}
     }
+
+
 
     public Bitmap getImageBitmap(final String uri){
         Thread t = new Thread(new Runnable() {

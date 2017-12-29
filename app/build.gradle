@@ -47,7 +47,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:11.8.0'
     compile 'io.predict:predict-io:4.1.1'
     compile 'com.google.gms:google-services:3.1.2'
-    compile 'com.facebook.android:facebook-login:[4,5)'
+    compile 'com.facebook.android:facebook-login:4.29.0'
     compile 'com.android.support:multidex:1.0.1'
 
     // Mapbox SDK dependency
