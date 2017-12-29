@@ -22,38 +22,20 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.AbsListView;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
 import com.google.firebase.auth.FirebaseAuth;
-import com.mapbox.services.android.navigation.ui.v5.route.RouteViewModel;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -80,10 +62,8 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.List;
 
-import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
-import io.predict.TransportationMode;
 
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
@@ -138,15 +118,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
     private String deviceIdentifier;
-
-
-    /*@Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        Intent i = new Intent(MainActivity.this, LoginActivity.class);
-        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(i);
-    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -705,21 +676,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //if (LoginActivity.getUser() != null) {
         FirebaseAuth istance = FirebaseAuth.getInstance();
 
-
         istance.signOut();
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect();
         currentUser = null;
-        onBackPressed();
-
-
 
         if (customizerThread != null) {
             customizerThread.interrupt();
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        finishAffinity();
 
+    }
 
     public Bitmap getImageBitmap(final String uri){
         Thread t = new Thread(new Runnable() {

@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onCancel() {
-                Log.w("facebook callback","hey its on cancel");
+                Log.w("FACEBOOK CALLBACK","hey its on cancel");
             }
 
             @Override
@@ -159,6 +159,7 @@ public class LoginActivity extends AppCompatActivity {
                 // Google Sign In failed, update UI appropriately
                 //Log.w(TAG, "Google sign in failed" + e.getStatusCode());
                 Toast.makeText(this, "Google sign in failed" + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+                Log.w("GOOGLE SIGN IN: ",e.getStatusCode()+ " -> " + e.toString());
                 // ...
             }
         }else{
