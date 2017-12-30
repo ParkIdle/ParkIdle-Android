@@ -537,6 +537,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            Toast.makeText(this, "Enabling WiFi ser", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void buildAlertMessage() {
@@ -564,11 +567,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
+                // se la mappa ha uno stato salvato lo inserisco
                 if(!mapStyleJSON.equals(""))
                     mapboxMap.setStyleJson(mapStyleJSON);
                 mMap = mapboxMap;
-                // se la mappa ha uno stato salvato lo inserisco
-
 
                 // MqttSubscribe dopo che la mappa viene assegnata in modo
                 // da evitare NullPointerException quando inserisco un marker
