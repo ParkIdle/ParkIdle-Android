@@ -7,6 +7,11 @@ import android.os.Bundle;
 import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.facebook.AccessToken;
@@ -63,7 +68,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
+
 
         FirebaseApp.initializeApp(this);
 
@@ -123,6 +130,12 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
+
+
+        ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
+        Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
+
 
     }//qua finisce on create
 

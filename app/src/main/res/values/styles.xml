@@ -16,4 +16,9 @@
         <item name="colorAccent">@color/parkIdleGrey</item>
     </style>
 
+    <style name="FacebookLoginButton">
+        <item name="android:background">@drawable/facebook</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+    </style>
+
 </resources>
