@@ -1,5 +1,7 @@
 package app.parkidle;
 
+import java.util.List;
+
 /**
  * Created by simonestaffa on 23/12/17.
  */
@@ -18,6 +20,7 @@ public class PIOEvent {
         this.date = date;
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
+        MainActivity.events.add(this);
     }
 
     public String getUUID(){

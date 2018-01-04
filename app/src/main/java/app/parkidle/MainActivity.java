@@ -61,7 +61,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
@@ -73,6 +75,8 @@ import static java.lang.String.valueOf;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
+
+    public static LinkedList<PIOEvent> events;
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerNav;
@@ -98,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
     private Marker me; // ha sempre come riferimento il mio Marker
     private String unitType;
-    private String mapStyleJSON;
+    private String mapStyleJSON = null;
 
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
@@ -126,11 +130,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.w("onCreate()","creating...");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_main);
+
+        // lista eventi salvati
+        events = new LinkedList<PIOEvent>();
+
+        //TODO: creare stringa di eventi nella shared pref, salvarli e caricarli quando necessario
+
+
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -171,8 +183,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mapView = (MapView) findViewById(R.id.mapView);
         // creo la mappa
         mapView.onCreate(savedInstanceState);
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        mapStyleJSON = sharedPreferences.getString("MapJSON","");
         // preparo la mappa
         prepareMap(mapView);
+
 
         // attivo PredictIO
         activatePredictIOTracker();
@@ -308,8 +323,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onStart() {
         super.onStart();
-        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-        mapStyleJSON = sharedPreferences.getString("MapJSON","");
+        Log.w("onStart()","starting...");
         mapView.onStart();
         if(currentUser != null){
             return;
@@ -321,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onResume() {
         super.onResume();
+        Log.w("onResume()","resuming...");
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
         mapView.onResume();
@@ -331,15 +346,17 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onPause() {
         super.onPause();
+
         mapView.onPause();
         mSensorManager.unregisterListener(this);
-
     }
 
     @Override
     public void onStop() {
         super.onStop();
+
         mapView.onStop();
+
     }
 
     @Override
@@ -352,10 +369,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences.Editor editor = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE).edit();
-        editor.remove("MapJSON");
-        editor.putString("MapJSON", mMap.getStyleJson());
-        editor.commit();
+
         mapView.onDestroy();
 
     }
@@ -364,6 +378,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        finishAffinity();
+
     }
 
     @SuppressLint("MissingPermission")
@@ -537,8 +559,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
-        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
-            Toast.makeText(this, "Enabling WiFi ser", Toast.LENGTH_SHORT).show();
+        if(!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -605,6 +627,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 5000);
+
                 mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
                     @Override
                     public void onScroll() {
@@ -643,6 +666,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         });
     }
+
+    // TODO: something than can save markers and load them! maybe??
+    /*private void loadMarkers(String tag){
+        Log.w(tag,"Loading markers...");
+        MapboxMap map = getmMap();
+        List<Marker> markers = map.getMarkers();
+
+        ListIterator<Marker> it = markers.listIterator();
+        while(it.hasNext()){
+            Marker marker = it.next();
+            LatLng latlng = marker.getPosition();
+            map.addMarker(new MarkerOptions()
+                    .position(new LatLng(latlng.getLatitude(), latlng.getLongitude()))
+                    .title(marker.getTitle())
+                    .setIcon(marker.getIcon()));
+        }
+        Log.w(tag,"Ended loading markers.");
+    }*/
 
     public static Point getOrigin() {
         return Point.fromLngLat(mLastLocation.getLongitude(), mLastLocation.getLatitude());
@@ -708,17 +749,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        //super.onBackPressed();
-        SharedPreferences.Editor editor = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE).edit();
-        editor.remove("MapJSON");
-        editor.putString("MapJSON", mMap.getStyleJson());
-        editor.commit();
-        finishAffinity();
-
-    }
-
     public Bitmap getImageBitmap(final String uri){
         Thread t = new Thread(new Runnable() {
             @Override
@@ -745,6 +775,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             e.printStackTrace();
         }
         return profileBitmap;
+    }
+
+    public static MapboxMap getmMap() {
+        return mMap;
     }
 }
 
