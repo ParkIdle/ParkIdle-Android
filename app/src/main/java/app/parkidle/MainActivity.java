@@ -181,13 +181,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         events = sharedPreferences.getStringSet("events",new HashSet<String>());
-        Log.w(TAG,"[EVENTS] -> " + events.toString());
-        Thread check = new Thread(new Runnable() {
+        //Log.w(TAG,"[EVENTS] -> " + events.toString());
+        final Thread check = new Thread(new Runnable() {
             @Override
             public void run() {
                 checkEvents(events);
             }
         });
+        check.start();
 
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
@@ -256,8 +257,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .position(point)
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
-                        Date d = new Date();
-                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        // TEST STUFF
+                        //Date d = new Date();
+                        //PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });
 
@@ -274,7 +276,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
                 mMap = mapboxMap;
-                renderEvents(events,mapboxMap);
+                Thread render = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            check.join();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        renderEvents(events,mapboxMap);
+                    }
+                });
+                render.start();
+
             }
 
         });
@@ -581,12 +595,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         //Log.w("LONG CLICK LISTENER","long clicking...");
-                        getmMap().addMarker(new MarkerOptions()
+                        mapboxMap.addMarker(new MarkerOptions()
                                 .position(point)
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
-                        Date d = new Date();
-                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        // TEST STUFF
+                        /*Date d = new Date();
+                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));*/
                     }
                 });
 
@@ -773,8 +788,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         istance.signOut();
 
         mAuth.signOut();
-        mGoogleApiClient.clearDefaultAccountAndReconnect();
-        LoginManager.getInstance().logOut();
+        mGoogleApiClient.clearDefaultAccountAndReconnect(); // disconnect from google
+        LoginManager.getInstance().logOut(); // disconnect from facebook
         currentUser = null;
         Intent i = new Intent(MainActivity.this,LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
