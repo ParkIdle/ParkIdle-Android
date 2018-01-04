@@ -51,7 +51,7 @@ dependencies {
     compile 'com.android.support:multidex:1.0.1'
 
     // Mapbox SDK dependency
-    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.0-SNAPSHOT@aar') {
+    compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.1') {
         transitive = true
     }
     compile 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.7.1'
