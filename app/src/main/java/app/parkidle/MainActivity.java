@@ -77,6 +77,7 @@ import io.predict.PredictIOStatus;
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
+import static app.parkidle.LoginActivity.noUserAccess;
 import static java.lang.String.valueOf;
 
 
@@ -351,18 +352,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         View drawerHeader = mDrawerNav.getHeaderView(0);
         // Profile Image nel Menu laterale
-        ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
-        TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
-        TextView email = drawerHeader.findViewById(R.id.menu_email);
-        final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
-        if (image_uri.contains(".jpg") || image_uri.contains(".png"))
-            profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-        // Display Name nel Menu laterale
-        display_name.setText(LoginActivity.getUser().getDisplayName());
+        if (!(noUserAccess)) {
+            ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
+            TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
+            TextView email = drawerHeader.findViewById(R.id.menu_email);
+            final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
+            if (image_uri.contains(".jpg") || image_uri.contains(".png"))
+                profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-        // Email nel Menu laterale
-        email.setText(LoginActivity.getUser().getEmail());
+            // Display Name nel Menu laterale
+            display_name.setText(LoginActivity.getUser().getDisplayName());
+
+            // Email nel Menu laterale
+            email.setText(LoginActivity.getUser().getEmail());
+        }
 
 
         // Controllo del Tutorial
