@@ -39,7 +39,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <com.facebook.login.widget.LoginButton
+    <com.facebook.login.widget.LoginButton xmlns:facebook="http://schemas.android.com/apk/res-auto"
         android:id="@+id/login_button"
         android:layout_width="246dp"
         android:layout_height="60dp"
@@ -47,18 +47,19 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="0dp"
+        android:paddingBottom="19sp"
+        android:paddingLeft="10sp"
+        android:paddingTop="19sp"
+        android:textSize="15sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
-        xmlns:facebook="http://schemas.android.com/apk/res-auto"
-        facebook:com_facebook_login_text="       Login"
+        facebook:com_facebook_login_text="       Sign in"
         facebook:com_facebook_logout_text="       Logout"
-        android:textSize="15sp"
-        android:paddingTop="19sp"
-        android:paddingLeft="10sp"
-        android:paddingBottom="19sp"/>
+        facebook:layout_constraintVertical_bias="0.20999998" />
+
+    
 
 </android.support.constraint.ConstraintLayout>
