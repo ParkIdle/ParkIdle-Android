@@ -37,6 +37,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -718,10 +719,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         alert.show();
     }
 
-    private void prepareMap(MapView mapView) {
-
-    }
-
     public static Point getOrigin() {
         return Point.fromLngLat(mLastLocation.getLongitude(), mLastLocation.getLatitude());
     }
@@ -777,6 +774,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect();
+        LoginManager.getInstance().logOut();
         currentUser = null;
         Intent i = new Intent(MainActivity.this,LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
