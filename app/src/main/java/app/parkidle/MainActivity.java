@@ -177,15 +177,105 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        events = sharedPreferences.getStringSet("events",new HashSet<String>());
+        /*Thread check = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                checkEvents(events);
+            }
+        });*/
+
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
         // creo la mappa
         mapView.onCreate(savedInstanceState);
         // preparo la mappa
-        prepareMap(mapView);
+        //prepareMap(mapView);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final MapboxMap mapboxMap) {
+                // MqttSubscribe dopo che la mappa viene assegnata in modo
+                // da evitare NullPointerException quando inserisco un marker
+                // di un parcheggio rilevato
 
-        Date d = new Date();
-        Log.w("@@@DATE@@@",d.toString());
+                mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier);
+                Thread mqttThread = new Thread(mMQTTSubscribe);
+                mqttThread.setName("MqttThread");
+                mqttThread.setPriority(Thread.NORM_PRIORITY);
+                mqttThread.run();
+
+                // to test MQTT
+                /*Date today = new Date();
+                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
+                PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+                Thread t5 = new Thread(peh);
+                t5.start();*/
+
+                // Customize map with markers, polylines, etc.
+                // Camera Position definisce la posizione della telecamera
+                position = new CameraPosition.Builder()
+                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 17
+                        .bearing(0)// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                // add marker aggiunge un marker sulla mappa con data posizione e titolo
+                me = mapboxMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .title("You")
+                        .setIcon(mIcon));
+
+                mapboxMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 5000);
+
+                mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
+                    @Override
+                    public void onScroll() {
+                        //Log.w("SCROLL LISTENER","scrolling...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        //Log.w("FLING LISTENER","flinging...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(@NonNull LatLng point) {
+                        //Log.w("LONG CLICK LISTENER","long clicking...");
+                        mapboxMap.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title("Parcheggio libero")
+                                .setIcon(icona_parcheggio_libero));
+                    }
+                });
+
+                mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(@NonNull Marker marker) {
+                        if (marker.getIcon() == icona_parcheggio_libero) {
+                            destination = Point.fromLngLat(
+                                    marker.getPosition().getLongitude(),
+                                    marker.getPosition().getLatitude());
+                            launchNavigation();
+                        }
+                        return true;
+                    }
+                });
+                mMap = mapboxMap;
+                checkEvents(events);
+                renderEvents(events);
+            }
+
+        });
+
+
 
         // attivo PredictIO
         activatePredictIOTracker();
@@ -263,8 +353,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
             startActivity(tutorial);
         }
-
-        renderEvents(events);
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -319,9 +407,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStart() {
         super.onStart();
         Log.w("onStart()","starting...");
-        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-        Set<String> events = sharedPreferences.getStringSet("events",null);
-        checkEvents(events);
         mapView.onStart();
         if(currentUser != null){
             return;
@@ -336,14 +421,16 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         Log.w("onResume()","resuming...");
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        checkEvents(events);
         mapView.onResume();
-        activatePredictIOTracker();
+        //activatePredictIOTracker();
         mLastLocation = getLastLocation();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        Log.w("onPause()","stopping...");
         mapView.onPause();
         mSensorManager.unregisterListener(this);
     }
@@ -352,10 +439,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStop() {
         super.onStop();
         mapView.onStop();
+        Log.w("onStop()","stopping...");
         SharedPreferences eventPreferences = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = eventPreferences.edit();
         editor.putStringSet("events",events);
-        editor.apply();
+        editor.commit();
     }
 
     @Override
@@ -441,7 +529,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mLastLocation = location;
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
-            public void onMapReady(MapboxMap mapboxMap) {
+            public void onMapReady(final MapboxMap mapboxMap) {
 
                 if (isCameraFollowing) {
                     // Customize map with markers, polylines, etc.
@@ -464,6 +552,46 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                             .setIcon(mIcon));
                 }
                 me.setPosition(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()));
+
+                mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
+                    @Override
+                    public void onScroll() {
+                        //Log.w("SCROLL LISTENER","scrolling...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        //Log.w("FLING LISTENER","flinging...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(@NonNull LatLng point) {
+                        //Log.w("LONG CLICK LISTENER","long clicking...");
+                        getmMap().addMarker(new MarkerOptions()
+                                .position(point)
+                                .title("Parcheggio libero")
+                                .setIcon(icona_parcheggio_libero));
+                    }
+                });
+
+                mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(@NonNull Marker marker) {
+                        if (marker.getIcon() == icona_parcheggio_libero) {
+                            destination = Point.fromLngLat(
+                                    marker.getPosition().getLongitude(),
+                                    marker.getPosition().getLatitude());
+                            launchNavigation();
+                        }
+                        return true;
+                    }
+                });
 
                 /*ValueAnimator markerAnimator = ObjectAnimator.ofObject(me, "position",
                         new LatLngEvaluator(), me.getPosition(), new LatLng(mLastLocation.getLatitude(),mLastLocation.getAltitude()));
@@ -582,87 +710,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void prepareMap(MapView mapView) {
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(final MapboxMap mapboxMap) {
-                // se la mappa ha uno stato salvato lo inserisco
-                if(!mapStyleJSON.equals(""))
-                    mapboxMap.setStyleJson(mapStyleJSON);
-                mMap = mapboxMap;
 
-                // MqttSubscribe dopo che la mappa viene assegnata in modo
-                // da evitare NullPointerException quando inserisco un marker
-                // di un parcheggio rilevato
-
-                mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier);
-                Thread mqttThread = new Thread(mMQTTSubscribe);
-                mqttThread.setName("MqttThread");
-                mqttThread.setPriority(Thread.NORM_PRIORITY);
-                mqttThread.run();
-
-                // to test MQTT
-                /*Date today = new Date();
-                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
-                PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
-                Thread t5 = new Thread(peh);
-                t5.start();*/
-
-                // Customize map with markers, polylines, etc.
-                // Camera Position definisce la posizione della telecamera
-                position = new CameraPosition.Builder()
-                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 17
-                        .bearing(0)// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
-                        .tilt(0) // Set the camera tilt to 20 degrees
-                        .build(); // Builds the CameraPosition object from the builder
-                // add marker aggiunge un marker sulla mappa con data posizione e titolo
-                me = mapboxMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                        .title("You")
-                        .setIcon(mIcon));
-
-                mapboxMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), 5000);
-
-                mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
-                    @Override
-                    public void onScroll() {
-                        isCameraFollowing = false;
-                    }
-                });
-                mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
-                    @Override
-                    public void onFling() {
-                        isCameraFollowing = false;
-                    }
-                });
-                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
-                    @Override
-                    public void onMapLongClick(@NonNull LatLng point) {
-                        mapboxMap.addMarker(new MarkerOptions()
-                                .position(point)
-                                .title("Parcheggio libero")
-                                .setIcon(icona_parcheggio_libero));
-                        Date d = new Date();
-                        PIOEvent e = new PIOEvent("Test","departed",d.toString(),"12","14");
-                    }
-                });
-                mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(@NonNull Marker marker) {
-                        if (marker.getIcon() == icona_parcheggio_libero) {
-                            destination = Point.fromLngLat(
-                                    marker.getPosition().getLongitude(),
-                                    marker.getPosition().getLatitude());
-                            launchNavigation();
-                        }
-                        return true;
-                    }
-                });
-
-            }
-
-        });
     }
 
     public static Point getOrigin() {
@@ -758,6 +806,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public static MapboxMap getmMap() {
+        mMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(@NonNull LatLng point) {
+                getmMap().addMarker(new MarkerOptions()
+                        .position(point)
+                        .title("Parcheggio libero")
+                        .setIcon(icona_parcheggio_libero));
+            }
+        });
         return mMap;
     }
 
