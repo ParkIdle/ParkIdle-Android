@@ -736,8 +736,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
         FirebaseAuth istance = FirebaseAuth.getInstance();
-
         istance.signOut();
+
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect();
         currentUser = null;
