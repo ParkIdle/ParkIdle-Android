@@ -26,6 +26,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -61,9 +63,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
@@ -76,7 +81,7 @@ import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
-    public static LinkedList<PIOEvent> events;
+    public static Set<String> events;
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerNav;
@@ -138,13 +143,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         setContentView(R.layout.activity_main);
 
-        // lista eventi salvati
-        events = new LinkedList<PIOEvent>();
-
-        //TODO: creare stringa di eventi nella shared pref, salvarli e caricarli quando necessario
-
-
-
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
 
@@ -184,11 +182,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mapView = (MapView) findViewById(R.id.mapView);
         // creo la mappa
         mapView.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-        mapStyleJSON = sharedPreferences.getString("MapJSON","");
         // preparo la mappa
         prepareMap(mapView);
 
+        Date d = new Date();
+        Log.w("@@@DATE@@@",d.toString());
 
         // attivo PredictIO
         activatePredictIOTracker();
@@ -205,7 +203,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
         mActionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
                 R.string.drawer_open, R.string.drawer_close) {
-
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -245,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         });
 
-
         View drawerHeader = mDrawerNav.getHeaderView(0);
         // Profile Image nel Menu laterale
         ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
@@ -262,9 +258,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         email.setText(LoginActivity.getUser().getEmail());
 
 
-        //Controllo del Tutorial
-        //TODO: Opzione per rivedere il tutorial al prossimo avvio nelle IMPOSTAZIONI
-
+        // Controllo del Tutorial
         SharedPreferences TutorialPreferences = getPreferences(MODE_PRIVATE);
         boo = TutorialPreferences.getBoolean("done",true);
         if (boo){
@@ -275,6 +269,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             startActivity(tutorial);
         }
 
+        renderEvents(events);
     }
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -329,6 +324,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onStart() {
         super.onStart();
         Log.w("onStart()","starting...");
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        Set<String> events = sharedPreferences.getStringSet("events",null);
+        checkEvents(events);
         mapView.onStart();
         if(currentUser != null){
             return;
@@ -351,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onPause() {
         super.onPause();
-
         mapView.onPause();
         mSensorManager.unregisterListener(this);
     }
@@ -359,24 +356,23 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onStop() {
         super.onStop();
-
         mapView.onStop();
-
+        SharedPreferences eventPreferences = getPreferences(MODE_PRIVATE);
+        SharedPreferences.Editor editor = eventPreferences.edit();
+        editor.putStringSet("events",events);
+        editor.apply();
     }
 
     @Override
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
         mapView.onDestroy();
-
     }
 
     @Override
@@ -388,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onBackPressed() {
-        //super.onBackPressed();
+        //super.onBackPressed(); // se commento questo, il tasto back non funziona piu
         finishAffinity();
 
     }
@@ -652,6 +648,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .position(point)
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
+                        Date d = new Date();
+                        PIOEvent e = new PIOEvent("Test","departed",d.toString(),"12","14");
                     }
                 });
                 mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
@@ -671,24 +669,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         });
     }
-
-    // TODO: something than can save markers and load them! maybe??
-    /*private void loadMarkers(String tag){
-        Log.w(tag,"Loading markers...");
-        MapboxMap map = getmMap();
-        List<Marker> markers = map.getMarkers();
-
-        ListIterator<Marker> it = markers.listIterator();
-        while(it.hasNext()){
-            Marker marker = it.next();
-            LatLng latlng = marker.getPosition();
-            map.addMarker(new MarkerOptions()
-                    .position(new LatLng(latlng.getLatitude(), latlng.getLongitude()))
-                    .title(marker.getTitle())
-                    .setIcon(marker.getIcon()));
-        }
-        Log.w(tag,"Ended loading markers.");
-    }*/
 
     public static Point getOrigin() {
         return Point.fromLngLat(mLastLocation.getLongitude(), mLastLocation.getLatitude());
@@ -741,8 +721,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
         FirebaseAuth istance = FirebaseAuth.getInstance();
-
         istance.signOut();
+
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect();
         currentUser = null;
@@ -790,6 +770,46 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public static MapboxMap getmMap() {
         return mMap;
+    }
+
+    private void checkEvents(Set<String> events){
+        Iterator<String> it = events.iterator();
+        String now = new Date().toString();
+
+        String time1 = now.split(" ")[3]; // current time
+        String hour1 = time1.split(":")[0];
+        String minutes1 = time1.split(":")[1];
+        String seconds1 = time1.split(":")[2];
+        while (it.hasNext()){
+            // event -> "UUID-event-date-latitude-longitude"
+            String e = it.next();
+            String[] event = e.split("-");
+            String date = event[2];
+
+            String time2 = date.split(" ")[3]; // event time
+            String hour2 = time2.split(":")[0];
+            String minutes2 = time2.split(":")[1];
+            String seconds2 = time2.split(":")[2];
+            if(Integer.parseInt(hour1) - Integer.parseInt(hour2) >= 1) {
+                if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                    events.remove(e);
+            }
+        }
+    }
+
+    private void renderEvents(Set<String> events){
+        Iterator<String> it = events.iterator();
+        while(it.hasNext()){
+            // event -> "UUID-event-date-latitude-longitude"
+            String e = it.next();
+            String[] event = e.split("-");
+            LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
+            Marker m = getmMap().addMarker(new MarkerOptions()
+                    .position(point)
+                    .title("Parcheggio libero")
+                    .setIcon(icona_parcheggio_libero));
+
+        }
     }
 }
 

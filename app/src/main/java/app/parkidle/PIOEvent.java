@@ -20,7 +20,7 @@ public class PIOEvent {
         this.date = date;
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
-        MainActivity.events.add(this);
+        MainActivity.events.add(this.toString());
     }
 
     public String getUUID(){
@@ -43,4 +43,8 @@ public class PIOEvent {
         return longitude;
     }
 
+    @Override
+    public String toString() {
+        return UUID + "-" + event + "-" + date + "-" + latitude + "-" + longitude;
+    }
 }
