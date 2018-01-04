@@ -34,7 +34,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="260dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,15 +47,18 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
         xmlns:facebook="http://schemas.android.com/apk/res-auto"
-        facebook:com_facebook_login_text="Login"
-        facebook:com_facebook_logout_text="Logout"/>
-        />
+        facebook:com_facebook_login_text="       Login"
+        facebook:com_facebook_logout_text="       Logout"
+        android:textSize="15sp"
+        android:paddingTop="19sp"
+        android:paddingLeft="10sp"
+        android:paddingBottom="19sp"/>
 
 </android.support.constraint.ConstraintLayout>
