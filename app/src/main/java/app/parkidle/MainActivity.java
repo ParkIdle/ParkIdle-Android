@@ -86,12 +86,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerNav;
     private ActionBarDrawerToggle mActionBarDrawerToggle;
-    private Bitmap profileBitmap = null;
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
 
     public static Thread customizerThread;
+
+    public static Bitmap profileBitmap;
 
     private boolean boo;
 
@@ -317,6 +318,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 switch(item.getItemId()){
                     case R.id.logout:
                         signOut();
+                        break;
+
+                    case R.id.db:
+                        dashboard();
                         break;
 
                     // TODO: inserire le funzioni per tutti gli altri tasti qui
@@ -777,7 +782,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
-    public Bitmap getImageBitmap(final String uri){
+    private void dashboard() {
+        Intent i = new Intent(MainActivity.this,Dashboard.class);
+        startActivity(i);
+    }
+
+    public static Bitmap getImageBitmap(final String uri){
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -789,6 +799,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     InputStream is = conn.getInputStream();
                     BufferedInputStream bis = new BufferedInputStream(is);
                     profileBitmap = BitmapFactory.decodeStream(bis);
+
                     bis.close();
                     is.close();
                 } catch (IOException e) {
