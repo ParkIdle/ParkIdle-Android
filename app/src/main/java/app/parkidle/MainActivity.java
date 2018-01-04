@@ -180,12 +180,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         events = sharedPreferences.getStringSet("events",new HashSet<String>());
-        /*Thread check = new Thread(new Runnable() {
+        Log.w(TAG,"[EVENTS] -> " + events.toString());
+        Thread check = new Thread(new Runnable() {
             @Override
             public void run() {
                 checkEvents(events);
             }
-        });*/
+        });
 
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
@@ -254,6 +255,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .position(point)
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
+                        Date d = new Date();
+                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });
 
@@ -270,8 +273,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
                 mMap = mapboxMap;
-                checkEvents(events);
-                renderEvents(events);
+                renderEvents(events,mapboxMap);
             }
 
         });
@@ -445,8 +447,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onStop();
         mapView.onStop();
         Log.w("onStop()","stopping...");
-        SharedPreferences eventPreferences = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor editor = eventPreferences.edit();
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putStringSet("events",events);
         editor.commit();
     }
@@ -582,6 +584,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .position(point)
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
+                        Date d = new Date();
+                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });
 
@@ -817,19 +821,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     public static MapboxMap getmMap() {
-        mMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(@NonNull LatLng point) {
-                getmMap().addMarker(new MarkerOptions()
-                        .position(point)
-                        .title("Parcheggio libero")
-                        .setIcon(icona_parcheggio_libero));
-            }
-        });
         return mMap;
     }
 
     private void checkEvents(Set<String> events){
+        Log.w(TAG,"Checking events...");
         Iterator<String> it = events.iterator();
         String now = new Date().toString();
 
@@ -852,21 +848,24 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     events.remove(e);
             }
         }
+        Log.w(TAG,"Check DONE...");
     }
 
-    private void renderEvents(Set<String> events){
+    private void renderEvents(Set<String> events,MapboxMap mapboxMap){
+        Log.w(TAG,"Rendering events...");
         Iterator<String> it = events.iterator();
         while(it.hasNext()){
             // event -> "UUID-event-date-latitude-longitude"
             String e = it.next();
             String[] event = e.split("-");
             LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
-            Marker m = getmMap().addMarker(new MarkerOptions()
+            Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(point)
                     .title("Parcheggio libero")
                     .setIcon(icona_parcheggio_libero));
 
         }
+        Log.w(TAG,"Render DONE...");
     }
 }
 

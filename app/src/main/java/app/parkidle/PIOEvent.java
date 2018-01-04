@@ -1,5 +1,7 @@
 package app.parkidle;
 
+import android.util.Log;
+
 import java.util.List;
 
 /**
@@ -21,6 +23,7 @@ public class PIOEvent {
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
         MainActivity.events.add(this.toString());
+        Log.w("Main","[NEW EVENT] -> " + this.toString());
     }
 
     public String getUUID(){
