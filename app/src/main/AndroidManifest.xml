@@ -66,9 +66,11 @@
 
         <activity android:name=".TutorialActivity"
             android:theme="@style/NoActionBar">
-
+        </activity>
+        <activity android:name=".Dashboard">
 
         </activity>
+
 
         <activity android:name=".LoginActivity"
             android:theme="@style/NoActionBar">

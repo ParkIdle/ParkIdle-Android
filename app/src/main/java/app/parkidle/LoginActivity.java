@@ -62,6 +62,8 @@ public class LoginActivity extends AppCompatActivity {
     public static GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
 
+    public static boolean noUserAccess = false;
+
     private static boolean withGoogle;
     private static boolean withFacebook;
 
@@ -131,6 +133,19 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        findViewById(R.id.noAccount).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch (v.getId()){
+                    case R.id.noAccount:
+                        noAccount_Access();
+                        break;
+                }
+            }
+        });
+
+
+
 
         ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
         Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
@@ -153,6 +168,13 @@ public class LoginActivity extends AppCompatActivity {
 
         Intent signInIntent_google = googleSignIn.getSignInIntent();
         startActivityForResult(signInIntent_google, RC_SIGN_IN_GOOGLE);
+    }
+
+    private void noAccount_Access(){
+        Intent i = new Intent(this,MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        noUserAccess = true;
+        startActivity(i);
     }
 
 
