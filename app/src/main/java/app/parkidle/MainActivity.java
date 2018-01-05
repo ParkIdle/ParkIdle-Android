@@ -186,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void run() {
                 checkEvents(events);
+                Log.w("CHECK THREAD", "I'm done!");
             }
         });
         check.start();
@@ -258,8 +259,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
                         // TEST STUFF
-                        //Date d = new Date();
-                        //PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        Date d = new Date();
+                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });
 
@@ -280,7 +281,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     @Override
                     public void run() {
                         try {
+                            Log.w("RENDER THREAD","Waiting for CHECK THREAD...");
                             check.join();
+                            Log.w("RENDER THREAD", "Starting render task");
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -600,8 +603,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
                         // TEST STUFF
-                        /*Date d = new Date();
-                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));*/
+                        Date d = new Date();
+                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });
 
