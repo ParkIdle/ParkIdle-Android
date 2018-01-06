@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
@@ -78,7 +79,6 @@ import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
 import static app.parkidle.LoginActivity.noUserAccess;
-import static java.lang.String.valueOf;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // da evitare NullPointerException quando inserisco un marker
                 // di un parcheggio rilevato
 
-                mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier);
+                mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(),mapboxMap);
                 Thread mqttThread = new Thread(mMQTTSubscribe);
                 mqttThread.setName("MqttThread");
                 mqttThread.setPriority(Thread.NORM_PRIORITY);
@@ -262,6 +262,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         // TEST STUFF
                         Date d = new Date();
                         PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                        PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+                        Thread t5 = new Thread(peh);
+                        t5.start();
                     }
                 });
 
@@ -296,8 +300,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
 
         });
-
-
 
         // attivo PredictIO
         activatePredictIOTracker();
@@ -437,11 +439,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onStart();
         Log.w("onStart()","starting...");
         mapView.onStart();
-        if(currentUser != null){
+        /*if(currentUser != null){
             return;
         }else{
             signOut();
-        }
+        }*/
     }
 
     @Override
@@ -598,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     }
                 });
 
-                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                /*mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         //Log.w("LONG CLICK LISTENER","long clicking...");
@@ -610,7 +612,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Date d = new Date();
                         PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
-                });
+                });*/
 
                 mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
                     @Override
@@ -654,7 +656,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 message = "'predict.io' tracker is in in-active state.";
                 break;
         }
-        //Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     public void activatePredictIOTracker() {
@@ -677,12 +679,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             predictIO.start(new PredictIO.PIOActivationListener() {
                 @Override
                 public void onActivated() {
-                    //Toast.makeText(MainActivity.this, "Activated listener", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Activated listener", Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void onActivationFailed(int error) {
-                    //Toast.makeText(MainActivity.this, "Activation failed!" , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Activation failed!" , Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
@@ -793,6 +795,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //if (LoginActivity.getUser() != null) {
         FirebaseAuth istance = FirebaseAuth.getInstance();
         istance.signOut();
+        noUserAccess = false;
 
         mAuth.signOut();
         mGoogleApiClient.clearDefaultAccountAndReconnect(); // disconnect from google

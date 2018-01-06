@@ -7,6 +7,7 @@ import android.widget.Toast;
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -30,9 +31,11 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     private final String TAG = "MQTTSubscribe";
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
+    private final MapboxMap mapboxMap;
 
-    public MQTTSubscribe(String deviceIdentifier) {
+    public MQTTSubscribe(String deviceIdentifier, MapboxMap mapboxMap) {
         this.deviceIdentifier = deviceIdentifier;
+        this.mapboxMap = mapboxMap;
     }
 
     public void subscribe() {
@@ -75,7 +78,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
         PIOEvent pioEvent = parseMqttMessage(message);
         if(pioEvent.getEvent().equals("DEPARTED_EVENT")) {
 
-            final Marker m = MainActivity.mMap.addMarker(new MarkerOptions()
+            final Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(new LatLng(pioEvent.getLatitude(), pioEvent.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
         }

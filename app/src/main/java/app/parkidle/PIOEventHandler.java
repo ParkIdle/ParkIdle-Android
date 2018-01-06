@@ -32,7 +32,7 @@ public class PIOEventHandler implements Runnable{
     private PIOTripSegment pioTripSegment;
     private String event;
     private final String TAG = "PIOEventHandler";
-    private final String myServerURL = "http://ec2-35-177-168-144.eu-west-2.compute.amazonaws.com:3000/pioevent";
+    private final String myServerURL = "http://ec2-35-177-185-194.eu-west-2.compute.amazonaws.com:3000/pioevent";
 
     public PIOEventHandler(PIOTripSegment pioTripSegment, String event){
         this.pioTripSegment = pioTripSegment;
@@ -111,8 +111,8 @@ public class PIOEventHandler implements Runnable{
                     break;
             }
             jsonParam.put("date", eventDate);
-            jsonParam.put("latitude", 12.0);
-            jsonParam.put("longitude", 12.9);
+            jsonParam.put("latitude", "" + eventLocation.getLatitude());
+            jsonParam.put("longitude", "" + eventLocation.getLongitude());
             //jsonParam.put("zone", eventZone);
         }catch(JSONException e){
             e.printStackTrace();

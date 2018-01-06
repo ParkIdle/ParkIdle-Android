@@ -68,7 +68,7 @@ public class PIOManager extends Application{
             t.setPriority(Thread.NORM_PRIORITY);
             t.start();
 
-            //Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
+            Toast.makeText(PIOManager.this, "Departure - Sending position", Toast.LENGTH_SHORT).show();
         }
 
         @Override
