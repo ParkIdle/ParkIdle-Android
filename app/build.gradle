@@ -14,10 +14,6 @@ android {
         multiDexEnabled true
     }
 
-
-
-
-
     buildTypes {
         release {
             minifyEnabled false
@@ -60,9 +56,8 @@ dependencies {
     }
     compile 'com.mapzen.android:lost:3.0.2'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
-    //compile 'com.rabbitmq:amqp-client:5.0.0'
-    //MQTT Lib
 
+    // MQTT Dependencies
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     testCompile 'junit:junit:4.12'

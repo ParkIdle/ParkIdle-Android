@@ -40,7 +40,6 @@
 
     </com.google.android.gms.common.SignInButton>
 
-
     <Button
         android:id="@+id/noAccount"
         android:layout_width="253dp"
@@ -48,7 +47,7 @@
         android:layout_gravity="bottom"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="60dp"
         android:backgroundTint="@color/colorAccent"
         android:text="Login without account"
         app:layout_constraintBottom_toTopOf="@+id/sign_in_button"
@@ -66,17 +65,18 @@
         android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:paddingBottom="19sp"
         android:paddingLeft="10sp"
         android:paddingTop="19sp"
         android:textSize="15sp"
-        app:com_facebook_login_text="       Sign in"
+        app:com_facebook_login_text="         Sign in"
         app:com_facebook_logout_text="       Logout"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/sign_in_button"
         app:layout_constraintVertical_bias="0.66" />
+
 
 
 </android.support.constraint.ConstraintLayout>

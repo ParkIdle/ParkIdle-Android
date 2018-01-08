@@ -28,6 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -73,22 +74,20 @@ public class LoginActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
 
-
         FirebaseApp.initializeApp(this);
 
-        //inizialiting the facebook options by the id provided from firebase
-        Log.w("helper","i'm here dude_main_inizialiting");
-
+        Log.w(TAG,"i'm here dude_main_inizialiting");
+        // inizialiting the Facebook options by the ID provided from Firebase
         mCallbackManager = CallbackManager.Factory.create();
         final LoginButton loginButton = findViewById(R.id.login_button);
         loginButton.setReadPermissions("email","public_profile");
-        Log.w("helper","i'm here dude_after inizialiting");
+        loginButton.setText(R.string.facebook_button_text);
+        Log.w(TAG,"i'm here dude_after inizialiting");
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Log.w("FACEBOOK CALLBACK","hey its on success");
                 handleFacebookAccessToken(loginResult.getAccessToken());
-
             }
 
             @Override
@@ -103,8 +102,7 @@ public class LoginActivity extends AppCompatActivity {
 
         });
 
-
-        //inizialiting the google options by the id provided from firebase
+        // inizialiting the Google options by the ID provided from Firebase
         // Configure Google Sign In
         google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(clientIdByServer)
@@ -120,8 +118,8 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-
-        //starting the listener of the button
+        // Google sign in button listener
+        final SignInButton signInButton = findViewById(R.id.sign_in_button);
         findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -133,6 +131,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // no account button listener
         findViewById(R.id.noAccount).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -144,13 +143,10 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-
-
-
+        // Animazione logo ParkIdle
         ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
         Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
         myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
-
 
     }//qua finisce on create
 
@@ -165,7 +161,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signIn_google() {
-
         Intent signInIntent_google = googleSignIn.getSignInIntent();
         startActivityForResult(signInIntent_google, RC_SIGN_IN_GOOGLE);
     }
@@ -175,7 +170,6 @@ public class LoginActivity extends AppCompatActivity {
         noUserAccess = true;
         startActivity(i);
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -202,7 +196,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
-
 
     private void updateUI(FirebaseUser user){
         if(user == null){
@@ -271,9 +264,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-
     public static boolean isWithGoogle() {
-
         return withGoogle;
     }
 
@@ -284,7 +275,5 @@ public class LoginActivity extends AppCompatActivity {
     public static FirebaseUser getUser(){
         return currentUser;
     }
-
-
 
 }

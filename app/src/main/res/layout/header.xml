@@ -17,7 +17,7 @@
         android:id="@+id/menu_display_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Andrea Misuraca"
+        android:text="'your display name here'"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:paddingTop="80dp"/>
@@ -26,7 +26,7 @@
         android:id="@+id/menu_email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="misu.it.official@gmail.com"
+        android:text="'your email here'"
         android:textColor="@color/white"
         android:paddingTop="120dp"
         />

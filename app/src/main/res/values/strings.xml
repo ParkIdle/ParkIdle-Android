@@ -6,4 +6,6 @@
     <string name="fb_login_protocol_scheme">fb156734918407060</string>
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>
+    <string name="facebook_button_text">Continue with Facebook</string>
+    <string name="google_button_text">Continue with Google</string>
 </resources>

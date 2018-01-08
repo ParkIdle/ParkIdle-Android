@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.TypeEvaluator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -38,6 +40,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.location.ActivityRecognitionResult;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
@@ -81,9 +91,12 @@ import static app.parkidle.LoginActivity.mGoogleApiClient;
 import static app.parkidle.LoginActivity.noUserAccess;
 
 
-public class MainActivity extends AppCompatActivity implements SensorEventListener {
+public class MainActivity extends AppCompatActivity implements SensorEventListener,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
 
     public static Set<String> events;
+
+    private GoogleApiClient mApiClient;
+    private ActivityRecognitionClient activityRecognitionClient;
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerNav;
@@ -301,6 +314,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         });
 
+        /*
         // attivo PredictIO
         activatePredictIOTracker();
         // controllo il suo stato per verificarne l'attivazione avvenuta con successo
@@ -310,6 +324,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         PredictIO.getInstance(this).setListener(pioManager.getmPredictIOListener());
         deviceIdentifier = PredictIO.getInstance(this).getDeviceIdentifier();
         //PredictIO.getInstance(this).setWebhookURL("https://requestb.in/t1fw7lt1");
+        */
+        mApiClient = new GoogleApiClient.Builder(this)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        mApiClient.connect();
+
 
         // Swipe-left Menu
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -475,6 +498,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putStringSet("events",events);
         editor.commit();
+        /*Task<Void> task = activityRecognitionClient.removeActivityUpdates(getActivityDetectionPendingIntent());
+        task.addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Log.w(TAG,"Removing recognition updates.");
+            }
+        });
+
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Failed to disable activity recognition.");
+            }
+        });*/
     }
 
     @Override
@@ -890,6 +927,57 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
         Log.w(TAG,"Render DONE...");
     }
+
+    /**
+     * Gets a PendingIntent to be sent for each activity detection.
+     */
+    private PendingIntent getActivityDetectionPendingIntent() {
+        Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
+
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when calling
+        // requestActivityUpdates() and removeActivityUpdates().
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.w(TAG,"CONNECTED");
+        activityRecognitionClient = ActivityRecognition.getClient(this);
+        Task task = activityRecognitionClient.requestActivityUpdates(30*1000, getActivityDetectionPendingIntent());
+        task.addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                Log.w(TAG,"ActivityRecognition ACTIVE");
+                Toast.makeText(getApplicationContext(),
+                        "ActivityRecognition ACTIVE",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+
+        task.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG,"ActivityRecognition NOT ACTIVE");
+                Toast.makeText(getApplicationContext(),
+                        "ActivityRecognition NOT ACTIVE",
+                        Toast.LENGTH_SHORT)
+                        .show();
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.w(TAG,"CONNECTION SUSPENDED");
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.w(TAG,"CONNECTION FAILED");
+
+    }
+
 }
 
 
