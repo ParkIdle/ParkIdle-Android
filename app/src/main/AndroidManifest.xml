@@ -82,7 +82,7 @@
         <activity android:name=".TutorialActivity"
             android:theme="@style/NoActionBar">
         </activity>
-        <activity android:name=".Dashboard">
+        <activity android:name=".DashboardActivity">
 
         </activity>
 

@@ -12,7 +12,7 @@ import android.widget.TextView;
  * Created by misu on 04/01/18.
  */
 
-public class Dashboard extends AppCompatActivity{
+public class DashboardActivity extends AppCompatActivity{
 
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
@@ -25,7 +25,7 @@ public class Dashboard extends AppCompatActivity{
         setContentView(R.layout.activity_dashboard);
 
         userText = findViewById(R.id.userText);
-        userText.setText("Hi "+LoginActivity.getUser().getDisplayName());
+        userText.setText(LoginActivity.getUser().getDisplayName());
         userBadge = findViewById(R.id.userBadge);
         userBadge.setImageBitmap(MainActivity.getImageBitmap(LoginActivity.getUser().getPhotoUrl().toString()));
 

@@ -75,7 +75,7 @@ public class EventHandler implements Runnable{
             }
 
             conn.disconnect();
-            Log.w(TAG,"Disconnecting...");
+            Log.w(TAG,"POST Request completed!");
         }catch(ProtocolException e){
             e.printStackTrace();
         }catch(IOException e){

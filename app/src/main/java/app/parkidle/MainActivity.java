@@ -1,7 +1,9 @@
 package app.parkidle;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
@@ -77,7 +79,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
@@ -166,8 +167,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // sensori android
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        //accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        //magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
@@ -233,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
-                        .bearing(0)// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
+                        .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 // add marker aggiunge un marker sulla mappa con data posizione e titolo
@@ -252,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         isCameraFollowing = false;
                     }
                 });
-
+                mapboxMap.
                 mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
                     @Override
                     public void onFling() {
@@ -600,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     position = new CameraPosition.Builder()
                             .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                             .zoom(17) // Sets the zoom to level 10
-                            .bearing(0) // degree - azimut
+                            .bearing(mLastLocation.getBearing()) // degree - azimut
                             .tilt(0) // Set the camera tilt to 20 degrees
                             .build(); // Builds the CameraPosition object from the builder
                     mapboxMap.animateCamera(CameraUpdateFactory
@@ -841,7 +842,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     private void dashboard() {
-        Intent i = new Intent(MainActivity.this,Dashboard.class);
+        Intent i = new Intent(MainActivity.this,DashboardActivity.class);
         startActivity(i);
     }
 
