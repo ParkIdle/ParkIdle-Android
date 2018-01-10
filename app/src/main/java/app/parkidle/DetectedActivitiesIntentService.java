@@ -16,6 +16,7 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 
 
 /**
@@ -73,56 +74,77 @@ public class DetectedActivitiesIntentService extends IntentService {
             String activity = null;
             switch(da.getType()){
                 case DetectedActivity.IN_VEHICLE:
-                    Log.w(TAG,"IN VEHICLE " + da.getConfidence() + "%");
-                    Toast.makeText(this, "IN VEHICLE", Toast.LENGTH_SHORT).show();
                     activity = "IN VEHICLE";
                     break;
                 case DetectedActivity.ON_BICYCLE:
-                    Log.w(TAG,"ON BICYCLE " + da.getConfidence() + "%");
-                    Toast.makeText(this, "ON BICYCLE", Toast.LENGTH_SHORT).show();
                     activity = "ON BICYCLE";
                     break;
                 case DetectedActivity.WALKING:
-                    Log.w(TAG,"WALKING " + da.getConfidence() + "%");
-                    Toast.makeText(this, "WALKING", Toast.LENGTH_SHORT).show();
                     activity = "WALKING";
                     break;
                 case DetectedActivity.ON_FOOT:
-                    Log.w(TAG,"ON FOOT " + da.getConfidence() + "%");
-                    Toast.makeText(this, "ON FOOT", Toast.LENGTH_SHORT).show();
                     activity = "ON FOOT";
                     break;
                 case DetectedActivity.RUNNING:
-                    Log.w(TAG,"RUNNING " + da.getConfidence() + "%");
-                    Toast.makeText(this, "RUNNING", Toast.LENGTH_SHORT).show();
-                    activity = "IRUNNING";
+                    activity = "RUNNING";
                     break;
                 case DetectedActivity.STILL:
-                    Log.w(TAG,"STILL " + da.getConfidence() + "%");
-                    Toast.makeText(this, "STILL", Toast.LENGTH_SHORT).show();
                     activity = "STILL";
                     break;
                 case DetectedActivity.TILTING:
-                    Log.w(TAG,"TILTING " + da.getConfidence() + "%");
-                    Toast.makeText(this, "TILTING", Toast.LENGTH_SHORT).show();
                     activity = "TILTING";
                     break;
                 case DetectedActivity.UNKNOWN:
-                    Log.w(TAG,"UNKNOWN " + da.getConfidence() + "%");
-                    Toast.makeText(this, "UNKNOWN", Toast.LENGTH_SHORT).show();
                     activity = "UNKNOWN";
                     break;
             }
+            Log.w(TAG,activity + da.getConfidence() + "%");
+            Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
             Looper.loop();
+            MainActivity.addDetectedActivity(activity);
             createEvent(activity);
         }
     }
 
-    private void createEvent(String activity){
-        Date now = new Date();
-        Location l = MainActivity.getMyLocation();
-        Double latitude = l.getLatitude();
-        Double longitude = l.getLongitude();
-        Event event = new Event("numerocasuale",activity,now.toString(),latitude.toString(),longitude.toString());
+    private void createEvent(String activity) {
+        if (activity != "IN VEHICLE")
+            return;
+        LinkedList<String> activityList = MainActivity.detectedActivities;
+        int size = activityList.size();
+        if (size != 4)
+            return;
+        // se ho una sequenza !VEHICLE - VEHICLE - VEHICLE - VEHICLE
+        // posso mandare l'evento di PARTENZA, perche lo ritengo valido
+        if (!activityList.getFirst().equals("IN VEHICLE")){
+            for(int i = 1; i < size; i++){
+                if(!activityList.get(i).equals("IN VEHICLE")) {
+                    Log.w(TAG, "Activity(" + i + ") isn't 'IN VEHICLE'");
+                    return;
+                }
+            }
+            Log.w(TAG,"Sequence Accepted! Creating DEPARTED event...");
+            Date now = new Date();
+            Location l = MainActivity.getMyLocation();
+            Double latitude = l.getLatitude();
+            Double longitude = l.getLongitude();
+            Event event = new Event("numerocasuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+        }
+        // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
+        // posso mandare l'evento di ARRIVO, perche lo ritengo valido
+        if (activityList.getFirst().equals("IN VEHICLE")) {
+            for (int i = 1; i < size; i++) {
+                if (activityList.get(i).equals("IN VEHICLE")) {
+                    Log.w(TAG, "Activity(" + i + ") is 'IN VEHICLE'");
+                    return;
+                }
+            }
+            // creo l'evento di arrivo
+            Log.w(TAG,"Sequence Accepted! Creating ARRIVAL event...");
+            Date now = new Date();
+            Location l = MainActivity.getMyLocation();
+            Double latitude = l.getLatitude();
+            Double longitude = l.getLongitude();
+            Event event = new Event("numerocasuale", "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
+        }
     }
 }

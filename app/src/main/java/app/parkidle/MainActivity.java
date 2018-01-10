@@ -73,6 +73,7 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -88,7 +89,9 @@ import static app.parkidle.LoginActivity.noUserAccess;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener,GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
 
-    public static Set<String> events;
+    public static Set<String> events; // mantiene eventi(markers) precedentemente ricevuti
+    public static LinkedList<String> detectedActivities; // mantiene le precedenti 4 activities
+
 
     private GoogleApiClient mApiClient;
     private ActivityRecognitionClient activityRecognitionClient;
@@ -970,6 +973,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     public static Location getMyLocation(){
         return mLastLocation;
+    }
+
+    public static void addDetectedActivity(String activity){
+        if(detectedActivities == null)
+            detectedActivities = new LinkedList<>();
+        if(detectedActivities.size() > 4){
+            detectedActivities.removeFirst();
+        }
+        detectedActivities.add(activity);
     }
 
 }

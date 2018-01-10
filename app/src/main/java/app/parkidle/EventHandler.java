@@ -94,12 +94,12 @@ public class EventHandler implements Runnable{
             jsonParam.put("ID", event.getID());
             jsonParam.put("event", event);
             switch (event.getEvent()) {
-                case "IN VEHICLE":
+                case "DEPARTED":
                     eventLatitude = event.getLatitude();
                     eventLongitude = event.getLongitude();
                     eventDate = event.getDate();
                     break;
-                /*case "ON FOOT":
+                /*case "ARRIVED":
                     eventLocation = pioTripSegment.arrivalLocation;
                     eventDate = pioTripSegment.arrivalTime;
                     break;
