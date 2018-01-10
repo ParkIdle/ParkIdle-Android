@@ -8,26 +8,27 @@ import java.util.List;
  * Created by simonestaffa on 23/12/17.
  */
 
-public class PIOEvent {
+public class Event {
 
-    private String UUID;
+    private String ID;
     private String event;
     private String date;
     private Double latitude;
     private Double longitude;
 
-    public PIOEvent(String UUID, String event, String date, String latitude, String longitude){
-        this.UUID = UUID;
+    public Event(String ID, String event, String date, String latitude, String longitude){
+        this.ID = ID;
         this.event = event;
         this.date = date;
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
         MainActivity.events.add(this.toString());
+        EventHandler eh = new EventHandler(this);
         Log.w("Main","[NEW EVENT] -> " + this.toString());
     }
 
-    public String getUUID(){
-        return UUID;
+    public String getID(){
+        return ID;
     }
 
     public String getEvent(){
@@ -48,6 +49,6 @@ public class PIOEvent {
 
     @Override
     public String toString() {
-        return UUID + "-" + event + "-" + date + "-" + latitude + "-" + longitude;
+        return ID + "-" + event + "-" + date + "-" + latitude + "-" + longitude;
     }
 }

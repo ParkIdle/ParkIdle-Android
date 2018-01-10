@@ -28,8 +28,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
-import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,7 +42,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -76,9 +73,7 @@ import java.net.URLConnection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import io.predict.PIOTripSegment;
@@ -217,7 +212,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // MqttSubscribe dopo che la mappa viene assegnata in modo
                 // da evitare NullPointerException quando inserisco un marker
                 // di un parcheggio rilevato
-
                 mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(),mapboxMap);
                 Thread mqttThread = new Thread(mMQTTSubscribe);
                 mqttThread.setName("MqttThread");
@@ -227,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 // to test MQTT
                 /*Date today = new Date();
                 PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
-                PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+                EventHandler peh = new EventHandler(pts,PredictIO.DEPARTED_EVENT);
                 Thread t5 = new Thread(peh);
                 t5.start();*/
 
@@ -273,12 +267,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
                         // TEST STUFF
-                        Date d = new Date();
-                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        /*Date d = new Date();
+                        Event p = new Event("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                         PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                        PIOEventHandler peh = new PIOEventHandler(pts,PredictIO.DEPARTED_EVENT);
+                        EventHandler peh = new EventHandler(pts,PredictIO.DEPARTED_EVENT);
                         Thread t5 = new Thread(peh);
-                        t5.start();
+                        t5.start();*/
                     }
                 });
 
@@ -332,7 +326,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 .build();
 
         mApiClient.connect();
-
 
         // Swipe-left Menu
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -530,14 +523,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         mapView.onSaveInstanceState(outState);
-
     }
 
     @Override
     public void onBackPressed() {
         //super.onBackPressed(); // se commento questo, il tasto back non funziona piu
         finishAffinity();
-
     }
 
     @SuppressLint("MissingPermission")
@@ -589,6 +580,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     }
 
     // questo metodo lo richiamo ogni volta che viene segnalato un location change (metodo "OnLocationChanged" in "getLastLocation")
+    // TODO: fix drawMarker
     public void drawMarker(final Location location) {
         if (location == null) {
             //Toast.makeText(this, "You have to enable GPS to use the app", Toast.LENGTH_SHORT).show();
@@ -647,7 +639,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .setIcon(icona_parcheggio_libero));
                         // TEST STUFF
                         Date d = new Date();
-                        PIOEvent p = new PIOEvent("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        Event p = new Event("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                     }
                 });*/
 
@@ -826,7 +818,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         NavigationLauncher.startNavigation(this, options);
     }
 
-
     private void signOut() {
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
@@ -975,7 +966,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.w(TAG,"CONNECTION FAILED");
+    }
 
+    public static Location getMyLocation(){
+        return mLastLocation;
     }
 
 }

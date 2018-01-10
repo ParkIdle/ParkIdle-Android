@@ -1,8 +1,6 @@
 package app.parkidle;
 
-import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -75,14 +73,14 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             Log.w(TAG, "Arrival: " + message.toString());
         }*/
 
-        PIOEvent pioEvent = parseMqttMessage(message);
-        if(pioEvent.getEvent().equals("DEPARTED_EVENT")) {
+        Event event = parseMqttMessage(message);
+        if(event.getEvent().equals("DEPARTED_EVENT")) {
 
             final Marker m = mapboxMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(pioEvent.getLatitude(), pioEvent.getLongitude()))
+                    .position(new LatLng(event.getLatitude(), event.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
         }
-        else if(pioEvent.getEvent().equals("ARRIVAL_EVENT")){
+        else if(event.getEvent().equals("ARRIVAL_EVENT")){
             // TODO:
             Log.w(TAG, "Arrival Event just received");
         }
@@ -100,10 +98,10 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     }
 
     // parsing del messaggio ricevuto
-    private PIOEvent parseMqttMessage(MqttMessage message){
+    private Event parseMqttMessage(MqttMessage message){
         String m = message.toString();
         String[] splitted = m.split(",");
-        PIOEvent pioEvent = new PIOEvent(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
-        return pioEvent;
+        Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
+        return event;
     }
 }

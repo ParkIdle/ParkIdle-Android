@@ -27,23 +27,19 @@ import io.predict.PredictIO;
  * Created by simonestaffa on 25/11/17.
  */
 
-public class PIOEventHandler implements Runnable{
+public class EventHandler implements Runnable{
 
-    private PIOTripSegment pioTripSegment;
-    private String event;
-    private final String TAG = "PIOEventHandler";
+    private Event event;
+    private final String TAG = "EventHandler";
     private final String myServerURL = "http://ec2-35-177-185-194.eu-west-2.compute.amazonaws.com:3000/pioevent";
 
-    public PIOEventHandler(PIOTripSegment pioTripSegment, String event){
-        this.pioTripSegment = pioTripSegment;
+    public EventHandler(Event event){
         this.event = event;
     }
 
     @Override
     public void run() { // la run crea la connessione con il server e invia la POST
-       // Looper.prepare();
         try {
-            //URL url = new URL(PIOManager.myServerURL);
             Log.w(TAG,"Creating connection...");
             URL url = new URL(myServerURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -85,35 +81,33 @@ public class PIOEventHandler implements Runnable{
         }catch(IOException e){
             e.printStackTrace();
         }
-        //Looper.loop();
         return;
     }
 
 
     // questa funzione prepara il JSONObject in base all'evento da inviare
     private void prepareJSON(JSONObject jsonParam){
-        Location eventLocation = null;
-        Date eventDate = null;
-        PIOZone eventZone = null;
+        Double eventLatitude = null;
+        Double eventLongitude = null;
+        String eventDate = null;
         try {
-            jsonParam.put("UUID", pioTripSegment.UUID);
+            jsonParam.put("ID", event.getID());
             jsonParam.put("event", event);
-            switch (event) {
-                case PredictIO.DEPARTED_EVENT:
-                    eventLocation = pioTripSegment.departureLocation;
-                    eventDate = pioTripSegment.departureTime;
-                    //eventZone = pioTripSegment.departureZone;
+            switch (event.getEvent()) {
+                case "IN VEHICLE":
+                    eventLatitude = event.getLatitude();
+                    eventLongitude = event.getLongitude();
+                    eventDate = event.getDate();
                     break;
-                case PredictIO.ARRIVED_EVENT:
+                /*case "ON FOOT":
                     eventLocation = pioTripSegment.arrivalLocation;
                     eventDate = pioTripSegment.arrivalTime;
-                    //eventZone = pioTripSegment.arrivalZone;
                     break;
+                    */
             }
             jsonParam.put("date", eventDate);
-            jsonParam.put("latitude", "" + eventLocation.getLatitude());
-            jsonParam.put("longitude", "" + eventLocation.getLongitude());
-            //jsonParam.put("zone", eventZone);
+            jsonParam.put("latitude", "" + eventLatitude);
+            jsonParam.put("longitude", "" + eventLongitude);
         }catch(JSONException e){
             e.printStackTrace();
         }
