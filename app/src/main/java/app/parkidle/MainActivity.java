@@ -253,6 +253,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         isCameraFollowing = false;
                     }
                 });
+<<<<<<< HEAD
+
+=======
+>>>>>>> bf4695f875683a8ff73940ea52a0bf371fecc7b8
                 mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
                     @Override
                     public void onFling() {
