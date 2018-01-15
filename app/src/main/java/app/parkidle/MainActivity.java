@@ -429,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 } else {
                     // User refused to grant permission. You can add AlertDialog here
                     // messaggio di avvertimento
-                    Toast.makeText(this, "GPS permission not granted. Please allow GPS using to use this app.", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, "GPS permission not granted. Please allow GPS using to use this app.", Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -943,10 +943,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onSuccess(Void result) {
                 Log.w(TAG,"ActivityRecognition ACTIVE");
-                Toast.makeText(getApplicationContext(),
+                /*Toast.makeText(getApplicationContext(),
                         "ActivityRecognition ACTIVE",
                         Toast.LENGTH_SHORT)
-                        .show();
+                        .show();*/
             }
         });
 
@@ -954,10 +954,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.w(TAG,"ActivityRecognition NOT ACTIVE");
-                Toast.makeText(getApplicationContext(),
+                /*Toast.makeText(getApplicationContext(),
                         "ActivityRecognition NOT ACTIVE",
                         Toast.LENGTH_SHORT)
-                        .show();
+                        .show();*/
             }
         });
     }

@@ -48,7 +48,7 @@ public class Test implements Runnable {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, " Test isRunning", Toast.LENGTH_LONG).show();
+                //Toast.makeText(context, " Test isRunning", Toast.LENGTH_LONG).show();
             }
         });
 
