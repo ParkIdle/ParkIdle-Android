@@ -99,7 +99,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                     break;
             }
             Log.w(TAG,activity + da.getConfidence() + "%");
-            Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
             Looper.loop();
             MainActivity.addDetectedActivity(activity);
             createEvent(activity);
