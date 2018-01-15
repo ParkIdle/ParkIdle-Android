@@ -63,8 +63,6 @@ public class LoginActivity extends AppCompatActivity {
     public static GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
 
-    public static boolean noUserAccess = false;
-
     private static boolean withGoogle;
     private static boolean withFacebook;
 
@@ -131,18 +129,6 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // no account button listener
-        findViewById(R.id.noAccount).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()){
-                    case R.id.noAccount:
-                        noAccount_Access();
-                        break;
-                }
-            }
-        });
-
         // Animazione logo ParkIdle
         ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
         Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
@@ -165,11 +151,6 @@ public class LoginActivity extends AppCompatActivity {
         startActivityForResult(signInIntent_google, RC_SIGN_IN_GOOGLE);
     }
 
-    private void noAccount_Access(){
-        Intent i = new Intent(this,MainActivity.class);
-        noUserAccess = true;
-        startActivity(i);
-    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
