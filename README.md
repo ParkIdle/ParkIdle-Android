@@ -6,7 +6,7 @@ ParkIdle is **totally free**, user will not pay for our service.
 
 ParkIdle is a **community** of people who wants to share their motion-activities, in order to help others finding a parking spot.
 
-### More info on [Wiki](https://github.com/lim996/parkidle/wiki)
+### More info on [Wiki](https://github.com/ParkIdle/ParkIdle-Android/wiki)
   
 
 
