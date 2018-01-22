@@ -140,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     // icons
     public static Icon mIcon; // il mio locator
     public static Icon icona_parcheggio_libero; // parcheggio libero (segna eventi departed)
+    public static Icon icona_parcheggio_libero_5mins; // parcheggio libero (segna eventi departed)
+
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
 
     private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
@@ -162,6 +164,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
         icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking_spot);
+        icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.parking_spot_5mins);
+
 
         // sensori android
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -912,7 +916,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(point)
                     .title("Parcheggio libero")
-                    .setIcon(icona_parcheggio_libero));
+                    .setIcon(parkingIconEvaluator(e));
 
         }
         Log.w(TAG,"Render DONE...");
@@ -978,6 +982,30 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             detectedActivities.removeFirst();
         }
         detectedActivities.add(activity);
+    }
+
+    public static Icon parkingIconEvaluator(String msg){
+
+        String now = new Date().toString();
+        String time1 = now.split(" ")[3]; // current time
+        String hour1 = time1.split(":")[0];
+        String minutes1 = time1.split(":")[1];
+        String seconds1 = time1.split(":")[2];
+
+        String[] event = msg.split("-");
+        String date = event[2];
+        String time2 = date.split(" ")[3]; // event time
+        String hour2 = time2.split(":")[0];
+        String minutes2 = time2.split(":")[1];
+        String seconds2 = time2.split(":")[2];
+
+        if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
+            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5){
+                return icona_parcheggio_libero_5mins;
+            }
+            return icona_parcheggio_libero;
+        }
+        return icona_parcheggio_libero;
     }
 
 }
