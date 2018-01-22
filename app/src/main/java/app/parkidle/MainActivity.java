@@ -916,7 +916,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(point)
                     .title("Parcheggio libero")
-                    .setIcon(parkingIconEvaluator(e));
+                    .setIcon(parkingIconEvaluator(e)));
 
         }
         Log.w(TAG,"Render DONE...");
