@@ -111,12 +111,12 @@ public class DetectedActivitiesIntentService extends IntentService {
             return;
         LinkedList<String> activityList = MainActivity.detectedActivities;
         int size = activityList.size();
-        if (size != 4)
+        if (size != 6)
             return;
-        // se ho una sequenza !VEHICLE - VEHICLE - VEHICLE - VEHICLE
+        // se ho una sequenza ON FOOT - ON FOOT - !VEHICLE - VEHICLE - VEHICLE - VEHICLE
         // posso mandare l'evento di PARTENZA, perche lo ritengo valido
         if (!activityList.getFirst().equals("IN VEHICLE")){
-            for(int i = 1; i < size; i++){
+            for(int i = 3; i < size; i++){
                 if(!activityList.get(i).equals("IN VEHICLE")) {
                     Log.w(TAG, "Activity(" + i + ") isn't 'IN VEHICLE'");
                     return;
@@ -129,10 +129,11 @@ public class DetectedActivitiesIntentService extends IntentService {
             Double longitude = l.getLongitude();
             Event event = new Event("numerocasuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
         }
+        /*
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
         // posso mandare l'evento di ARRIVO, perche lo ritengo valido
         if (activityList.getFirst().equals("IN VEHICLE")) {
-            for (int i = 1; i < size; i++) {
+            for (int i = 3; i < size; i++) {
                 if (activityList.get(i).equals("IN VEHICLE")) {
                     Log.w(TAG, "Activity(" + i + ") is 'IN VEHICLE'");
                     return;
@@ -146,5 +147,6 @@ public class DetectedActivitiesIntentService extends IntentService {
             Double longitude = l.getLongitude();
             Event event = new Event("numerocasuale", "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
         }
+        */
     }
 }

@@ -27,6 +27,8 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
 
     MqttClient client;
     private final String TAG = "MQTTSubscribe";
+
+    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-185-194.eu-west-2.compute.amazonaws.com:1883";
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
     private final MapboxMap mapboxMap;
@@ -39,6 +41,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     public void subscribe() {
         try {
             Log.w(TAG,"Subscribing....");
+            // TODO: inserire Mosquitto Broker hostato su AWS
             client = new MqttClient(mMQTTBroker, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);

@@ -79,6 +79,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
 
@@ -273,12 +274,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                                 .title("Parcheggio libero")
                                 .setIcon(icona_parcheggio_libero));
                         // TEST STUFF
-                        /*Date d = new Date();
+                        Date d = new Date();
                         Event p = new Event("TEST","departed",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                        PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                        EventHandler peh = new EventHandler(pts,PredictIO.DEPARTED_EVENT);
+                        //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                        EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start();*/
+                        t5.start();
                     }
                 });
 
@@ -978,7 +979,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public static void addDetectedActivity(String activity){
         if(detectedActivities == null)
             detectedActivities = new LinkedList<>();
-        if(detectedActivities.size() > 4){
+        if(detectedActivities.size() > 6){
             detectedActivities.removeFirst();
         }
         detectedActivities.add(activity);
