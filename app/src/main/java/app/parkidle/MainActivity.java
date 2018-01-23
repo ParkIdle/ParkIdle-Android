@@ -370,6 +370,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         dashboard();
                         break;
 
+                    case R.id.mycar:
+                        myCar();
+                        break;
+
+
+
                     // TODO: inserire le funzioni per tutti gli altri tasti qui
                     // case R.id.bottoneEsempio:
                     //      buttonStuff....
@@ -405,6 +411,50 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             editor.commit();
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
             startActivity(tutorial);
+        }
+
+
+
+    }
+
+    private void saveParking() {
+        //salvataggio parcheggio
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        edit.putFloat("latpark", (float) DetectedActivitiesIntentService.l.getLatitude());
+        edit.putFloat("longpark", (float) DetectedActivitiesIntentService.l.getLongitude());
+        edit.commit();
+
+    }
+    private double latpark;
+    private double longpark;
+
+    public void myCar(){
+
+    //TODO
+        SharedPreferences sharedPreferences = getSharedPreferences("parkingPreferences",MODE_PRIVATE);
+
+        latpark = sharedPreferences.getFloat("latpark",0);
+        longpark = sharedPreferences.getFloat("longpark",0);
+        if(latpark==0 && longpark==0){
+            Toast.makeText(this, "Parcheggio non salvato", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            LatLng parcheggio =new LatLng(latpark,longpark);
+            isCameraFollowing=false;
+            Marker parkmarker = mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                    .title("You")
+                    .setIcon(icona_whereiparked));
+
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(parcheggio) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(0) // degree - azimut
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), null);
         }
     }
 

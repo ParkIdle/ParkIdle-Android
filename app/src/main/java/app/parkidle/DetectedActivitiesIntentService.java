@@ -26,6 +26,8 @@ import java.util.LinkedList;
  */
 public class DetectedActivitiesIntentService extends IntentService {
 
+    public static Location l;
+
     protected static final String TAG = "DetectedActivitiesIS";
 
     /**
@@ -124,7 +126,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Log.w(TAG,"Sequence Accepted! Creating DEPARTED event...");
             Date now = new Date();
-            Location l = MainActivity.getMyLocation();
+            l = MainActivity.getMyLocation();
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
             Event event = new Event("numerocasuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
