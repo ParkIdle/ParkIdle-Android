@@ -1,6 +1,10 @@
 package app.parkidle;
 
 import android.util.Log;
+import android.widget.Toast;
+
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
 import java.util.List;
 
@@ -23,7 +27,7 @@ public class Event {
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
         MainActivity.events.add(this.toString());
-        EventHandler eh = new EventHandler(this);
+
         Log.w("Main","[NEW EVENT] -> " + this.toString());
     }
 

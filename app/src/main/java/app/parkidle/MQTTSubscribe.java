@@ -1,5 +1,11 @@
 package app.parkidle;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -28,14 +34,16 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     MqttClient client;
     private final String TAG = "MQTTSubscribe";
 
-    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-185-194.eu-west-2.compute.amazonaws.com:1883";
+    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-110-193.eu-west-2.compute.amazonaws.com:1883";
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
     private final MapboxMap mapboxMap;
+    private final Context context;
 
-    public MQTTSubscribe(String deviceIdentifier, MapboxMap mapboxMap) {
+    public MQTTSubscribe(String deviceIdentifier, MapboxMap mapboxMap, Context context) {
         this.deviceIdentifier = deviceIdentifier;
         this.mapboxMap = mapboxMap;
+        this.context = context;
     }
 
     public void subscribe() {
@@ -45,6 +53,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             client = new MqttClient(mMQTTBroker, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
+            options.setAutomaticReconnect(true);
             options.setUserName("sgmzzqjb");
             options.setPassword("1xCzGYi15ogy".toCharArray());
             Log.w(TAG,"Connecting....");
@@ -61,8 +70,8 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
 
     @Override
     public void connectionLost(Throwable cause) { // viene chiamato quando MQTT lancia un eccezione e viene interrotta la connessione
-
         Log.w(TAG,"Connection lost...." + cause.toString());
+        subscribe();
     }
 
     @Override
@@ -77,13 +86,16 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
         }*/
 
         Event event = parseMqttMessage(message);
-        if(event.getEvent().equals("DEPARTED_EVENT")) {
+        if(event.getEvent().equals("DEPARTED")) {
 
             final Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(new LatLng(event.getLatitude(), event.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
+            notification(event.getLatitude(),event.getLongitude());
+
+
         }
-        else if(event.getEvent().equals("ARRIVAL_EVENT")){
+        else if(event.getEvent().equals("ARRIVAL")){
             // TODO:
             Log.w(TAG, "Arrival Event just received");
         }
@@ -106,5 +118,44 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
         String[] splitted = m.split(",");
         Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
         return event;
+    }
+
+    private void notification(Double lat, Double lng){
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context, MainActivity.NOTIFICATION_CHANNEL_ID);
+        int requestID = (int) System.currentTimeMillis();
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+
+        //**add this line**
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.putExtra("action","toNotifiedParkingSpot");
+        notificationIntent.putExtra("lat",lat);
+        notificationIntent.putExtra("lng",lng);
+        //**edit this line to put requestID as requestCode**
+        PendingIntent contentIntent = PendingIntent.getActivity(context, requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(MainActivity.language == 0)
+            notificationBuilder.setAutoCancel(true)
+                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.ic_local_parking_black_24dp)
+                    .setTicker("ParkIdle")
+                    .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26. check below update for 26 API
+                    .setContentTitle("C'è un nuovo parcheggio libero vicino a te!")
+                    .setContentText("Clicca qui per vedere dove")
+                    .setContentInfo("Parcheggio libero")
+                    .setContentIntent(contentIntent);
+        else notificationBuilder.setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.ic_local_parking_black_24dp)
+                .setTicker("ParkIdle")
+                .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26. check below update for 26 API
+                .setContentTitle("There's a new empty parking spot near you!")
+                .setContentText("Click here to get there")
+                .setContentInfo("Parking Spot")
+                .setContentIntent(contentIntent);
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notificationBuilder.build());
     }
 }

@@ -8,4 +8,6 @@
     <color name="parkIdleGrey">#231F20</color>
     <color name="grey">#C6C6C6</color>
     <color name="white">#FFFFFF</color>
+    <color name="red">#ff0000</color>
+    <color name="green">#50AE55</color>
 </resources>
