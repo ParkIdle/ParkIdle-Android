@@ -31,7 +31,7 @@ public class EventHandler implements Runnable{
 
     private Event event;
     private final String TAG = "EventHandler";
-    private final String myServerURL = "http://ec2-35-177-185-194.eu-west-2.compute.amazonaws.com:3000/pioevent";
+    private final String myServerURL = "http://ec2-35-177-110-193.eu-west-2.compute.amazonaws.com:3000/pioevent";
 
     public EventHandler(Event event){
         this.event = event;
@@ -59,9 +59,12 @@ public class EventHandler implements Runnable{
             os.write(jsonParam.toString().getBytes("utf-8"));
             os.flush();
             os.close();
+            Log.w(TAG,"OS Closed...");
             StringBuilder sb = new StringBuilder();
+            Log.w(TAG,"Waiting for HTTP Result");
             int HttpResult = conn.getResponseCode();
             if (HttpResult == HttpURLConnection.HTTP_OK) {
+                Log.w(TAG,"HTTP_OK...");
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader(conn.getInputStream(), "utf-8"));
                 String line = null;
@@ -70,10 +73,12 @@ public class EventHandler implements Runnable{
                 }
                 br.close();
                 System.out.println("" + sb.toString());
+                Log.w(TAG,"" + sb.toString());
             } else {
                 System.out.println(conn.getResponseMessage());
+                Log.w(TAG,conn.getResponseMessage());
             }
-
+            Log.w(TAG,"Disconnecting...");
             conn.disconnect();
             Log.w(TAG,"POST Request completed!");
         }catch(ProtocolException e){
@@ -91,8 +96,8 @@ public class EventHandler implements Runnable{
         Double eventLongitude = null;
         String eventDate = null;
         try {
-            jsonParam.put("ID", event.getID());
-            jsonParam.put("event", event);
+            jsonParam.put("id", event.getID());
+            jsonParam.put("event", event.getEvent());
             switch (event.getEvent()) {
                 case "DEPARTED":
                     eventLatitude = event.getLatitude();
@@ -108,6 +113,7 @@ public class EventHandler implements Runnable{
             jsonParam.put("date", eventDate);
             jsonParam.put("latitude", "" + eventLatitude);
             jsonParam.put("longitude", "" + eventLongitude);
+            Log.w(TAG,"JsonParam Ready");
         }catch(JSONException e){
             e.printStackTrace();
         }

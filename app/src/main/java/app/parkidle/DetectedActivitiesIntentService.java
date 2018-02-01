@@ -6,6 +6,7 @@ package app.parkidle;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Looper;
 import android.util.Log;
@@ -17,6 +18,7 @@ import com.google.android.gms.location.DetectedActivity;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -25,6 +27,11 @@ import java.util.LinkedList;
  *  {@link com.google.android.gms.location.ActivityRecognitionClient#requestActivityUpdates}.
  */
 public class DetectedActivitiesIntentService extends IntentService {
+
+    private Location l;
+    private String activitiesJson;
+    private SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
+    private SharedPreferences.Editor editor = MainActivity.editor;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -35,7 +42,6 @@ public class DetectedActivitiesIntentService extends IntentService {
     public DetectedActivitiesIntentService() {
         // Use the TAG to name the worker thread.
         super(TAG);
-
     }
 
     @Override
@@ -52,7 +58,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     @SuppressWarnings("unchecked")
     @Override
     protected void onHandleIntent(Intent intent) {
-        //Log.w(TAG,"HANDLING INTENT");
+        Log.w(TAG,"HANDLING INTENT");
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
         // Get the list of the probable activities associated with the current state of the
@@ -61,16 +67,12 @@ public class DetectedActivitiesIntentService extends IntentService {
         ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
         Log.w(TAG,detectedActivities.toString());
 
+        if(sharedPreferences == null)
+            sharedPreferences = getSharedPreferences("PARKIDLE_PREFENCES",MODE_PRIVATE);
+        activitiesJson = sharedPreferences.getString("detectedActivities","");
+
         // Log each activity.
         for (DetectedActivity da: detectedActivities) {
-            /*if(da.getType() == DetectedActivity.IN_VEHICLE) {
-                Log.w(TAG,"IN VEHICLE");
-                Toast.makeText(this, "IN VEHICLE!", Toast.LENGTH_SHORT).show();
-            }
-            if(da.getType() == DetectedActivity.STILL){
-                Log.w(TAG,"STILL");
-            }*/
-            Looper.getMainLooper();
             String activity = null;
             switch(da.getType()){
                 case DetectedActivity.IN_VEHICLE:
@@ -98,53 +100,135 @@ public class DetectedActivitiesIntentService extends IntentService {
                     activity = "UNKNOWN";
                     break;
             }
-            Log.w(TAG,activity + da.getConfidence() + "%");
+            Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
             //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
-            Looper.loop();
-            MainActivity.addDetectedActivity(activity);
+            if(activity.equals("UNKNOWN") || activity.equals("TILTING")) {
+                Log.w(TAG,activity + " non tenuta in considerazione.");
+                return;
+            }
+            addDetectedActivity(activity);
             createEvent(activity);
+
         }
     }
 
     private void createEvent(String activity) {
-        if (activity != "IN VEHICLE")
+        Log.w(TAG,"Creating event...");;
+        //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        //activitiesJson = sharedPreferences.getString("detectedActivities","");
+        String[] split = activitiesJson.split(",");
+        if (split.length != 5) {
+            Log.w(TAG, "[!] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
-        LinkedList<String> activityList = MainActivity.detectedActivities;
-        int size = activityList.size();
-        if (size != 4)
-            return;
-        // se ho una sequenza !VEHICLE - VEHICLE - VEHICLE - VEHICLE
-        // posso mandare l'evento di PARTENZA, perche lo ritengo valido
-        if (!activityList.getFirst().equals("IN VEHICLE")){
-            for(int i = 1; i < size; i++){
-                if(!activityList.get(i).equals("IN VEHICLE")) {
-                    Log.w(TAG, "Activity(" + i + ") isn't 'IN VEHICLE'");
-                    return;
-                }
+        }
+
+        // se ho una sequenza !VEHICLE - !VEHICLE - !VEHICLE - VEHICLE - VEHICLE
+        // se ho una sequenza !BICYCLE - !BICYCLE - !BICYCLE - BICYCLE - BICYCLE
+        /*if(!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")) {
+            Log.w(TAG, "[0] Vediamo se sei partito...");
+            if(split[1].equals("IN VEHICLE") || split[1].equals("ON BICYCLE")){
+                Log.w(TAG,"[1] No non sei partito...");
+                return;
             }
-            Log.w(TAG,"Sequence Accepted! Creating DEPARTED event...");
+            if(split[2].equals("IN VEHICLE") || split[2].equals("ON BICYCLE")){
+                Log.w(TAG,"[2] No non sei partito...");
+                return;
+            }
+            if(!split[3].equals("IN VEHICLE") && !split[3].equals("ON BICYCLE")) {
+                Log.w(TAG, "[3] No non sei partito... (non sei in veicolo allo stato 3)");
+                return;
+            }
+            if(!split[4].equals("IN VEHICLE") && !split[4].equals("ON BICYCLE")) {
+                Log.w(TAG, "[4] No non sei partito...");
+                return;
+            }
+            Log.w(TAG,"[x] Sei partito!");
             Date now = new Date();
-            Location l = MainActivity.getMyLocation();
+            l = MainActivity.getMyLocation();
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
-            Event event = new Event("numerocasuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+            Event event = new Event(MainActivity.deviceIdentifier, "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+            EventHandler eh = new EventHandler(event);
+            Thread handler = new Thread(eh);
+            handler.setName("EventHandler");
+            handler.start();
+        }*/
+        // vecchio check
+        if (!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")){
+            for(int i = 1; i < split.length; i++){
+                if(i < 3){
+                    if(split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")){
+                        Log.w(TAG,"Le activity 2-3 sono inVehicle o onBicycle: CHIUDO");
+                        return;
+                    }
+                }
+                else {
+                    if(!split[i].equals("IN VEHICLE") && !split[i].equals("ON BICYCLE")) {
+                        Log.w(TAG, "La " + (i+1) + " non è 'IN VEHICLE o BICYCLE'");
+                        return;
+                    }
+                }
+            }
+            Log.w(TAG,"[x] Sei partito!");
+            Date now = new Date();
+            l = MainActivity.getMyLocation();
+            Double latitude = l.getLatitude();
+            Double longitude = l.getLongitude();
+            Event event = new Event("casuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+            EventHandler eh = new EventHandler(event);
+            Thread handler = new Thread(eh);
+            handler.setName("EventHandler");
+            handler.start();
         }
+
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
-        // posso mandare l'evento di ARRIVO, perche lo ritengo valido
-        if (activityList.getFirst().equals("IN VEHICLE")) {
-            for (int i = 1; i < size; i++) {
-                if (activityList.get(i).equals("IN VEHICLE")) {
-                    Log.w(TAG, "Activity(" + i + ") is 'IN VEHICLE'");
-                    return;
+        else{
+            Log.w(TAG,"[0] Vediamo se sei arrivato...");
+            if(split[0].equals("IN VEHICLE") || split[0].equals("ON BICYCLE")) {
+                for (int i = 1; i < split.length; i++) {
+                    if (split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
+                        Log.w(TAG, "[" + i + "] No non sei arrivato...");
+                        return;
+                    }
                 }
+                // creo l'evento di arrivo
+                Log.w(TAG, "[x] Sei arrivato!");
+                saveParking();
+                Date now = new Date();
+                Location l = MainActivity.getMyLocation();
+                Double latitude = l.getLatitude();
+                Double longitude = l.getLongitude();
+                Event event = new Event("casuale", "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
+
             }
-            // creo l'evento di arrivo
-            Log.w(TAG,"Sequence Accepted! Creating ARRIVAL event...");
-            Date now = new Date();
-            Location l = MainActivity.getMyLocation();
-            Double latitude = l.getLatitude();
-            Double longitude = l.getLongitude();
-            Event event = new Event("numerocasuale", "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
         }
+
+    }
+
+    public void saveParking() {
+        //salvataggio parcheggio
+        if(editor == null)
+            editor = sharedPreferences.edit();
+        if(l != null) {
+            editor.putFloat("latpark", (float) l.getLatitude());
+            editor.putFloat("longpark", (float) l.getLongitude());
+            editor.apply();
+        }
+    }
+
+    private synchronized void addDetectedActivity(String activity){
+        if(activitiesJson.equals("")) activitiesJson += activity;
+        else activitiesJson = activitiesJson + "," + activity;
+
+        String[] jsonSplit = activitiesJson.split(",");
+        if(jsonSplit.length > 5){
+            activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
+        }
+        if(editor == null)
+            editor = sharedPreferences.edit();
+        editor.putString("detectedActivities", activitiesJson);
+        editor.apply();
+
+        Log.w(TAG,"@@@ACTIVITY LIST@@@ : " + activitiesJson);
     }
 }

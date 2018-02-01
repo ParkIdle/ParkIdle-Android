@@ -3,7 +3,10 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ParkIdle-Android.iml" filepath="$PROJECT_DIR$/ParkIdle-Android.iml" />
+      <module fileurl="file://C:\Users\Alessio\Desktop\ParkIdle-Android\ParkIdle-Android.iml" filepath="C:\Users\Alessio\Desktop\ParkIdle-Android\ParkIdle-Android.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://D:\Utenti\Andrea\GitHub\ParkIdle-Android\app\app.iml" filepath="D:\Utenti\Andrea\GitHub\ParkIdle-Android\app\app.iml" />
+      <module fileurl="file://C:\Users\Alessio\Desktop\ParkIdle-Android\app\app.iml" filepath="C:\Users\Alessio\Desktop\ParkIdle-Android\app\app.iml" />
     </modules>
   </component>
 </project>

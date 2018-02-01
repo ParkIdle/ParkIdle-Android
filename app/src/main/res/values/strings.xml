@@ -8,4 +8,6 @@
     <string name="drawer_close">Close</string>
     <string name="facebook_button_text">Continue with Facebook</string>
     <string name="google_button_text">Continue with Google</string>
+    <string name="you_en">You</string>
+    <string name="you_it">Sei qui</string>
 </resources>

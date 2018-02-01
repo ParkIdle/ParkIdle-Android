@@ -72,67 +72,73 @@ public class LoginActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
 
+        Log.w(TAG,"Inizio procedura login");
         FirebaseApp.initializeApp(this);
 
-        Log.w(TAG,"i'm here dude_main_inizialiting");
         // inizialiting the Facebook options by the ID provided from Firebase
         mCallbackManager = CallbackManager.Factory.create();
-        final LoginButton loginButton = findViewById(R.id.login_button);
-        loginButton.setReadPermissions("email","public_profile");
-        loginButton.setText(R.string.facebook_button_text);
-        Log.w(TAG,"i'm here dude_after inizialiting");
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+        runOnUiThread(new Runnable() {
             @Override
-            public void onSuccess(LoginResult loginResult) {
-                Log.w("FACEBOOK CALLBACK","hey its on success");
-                handleFacebookAccessToken(loginResult.getAccessToken());
-            }
+            public void run() {
+                final LoginButton loginButton = findViewById(R.id.login_button);
+                loginButton.setReadPermissions("email","public_profile");
+                loginButton.setText(R.string.facebook_button_text);
 
-            @Override
-            public void onCancel() {
-                Log.w("FACEBOOK CALLBACK","hey its on cancel");
-            }
+                loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        Log.w("FACEBOOK CALLBACK","hey its on success");
+                        handleFacebookAccessToken(loginResult.getAccessToken());
+                    }
 
-            @Override
-            public void onError(FacebookException error) {
-                Log.w("FACEBOOK CALLBACK",error.toString());
-            }
+                    @Override
+                    public void onCancel() {
+                        Log.w("FACEBOOK CALLBACK","hey its on cancel");
+                    }
 
+                    @Override
+                    public void onError(FacebookException error) {
+                        Log.w("FACEBOOK CALLBACK",error.toString());
+                    }
+
+                });
+
+                // inizialiting the Google options by the ID provided from Firebase
+                // Configure Google Sign In
+                google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                        .requestIdToken(clientIdByServer)
+                        .requestEmail()
+                        .build();
+                googleSignIn = GoogleSignIn.getClient(LoginActivity.this,google_options);
+
+
+                mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
+                        .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
+                        .build();
+                mGoogleApiClient.connect();
+
+                mAuth = FirebaseAuth.getInstance();
+
+                // Google sign in button listener
+                final SignInButton signInButton = findViewById(R.id.sign_in_button);
+                findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (v.getId()){
+                            case R.id.sign_in_button:
+                                signIn_google();
+                                break;
+                        }
+                    }
+                });
+
+                // Animazione logo ParkIdle
+                ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
+                Animation myFadeInAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.fadein);
+                myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
+            }
         });
 
-        // inizialiting the Google options by the ID provided from Firebase
-        // Configure Google Sign In
-        google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(clientIdByServer)
-                .requestEmail()
-                .build();
-        googleSignIn = GoogleSignIn.getClient(this,google_options);
-
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
-                .build();
-        mGoogleApiClient.connect();
-
-        mAuth = FirebaseAuth.getInstance();
-
-        // Google sign in button listener
-        final SignInButton signInButton = findViewById(R.id.sign_in_button);
-        findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()){
-                    case R.id.sign_in_button:
-                        signIn_google();
-                        break;
-                }
-            }
-        });
-
-        // Animazione logo ParkIdle
-        ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
-        Animation myFadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fadein);
-        myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
 
     }//qua finisce on create
 
