@@ -84,6 +84,8 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
+    public static MqttClient MQTTClient;
 
     // sensori
     private SensorManager mSensorManager;
@@ -223,6 +226,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
                 editor = sharedPreferences.edit();
                 events = sharedPreferences.getStringSet("events",new HashSet<String>());
+                language = sharedPreferences.getInt("language",0);
             }
         });
         shared.start();
@@ -231,7 +235,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void run() {
 
-                language = sharedPreferences.getInt("language",0);
                 // icona
                 mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
                 icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
@@ -315,6 +318,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                             launchNavigation();
                                         }
                                     });
+                                }
+                                if(marker.getIcon().equals(mIcon)){
+                                    //TODO: window marker personale
                                 }
 
                                 return window;

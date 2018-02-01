@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseUser;
 import butterknife.ButterKnife;
 
 
-public class ParkIdle_Account extends AppCompatActivity {
+public class ParkIdleAccountActivity extends AppCompatActivity {
     public static FirebaseAuth mAuth;
     public EditText email;
     public EditText password;

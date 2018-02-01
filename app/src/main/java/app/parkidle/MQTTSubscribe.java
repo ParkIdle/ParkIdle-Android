@@ -31,10 +31,10 @@ import static app.parkidle.MainActivity.icona_parcheggio_libero;
 public class MQTTSubscribe implements MqttCallback,Runnable{
 
 
-    MqttClient client;
+    private MqttClient client;
     private final String TAG = "MQTTSubscribe";
 
-    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-110-193.eu-west-2.compute.amazonaws.com:1883";
+    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-106-206.eu-west-2.compute.amazonaws.com:1883";
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
     private final MapboxMap mapboxMap;
@@ -46,16 +46,21 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
         this.context = context;
     }
 
+    @Override
+    public void run() {
+        subscribe();
+    }
+
     public void subscribe() {
         try {
             Log.w(TAG,"Subscribing....");
             // TODO: inserire Mosquitto Broker hostato su AWS
-            client = new MqttClient(mMQTTBroker, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
+            client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(true);
-            options.setAutomaticReconnect(true);
-            options.setUserName("sgmzzqjb");
-            options.setPassword("1xCzGYi15ogy".toCharArray());
+            //options.setAutomaticReconnect(true);
+            //options.setUserName("sgmzzqjb");
+            //options.setPassword("1xCzGYi15ogy".toCharArray());
             Log.w(TAG,"Connecting....");
             client.connect(options); // mi connetto al broker
             Log.w(TAG,"Connected$....");
@@ -63,6 +68,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             client.subscribe("server/departed"); // mi sottoscrivo al topic server/departed
             client.subscribe("server/arrival"); // same
             Log.w(TAG,"Successfully subscribed");
+            MainActivity.MQTTClient = client;
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -105,11 +111,6 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     public void deliveryComplete(IMqttDeliveryToken token) {
         // TODO Auto-generated method stub
         Log.w(TAG,"Delivery complete....");
-    }
-
-    @Override
-    public void run() {
-        subscribe();
     }
 
     // parsing del messaggio ricevuto

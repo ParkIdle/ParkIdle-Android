@@ -96,8 +96,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SettingsActivity" />
-        <activity android:name=".FeedbackActivity" />
-        <activity android:name=".ParkIdle_Account" />
+        <activity android:name=".FeedBackActivity" />
+        <activity android:name=".ParkIdleAccountActivity" />
         <activity android:name=".SignUpActivity"></activity>
     </application>
 
