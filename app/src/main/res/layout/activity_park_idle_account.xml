@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@drawable/login_bg"
-    android:fitsSystemWindows="true">
+    android:orientation="vertical">
 
 
     <LinearLayout
@@ -70,6 +70,5 @@
             android:padding="12dp"
             android:text="Not Registered? Create an account" />
 
-
     </LinearLayout>
-</ScrollView>
+</LinearLayout>
