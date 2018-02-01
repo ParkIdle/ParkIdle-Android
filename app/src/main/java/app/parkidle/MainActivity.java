@@ -477,6 +477,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             case R.id.settings:
                                 settings();
                                 break;
+
+                            case R.id.feedback:
+                                feedback_activity();
+                                break;
+
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
                             // case R.id.bottoneEsempio:
                             //      buttonStuff....
@@ -1187,6 +1192,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .newCameraPosition(position), null);
             }
         }
+    }
+
+
+    private void feedback_activity(){
+        Intent i = new Intent(this,FeedBackActivity.class);
+        startActivity(i);
     }
 
 }

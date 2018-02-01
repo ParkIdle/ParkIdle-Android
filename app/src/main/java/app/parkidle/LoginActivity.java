@@ -132,6 +132,17 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
+                findViewById(R.id.sign_in_parkidle).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (v.getId()){
+                            case R.id.sign_in_parkidle:
+                                parkIdle_signIn();
+                                break;
+                        }
+                    }
+                });
+
                 // Animazione logo ParkIdle
                 ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
                 Animation myFadeInAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.fadein);
@@ -249,6 +260,11 @@ public class LoginActivity extends AppCompatActivity {
                         // ...
                     }
                 });
+    }
+
+    private void parkIdle_signIn(){
+        Intent i = new Intent(this,ParkIdle_Account.class);
+        startActivity(i);
     }
 
     public static boolean isWithGoogle() {
