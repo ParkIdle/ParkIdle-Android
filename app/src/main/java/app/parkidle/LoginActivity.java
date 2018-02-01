@@ -97,22 +97,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 });
 
-                // inizialiting the Google options by the ID provided from Firebase
-                // Configure Google Sign In
-                google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(clientIdByServer)
-                        .requestEmail()
-                        .build();
-                googleSignIn = GoogleSignIn.getClient(LoginActivity.this,google_options);
-
-
-                mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
-                        .build();
-                mGoogleApiClient.connect();
-
-                mAuth = FirebaseAuth.getInstance();
-
                 // Google sign in button listener
                 final SignInButton signInButton = findViewById(R.id.sign_in_button);
                 findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
@@ -143,6 +127,22 @@ public class LoginActivity extends AppCompatActivity {
                 myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
             }
         });
+
+        // inizialiting the Google options by the ID provided from Firebase
+        // Configure Google Sign In
+        google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(clientIdByServer)
+                .requestEmail()
+                .build();
+        googleSignIn = GoogleSignIn.getClient(LoginActivity.this,google_options);
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
+                .build();
+        mGoogleApiClient.connect();
+
+        mAuth = FirebaseAuth.getInstance();
 
 
     }//qua finisce on create
