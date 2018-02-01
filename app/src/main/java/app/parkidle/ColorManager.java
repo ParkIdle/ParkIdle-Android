@@ -1,8 +1,15 @@
 package app.parkidle;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
+import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -15,52 +22,45 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by Andrea on 22/01/2018.
  */
 
-public class ColorManager implements Runnable {
+public class ColorManager extends Activity implements Runnable {
 
     private List<Marker> markers;
-
+    private SQLiteOpenHelper mDbHelper;
+    private SQLiteDatabase data;
+    private Marker selectedMarker;
+    private Icon newIcon;
     private Marker mak;
+    public MapboxMap map;
+    private List<Marker> listMarker;
+    private Iterator<Marker> it;
+    private Marker MMM;
+    private Iterator<String> checkIterator;
+
 
     @Override
     public void run() {
 
-        Iterator<String> it = MainActivity.events.iterator();
-
-        String now = new Date().toString();
-        String time1 = now.split(" ")[3]; // current time
-        String hour1 = time1.split(":")[0];
-        String minutes1 = time1.split(":")[1];
-        String seconds1 = time1.split(":")[2];
-
-        markers = MainActivity.getmMap().getMarkers();
-        Iterator<Marker> mark = markers.iterator();
-        mak = mark.next();
-        mak.getPosition()
-
-
-
-        while (it.hasNext()){
-            // event -> "UUID-event-date-latitude-longitude"
-            String e = it.next();
-            String[] event = e.split("-");
-            String date = event[2];
-
-            String time2 = date.split(" ")[3]; // event time
-            String hour2 = time2.split(":")[0];
-            String minutes2 = time2.split(":")[1];
-            String seconds2 = time2.split(":")[2];
-
-
-        if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5){
-                return MainActivity.icona_parcheggio_libero_5mins;
+        map = MainActivity.getmMap();
+        listMarker = map.getMarkers();
+        it = listMarker.iterator();
+        while(it.hasNext()){
+            MMM = it.next();
+            String markerID = String.valueOf(MMM.getId());
+            checkIterator = MainActivity.events.iterator();
+            while(checkIterator.hasNext()){
+                String markerSearcher = checkIterator.next();
+                String[] event = markerSearcher.split("-");
+                if (event[0] == markerID ){
+                    Log.d("MarkerFound: ", "Evaluating Marker color");
+                    MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+                }
             }
-            return MainActivity.icona_parcheggio_libero;
         }
-        return MainActivity.icona_parcheggio_libero;
-    }
 
-    MainActivity.getmMap().removeMarker();
-
+        try {
+            Thread.sleep(3*60*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

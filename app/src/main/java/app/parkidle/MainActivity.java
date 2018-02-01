@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static Thread customizerThread;
 
     public static Bitmap profileBitmap;
-
+    private DatabasedMarker dtb;
     private boolean boo;
 
     public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
@@ -1019,6 +1019,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         Log.w(TAG,"Check DONE...");
         renderEvents(events,getmMap());
+
+
     }
 
     private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
@@ -1029,21 +1031,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String e = it.next();
             String[] event = e.split("-");
             LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
+            long ID = Long.valueOf(event[0]).longValue();
             if(isItalian()){
                 Marker m = mapboxMap.addMarker(new MarkerOptions()
                         .position(point)
                         .title("Parcheggio libero")
                         .setIcon(parkingIconEvaluator(e)));
+                m.setId(ID);
+
             }
             else {
                 Marker m = mapboxMap.addMarker(new MarkerOptions()
                         .position(point)
                         .title("Free Parking Spot")
                         .setIcon(parkingIconEvaluator(e)));
+                m.setId(ID);
             }
 
         }
         Log.w(TAG,"Render DONE...");
+        ColorManager colorManager = new ColorManager();
+        Thread colorThread = new Thread(colorManager);
+        colorThread.setName("ColorEvaluationThread");
+        colorThread.setPriority(Thread.NORM_PRIORITY);
+        colorThread.run();
     }
 
     /**

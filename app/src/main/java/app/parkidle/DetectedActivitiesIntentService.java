@@ -174,7 +174,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             l = MainActivity.getMyLocation();
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
-            Event event = new Event("casuale", "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+            Event event = new Event(markerIdHashcode(latitude,longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
             EventHandler eh = new EventHandler(event);
             Thread handler = new Thread(eh);
             handler.setName("EventHandler");
@@ -230,5 +230,10 @@ public class DetectedActivitiesIntentService extends IntentService {
         editor.apply();
 
         Log.w(TAG,"@@@ACTIVITY LIST@@@ : " + activitiesJson);
+    }
+
+    private String markerIdHashcode(Double lat, Double lon){
+        long hasho = (long)((lat*15661+lon*27773)/33911);
+        return ""+hasho;
     }
 }

@@ -92,8 +92,8 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
                     .position(new LatLng(event.getLatitude(), event.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
             notification(event.getLatitude(),event.getLongitude());
-
-
+            long ID = Long.valueOf(event.getID()).longValue();
+            m.setId(ID);
         }
         else if(event.getEvent().equals("ARRIVAL")){
             // TODO:
