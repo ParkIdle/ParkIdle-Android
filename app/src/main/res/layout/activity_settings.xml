@@ -6,26 +6,85 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     tools:context="app.parkidle.SettingsActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="510dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="1dp">
+
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/language_label"
-            android:layout_gravity="center_horizontal"
-            android:text="Language"
-            android:ellipsize="end"
-            />
-        <android.support.v7.widget.AppCompatSpinner
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/language_spinner"
             android:layout_gravity="center_horizontal"
-            >
+            android:ellipsize="end"
+            android:text="Language" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/language_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
 
         </android.support.v7.widget.AppCompatSpinner>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/Raggiolabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:text="Visualizza parcheggi nel raggio di:" />
+
+        <SeekBar
+            android:id="@+id/seek_Bar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:max="50" />
+
+        <TextView
+            android:id="@+id/text-view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            android:textSize="10sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Switch
+            android:id="@+id/switch1"
+            android:layout_width="match_parent"
+            android:layout_height="47dp"
+            android:text="Risparmio energia con batteria scarica" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/unita_misura_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:text="Unità di misura" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/unita_misura_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+        </android.support.v7.widget.AppCompatSpinner>
+
+
     </LinearLayout>
 
 

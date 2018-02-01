@@ -50,6 +50,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -111,7 +112,7 @@ import static app.parkidle.LoginActivity.mGoogleApiClient;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
 
     public static int language; //0 italian, 1 english
-
+    public static int metric; //0 metri, 1 miglia
     public static SharedPreferences sharedPreferences;
     public static SharedPreferences.Editor editor;
 
@@ -184,8 +185,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private double latpark;
     private double longpark;
 
+
+
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+
+
+
+
         super.onCreate(savedInstanceState);
         Log.w("onCreate()","creating...");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -193,6 +201,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         setContentView(R.layout.activity_main);
+
 
         /*Bugfender.init(this, "ciCsDGK2Y1mlUar2wq7WUySADw0v84gZ", BuildConfig.DEBUG);
         Bugfender.enableLogcatLogging();
@@ -538,6 +547,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
     }
+
+
 
     public void myCar(){
 
@@ -906,9 +917,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void launchNavigation() {
-
-        this.unitType = DirectionsCriteria.METRIC;
-
+        if(metric==0)
+            this.unitType = DirectionsCriteria.METRIC;
+        else
+            this.unitType=DirectionsCriteria.IMPERIAL;
         /*NavigationNotification mNavNotification = new NavigationNotification() {
             @Override
             public Notification getNotification() {

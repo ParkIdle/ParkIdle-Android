@@ -81,7 +81,10 @@
 
         <!-- <service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity" >
+
+        </activity>
+
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
@@ -94,7 +97,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
+
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
         <activity android:name=".ParkIdleAccountActivity" />

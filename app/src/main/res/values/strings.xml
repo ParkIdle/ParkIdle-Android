@@ -10,4 +10,8 @@
     <string name="google_button_text">Continue with Google</string>
     <string name="you_en">You</string>
     <string name="you_it">Sei qui</string>
+    <string-array name="spinner_options">
+        <item name="kilometri">Kilometri</item>
+        <item name="miglia">Miglia </item>
+    </string-array>
 </resources>
