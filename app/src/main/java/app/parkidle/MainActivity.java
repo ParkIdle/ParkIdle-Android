@@ -200,21 +200,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());*/
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
-                }
-                // se ho gia i permessi posso chiedere di localizzarmi
-                locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-                checkGPSEnabled(locationManager); // controllo lo stato del GPS
-                mLastLocation = getLastLocation(); // localizzo
-            }
-        });
-        t.start();
+
+        // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
+        }
+        // se ho gia i permessi posso chiedere di localizzarmi
+        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        mLastLocation = getLastLocation(); // localizzo
+
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
 
@@ -346,6 +342,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                                     .title("Tu")
                                     .setIcon(mIcon));
+
+
+
                         }
                         else {
                             // add marker aggiunge un marker sulla mappa con data posizione e titolo
@@ -383,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                         .setIcon(icona_parcheggio_libero)
                                         .position(point)
                                         .setTitle("Parcheggio libero"));
+
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                                 // TEST STUFF

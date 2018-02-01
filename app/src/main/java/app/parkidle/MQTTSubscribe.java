@@ -97,6 +97,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             final Marker m = mapboxMap.addMarker(new MarkerOptions()
                     .position(new LatLng(event.getLatitude(), event.getLongitude()))
                     .title("Empty parking spot").setIcon(icona_parcheggio_libero));
+
             notification(event.getLatitude(),event.getLongitude());
 
 
