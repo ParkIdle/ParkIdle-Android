@@ -4,11 +4,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.telecom.Call;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -18,9 +15,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
-import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -103,22 +97,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 });
 
-                // inizialiting the Google options by the ID provided from Firebase
-                // Configure Google Sign In
-                google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(clientIdByServer)
-                        .requestEmail()
-                        .build();
-                googleSignIn = GoogleSignIn.getClient(LoginActivity.this,google_options);
-
-
-                mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
-                        .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
-                        .build();
-                mGoogleApiClient.connect();
-
-                mAuth = FirebaseAuth.getInstance();
-
                 // Google sign in button listener
                 final SignInButton signInButton = findViewById(R.id.sign_in_button);
                 findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
@@ -132,12 +110,39 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
+                findViewById(R.id.sign_in_parkidle).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (v.getId()){
+                            case R.id.sign_in_parkidle:
+                                parkIdle_signIn();
+                                break;
+                        }
+                    }
+                });
+
                 // Animazione logo ParkIdle
                 ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
                 Animation myFadeInAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.fadein);
                 myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
             }
         });
+
+        // inizialiting the Google options by the ID provided from Firebase
+        // Configure Google Sign In
+        google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(clientIdByServer)
+                .requestEmail()
+                .build();
+        googleSignIn = GoogleSignIn.getClient(LoginActivity.this,google_options);
+
+
+        mGoogleApiClient = new GoogleApiClient.Builder(LoginActivity.this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, google_options)
+                .build();
+        mGoogleApiClient.connect();
+
+        mAuth = FirebaseAuth.getInstance();
 
 
     }//qua finisce on create
@@ -249,6 +254,11 @@ public class LoginActivity extends AppCompatActivity {
                         // ...
                     }
                 });
+    }
+
+    private void parkIdle_signIn(){
+        Intent i = new Intent(this,ParkIdleAccountActivity.class);
+        startActivity(i);
     }
 
     public static boolean isWithGoogle() {

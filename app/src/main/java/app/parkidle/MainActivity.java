@@ -84,6 +84,8 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
+import org.eclipse.paho.client.mqttv3.MqttClient;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -152,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
+    public static MqttClient MQTTClient;
 
     // sensori
     private SensorManager mSensorManager;
@@ -197,21 +200,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());*/
 
-        Thread t = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
-                }
-                // se ho gia i permessi posso chiedere di localizzarmi
-                locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-                checkGPSEnabled(locationManager); // controllo lo stato del GPS
-                mLastLocation = getLastLocation(); // localizzo
-            }
-        });
-        t.start();
+
+        // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
+        }
+        // se ho gia i permessi posso chiedere di localizzarmi
+        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        mLastLocation = getLastLocation(); // localizzo
+
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
 
@@ -223,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
                 editor = sharedPreferences.edit();
                 events = sharedPreferences.getStringSet("events",new HashSet<String>());
+                language = sharedPreferences.getInt("language",0);
             }
         });
         shared.start();
@@ -231,7 +231,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void run() {
 
-                language = sharedPreferences.getInt("language",0);
                 // icona
                 mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
                 icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
@@ -316,6 +315,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                         }
                                     });
                                 }
+                                if(marker.getIcon().equals(mIcon)){
+                                    //TODO: window marker personale
+                                }
 
                                 return window;
                             }
@@ -340,6 +342,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                                     .title("Tu")
                                     .setIcon(mIcon));
+
+
+
                         }
                         else {
                             // add marker aggiunge un marker sulla mappa con data posizione e titolo
@@ -377,6 +382,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                         .setIcon(icona_parcheggio_libero)
                                         .position(point)
                                         .setTitle("Parcheggio libero"));
+
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                                 // TEST STUFF
@@ -477,6 +483,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             case R.id.settings:
                                 settings();
                                 break;
+
+                            case R.id.feedback:
+                                feedback_activity();
+                                break;
+
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
                             // case R.id.bottoneEsempio:
                             //      buttonStuff....
@@ -1198,6 +1209,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .newCameraPosition(position), null);
             }
         }
+    }
+
+
+    private void feedback_activity(){
+        Intent i = new Intent(this,FeedBackActivity.class);
+        startActivity(i);
     }
 
 }

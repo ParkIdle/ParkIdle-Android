@@ -56,7 +56,6 @@ public class ColorManager extends Activity implements Runnable {
                 }
             }
         }
-
         try {
             Thread.sleep(3*60*1000);
         } catch (InterruptedException e) {
