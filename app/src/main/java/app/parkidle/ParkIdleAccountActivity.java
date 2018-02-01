@@ -23,14 +23,12 @@ public class ParkIdleAccountActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_park_idle__account);
+        setContentView(R.layout.activity_park_idle_account);
 
         mAuth = FirebaseAuth.getInstance();
 
         EditText email = findViewById(R.id.input_email);
         EditText password = findViewById(R.id.input_password);
-
-
 
         findViewById(R.id.btn_parkidle_signup).setOnClickListener(new View.OnClickListener() {
             @Override
