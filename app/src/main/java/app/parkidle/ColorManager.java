@@ -40,26 +40,33 @@ public class ColorManager extends Activity implements Runnable {
     @Override
     public void run() {
 
-        map = MainActivity.getmMap();
-        listMarker = map.getMarkers();
-        it = listMarker.iterator();
-        while(it.hasNext()){
-            MMM = it.next();
-            String markerID = String.valueOf(MMM.getId());
-            checkIterator = MainActivity.events.iterator();
-            while(checkIterator.hasNext()){
-                String markerSearcher = checkIterator.next();
-                String[] event = markerSearcher.split("-");
-                if (event[0] == markerID ){
-                    Log.d("MarkerFound: ", "Evaluating Marker color");
-                    MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+
+        while (true) {
+            Log.d("COLOR: ", "STARTED");
+            map = MainActivity.getmMap();
+            listMarker = map.getMarkers();
+            it = listMarker.iterator();
+            while (it.hasNext()) {
+                MMM = it.next();
+                String markerID = String.valueOf(MMM.getId());
+                checkIterator = MainActivity.events.iterator();
+                while (checkIterator.hasNext()) {
+                    String markerSearcher = checkIterator.next();
+                    String[] event = markerSearcher.split("-");
+                    if (event[0] == markerID) {
+                        Log.d("MarkerFound: ", "Evaluating Marker color");
+                        MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+                    }
                 }
             }
-        }
-        try {
-            Thread.sleep(3*60*1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+
+            Log.d("COLOR: ", "DONE");
+
+            try {
+                Thread.sleep( 3 * 60 * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
