@@ -8,3 +8,7 @@
 /captures
 .externalNativeBuild
 .idea/modules.xml
+.idea/modules.xml
+app/src/main/java/app/parkidle/ColorManager.java
+app/src/main/java/app/parkidle/MainActivity.java
+app/src/main/java/app/parkidle/ColorManager.java
