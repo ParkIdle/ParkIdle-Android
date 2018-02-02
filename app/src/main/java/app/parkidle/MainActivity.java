@@ -92,6 +92,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -200,11 +201,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setContentView(R.layout.activity_main);
 
 
-        /*Bugfender.init(this, "ciCsDGK2Y1mlUar2wq7WUySADw0v84gZ", BuildConfig.DEBUG);
+        Bugfender.init(this, "ciCsDGK2Y1mlUar2wq7WUySADw0v84gZ", BuildConfig.DEBUG);
         Bugfender.enableLogcatLogging();
         Bugfender.enableUIEventLogging(this.getApplication());
         Bugfender.enableCrashReporting();
-        Bugfender.setDeviceString("user.email",currentUser.getEmail());*/
+        Bugfender.setDeviceString("user.email",currentUser.getEmail());
 
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
@@ -229,6 +230,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 editor = sharedPreferences.edit();
                 events = sharedPreferences.getStringSet("events",new HashSet<String>());
                 language = sharedPreferences.getInt("language",0);
+                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
+
+                checkEvents(events);
+                Log.w("RENDER THREAD", "Starting render task");
+                renderEvents(events,getmMap());
+                Log.w("RENDER THREAD", "End render task");
             }
         });
         shared.start();
@@ -544,7 +551,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             startActivity(tutorial);
         }
 
-        Thread render = new Thread(new Runnable() {
+        /*Thread render = new Thread(new Runnable() {
             @Override
             public void run() {
                 Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
@@ -561,7 +568,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
         });
-        render.start();
+        render.start();*/
 
     }
 
@@ -1034,7 +1041,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return mMap;
     }
 
-    private void checkEvents(Set<String> events){
+    private synchronized void checkEvents(Set<String> events){
         Log.w(TAG,"Checking events...");
         Iterator<String> it = events.iterator();
         String now = new Date().toString();
@@ -1045,23 +1052,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds1 = time1.split(":")[2];
         while (it.hasNext()){
             // event -> "UUID-event-date-latitude-longitude"
-            String e = it.next();
-            String[] event = e.split("-");
-            String date = event[2];
+            try {
+                String e = it.next();
+                String[] event = e.split("-");
+                String date = event[2];
 
-            String time2 = date.split(" ")[3]; // event time
-            String hour2 = time2.split(":")[0];
-            String minutes2 = time2.split(":")[1];
-            String seconds2 = time2.split(":")[2];
-            if(Integer.parseInt(hour1) - Integer.parseInt(hour2) >= 1) {
-                if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
-                    events.remove(e);
+                String time2 = date.split(" ")[3]; // event time
+                String hour2 = time2.split(":")[0];
+                String minutes2 = time2.split(":")[1];
+                String seconds2 = time2.split(":")[2];
+                if (Integer.parseInt(hour1) - Integer.parseInt(hour2) >= 1) {
+                    if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                        events.remove(e);
+                }
+            }catch(ConcurrentModificationException e){
+                return;
             }
         }
         Log.w(TAG,"Check DONE...");
     }
 
-    private void renderEvents(Set<String> events,MapboxMap mapboxMap){
+    private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
         Log.w(TAG,"Rendering events...");
         Iterator<String> it = events.iterator();
         if(mapboxMap == null) return;

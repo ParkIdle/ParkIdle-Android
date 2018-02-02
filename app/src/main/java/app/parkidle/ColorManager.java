@@ -38,7 +38,7 @@ public class ColorManager extends Activity implements Runnable {
 
 
     @Override
-    public void run() {
+    public synchronized void run() {
         while (true) {
             map = MainActivity.getmMap();
             if(map == null){

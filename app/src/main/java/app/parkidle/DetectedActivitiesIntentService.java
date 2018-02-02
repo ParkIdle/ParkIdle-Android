@@ -172,6 +172,10 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,"[x] Sei partito!");
             Date now = new Date();
             l = MainActivity.getMyLocation();
+            if(l==null){
+                Log.w(TAG,"La location è null non posso mandare l'evento(partenza)");
+                return;
+            }
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
             Event event = new Event(markerIdHashcode(latitude,longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
@@ -194,6 +198,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                 // creo l'evento di arrivo
                 Log.w(TAG, "[x] Sei arrivato!");
                 l = MainActivity.getMyLocation();
+                if(l==null){
+                    Log.w(TAG,"La location è null non posso inviare l'evento (arrivo)");
+                    return;
+                }
                 Double latitude = l.getLatitude();
                 Double longitude = l.getLongitude();
                 saveParking();
