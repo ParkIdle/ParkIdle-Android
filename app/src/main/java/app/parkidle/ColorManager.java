@@ -44,7 +44,9 @@ public class ColorManager extends Activity implements Runnable {
         while (true) {
             Log.d("COLOR: ", "STARTED");
             map = MainActivity.getmMap();
+            if(map == null) return;
             listMarker = map.getMarkers();
+            if(listMarker.isEmpty()) return;
             it = listMarker.iterator();
             while (it.hasNext()) {
                 MMM = it.next();

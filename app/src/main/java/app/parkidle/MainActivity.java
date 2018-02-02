@@ -442,22 +442,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });*/
                         mMap = mapboxMap;
-                        checkEvents(events);
                         //renderEvents(events, mapboxMap);
-                        /*Thread render = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
-                                    //check.join();
-                                    Log.w("RENDER THREAD", "Starting render task");
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
 
-                            }
-                        });*/
-                        //render.start();
 
                     }
 
@@ -465,6 +451,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Swipe-left Menu
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
+
+                Thread render = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
+                                try {
+                                    shared.join();
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
+                                checkEvents(events);
+                                renderEvents(events,getmMap());
+                                Log.w("RENDER THREAD", "Starting render task");
+
+                            }
+                        });
+                render.start();
 
                 if(isItalian()){
                     Menu m = mDrawerNav.getMenu();
@@ -1041,7 +1044,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return mMap;
     }
 
-    private synchronized void checkEvents(Set<String> events){
+    private void checkEvents(Set<String> events){
         Log.w(TAG,"Checking events...");
         Iterator<String> it = events.iterator();
         String now = new Date().toString();
@@ -1066,12 +1069,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
         Log.w(TAG,"Check DONE...");
-        renderEvents(events,getmMap());
-
-
     }
 
-    private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
+    private void renderEvents(Set<String> events,MapboxMap mapboxMap){
         Log.w(TAG,"Rendering events...");
         Iterator<String> it = events.iterator();
         while(it.hasNext()){

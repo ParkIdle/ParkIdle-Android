@@ -198,7 +198,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Location l = MainActivity.getMyLocation();
                 Double latitude = l.getLatitude();
                 Double longitude = l.getLongitude();
-                Event event = new Event("casuale", "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
+                Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
             }
         }
