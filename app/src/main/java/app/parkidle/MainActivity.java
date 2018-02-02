@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     String date = getDateFromMarkerID(markerID);
                                     if(isItalian()){
                                         minutes.setText("Libero da:    " + date + " minuti");
-                                        distance.setText("Distanza:      " + distanza);
+                                        distance.setText("Distanza(linea d'aria):      " + distanza);
                                     }
                                     else {
                                         minutes.setText("Since:    " + date + " minutes");
@@ -567,12 +567,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             isCameraFollowing=false;
             if(isItalian()) {
                 Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .position(new LatLng(latpark, longpark))
                         .title("La tua macchina")
                         .setIcon(icona_whereiparked));
             }else{
                 Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .position(new LatLng(new LatLng(latpark, longpark)))
                         .title("Your Car")
                         .setIcon(icona_whereiparked));
             }

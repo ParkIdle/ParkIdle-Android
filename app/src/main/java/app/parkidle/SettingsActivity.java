@@ -76,34 +76,6 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                seekbar();
-                adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
-                spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
-                spinner_unita_misura.setAdapter(adapter);
-                spinner_unita_misura.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                    @Override
-                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                        String text1 = spinner_unita_misura.getItemAtPosition(position).toString();
-
-                        TextView spinner_dialog_text=(TextView) view;
-                        Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
-                        if(text1.equals("kilometri")) metric=0;
-                        else metric=1;
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> parent) {
-
-                    }
-                });
-
-            }
-        });
-
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -127,6 +99,27 @@ public class SettingsActivity extends AppCompatActivity {
                         MainActivity.editor.putInt("language",position);
                         MainActivity.editor.apply();
                         Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+                seekbar();
+                switch_batteria();
+                adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
+                spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
+                spinner_unita_misura.setAdapter(adapter);
+                spinner_unita_misura.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        String text1 = spinner_unita_misura.getItemAtPosition(position).toString();
+
+                        TextView spinner_dialog_text=(TextView) view;
+                        Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
+                        if(text1.equals("kilometri")) metric=0;
+                        else metric=1;
                     }
 
                     @Override
