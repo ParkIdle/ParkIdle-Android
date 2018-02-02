@@ -191,9 +191,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
-
-
-
         super.onCreate(savedInstanceState);
         Log.w("onCreate()","creating...");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -294,8 +291,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 final View window; // Creating an instance for View Object
                                 LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                                 window = inflater.inflate(R.layout.parkidle_info_window, null);
-
-                                if (marker.getIcon().equals(icona_parcheggio_libero)) {
+                                Icon icon = marker.getIcon();
+                                if (icon.equals(icona_parcheggio_libero) ||
+                                        icon.equals(icona_parcheggio_libero_5mins) ||
+                                            icon.equals(icona_parcheggio_libero_10mins) ||
+                                                icon.equals(icona_parcheggio_libero_20mins)) {
                                     LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                                     String distanza = calculateDistance(marker.getPosition(), myLatLng);
 
@@ -306,6 +306,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     TextView distance = (TextView) window.findViewById(R.id.info_distance);
                                     long markerID = marker.getId();
                                     String date = getDateFromMarkerID(markerID);
+                                    if(icon.equals(icona_parcheggio_libero)){
+                                        date = "< 5";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_5mins)){
+                                        date = "> 5";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_10mins)){
+                                        date = "> 10";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_20mins)){
+                                        date = "> 20";
+                                    }
                                     if(isItalian()){
                                         minutes.setText("Libero da:    " + date + " minuti");
                                         distance.setText("Distanza(linea d'aria):      " + distanza);
@@ -394,15 +406,26 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                         .position(point)
                                         .setTitle("Parcheggio libero"));
 
+
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                                 // TEST STUFF
                                 //Date d = new Date();
                                 //Event p = new Event("TEST","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                                 //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                        /*EventHandler peh = new EventHandler(p);
-                        Thread t5 = new Thread(peh);
-                        t5.start();*/
+                                /*EventHandler peh = new EventHandler(p);
+                                Thread t5 = new Thread(peh);
+                                t5.start();*/
+                            }
+                        });
+
+                        mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                            @Override
+                            public void onMapClick(@NonNull LatLng point) {
+                                mapboxMap.addMarker(new MarkerOptions()
+                                        .setIcon(icona_parcheggio_libero_5mins)
+                                        .position(point)
+                                        .setTitle("Parcheggio libero"));
                             }
                         });
 

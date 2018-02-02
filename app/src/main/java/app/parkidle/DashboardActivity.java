@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.QuickContactBadge;
 import android.widget.TextView;
+import android.widget.Toast;
 
 /**
  * Created by misu on 04/01/18.
@@ -29,7 +30,8 @@ public class DashboardActivity extends AppCompatActivity{
         userBadge = findViewById(R.id.userBadge);
         userBadge.setImageBitmap(MainActivity.getImageBitmap(LoginActivity.getUser().getPhotoUrl().toString()));
 
-
+        if(MainActivity.language == 0) Toast.makeText(this, "Work in progress\nQui potrai personalizzare il tuo profilo", Toast.LENGTH_SHORT).show();
+        else Toast.makeText(this, "Work in progress\nHere you can customize your profile", Toast.LENGTH_SHORT).show();
     }
 
 
