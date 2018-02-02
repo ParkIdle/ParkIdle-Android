@@ -31,7 +31,7 @@ public class EventHandler implements Runnable{
 
     private Event event;
     private final String TAG = "EventHandler";
-    private final String myServerURL = "http://ec2-35-177-110-193.eu-west-2.compute.amazonaws.com:3000/pioevent";
+    private final String myServerURL = "http://ec2-35-177-216-151.eu-west-2.compute.amazonaws.com:3000/pioevent";
 
     public EventHandler(Event event){
         this.event = event;

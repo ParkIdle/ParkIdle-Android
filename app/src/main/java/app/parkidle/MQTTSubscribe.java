@@ -34,7 +34,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     private MqttClient client;
     private final String TAG = "MQTTSubscribe";
 
-    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-106-206.eu-west-2.compute.amazonaws.com:1883";
+    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-216-151.eu-west-2.compute.amazonaws.com:1883";
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private final String deviceIdentifier;
     private final MapboxMap mapboxMap;
