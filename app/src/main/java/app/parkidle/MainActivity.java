@@ -595,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .title("Your Car")
                         .setIcon(icona_whereiparked));
             }
-
+            mDrawerLayout.closeDrawers();
             CameraPosition position = new CameraPosition.Builder()
                     .target(parcheggio) // Sets the new camera position
                     .zoom(17) // Sets the zoom to level 10

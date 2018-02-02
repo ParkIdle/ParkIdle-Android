@@ -17,8 +17,10 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -70,10 +72,12 @@ public class DetectedActivitiesIntentService extends IntentService {
         if(sharedPreferences == null)
             sharedPreferences = getSharedPreferences("PARKIDLE_PREFENCES",MODE_PRIVATE);
         activitiesJson = sharedPreferences.getString("detectedActivities","");
-
+        String maxActivity = null;
+        String activity = null;
+        int maxConfidence = 0;
         // Log each activity.
         for (DetectedActivity da: detectedActivities) {
-            String activity = null;
+
             switch(da.getType()){
                 case DetectedActivity.IN_VEHICLE:
                     activity = "IN VEHICLE";
@@ -101,15 +105,19 @@ public class DetectedActivitiesIntentService extends IntentService {
                     break;
             }
             Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
-            //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
-            if(activity.equals("UNKNOWN") || activity.equals("TILTING")) {
-                Log.w(TAG,activity + " non tenuta in considerazione.");
-                return;
+            if(da.getConfidence() > maxConfidence){
+                maxConfidence = da.getConfidence();
+                maxActivity = activity;
             }
-            addDetectedActivity(activity);
-            createEvent(activity);
 
         }
+        //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
+        if(activity.equals("UNKNOWN") || activity.equals("TILTING")) {
+            Log.w(TAG,activity + " non tenuta in considerazione.");
+            return;
+        }
+        addDetectedActivity(maxActivity);
+        createEvent(maxActivity);
     }
 
     private void createEvent(String activity) {
@@ -246,9 +254,5 @@ public class DetectedActivitiesIntentService extends IntentService {
     private String markerIdHashcode(Double lat, Double lon){
         long hasho = (long)((lat*15661+lon*27773)/33911);
         return ""+hasho;
-    }
-
-    private void updateRequestInterval(long millis){
-        MainActivity.newRequestMillis(millis);
     }
 }
