@@ -218,25 +218,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
-
+        sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        editor = sharedPreferences.edit();
 
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
-        final Thread shared = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-                editor = sharedPreferences.edit();
-                events = sharedPreferences.getStringSet("events",new HashSet<String>());
-                language = sharedPreferences.getInt("language",0);
-                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
-
-                checkEvents(events);
-                Log.w("RENDER THREAD", "Starting render task");
-                renderEvents(events,getmMap());
-                Log.w("RENDER THREAD", "End render task");
-            }
-        });
-        shared.start();
 
             // icona
             mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
@@ -270,246 +255,258 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
             });
 
-                // preparo la mappa
-                //prepareMap(mapView);
-                mapView.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(final MapboxMap mapboxMap) {
+            // preparo la mappa
+            //prepareMap(mapView);
+            mapView.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(final MapboxMap mapboxMap) {
+                    mMap = mapboxMap;
+                    mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
+                        @Nullable
+                        @Override
+                        public View getInfoWindow(@NonNull final Marker marker) {
+                            final View window; // Creating an instance for View Object
+                            LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                            window = inflater.inflate(R.layout.parkidle_info_window, null);
+                            Icon icon = marker.getIcon();
+                            if (icon.equals(icona_parcheggio_libero) ||
+                                    icon.equals(icona_parcheggio_libero_5mins) ||
+                                        icon.equals(icona_parcheggio_libero_10mins) ||
+                                            icon.equals(icona_parcheggio_libero_20mins)) {
+                                LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                                String distanza = calculateDistance(marker.getPosition(), myLatLng);
 
-                        mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
-                            @Nullable
-                            @Override
-                            public View getInfoWindow(@NonNull final Marker marker) {
-                                final View window; // Creating an instance for View Object
-                                LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                window = inflater.inflate(R.layout.parkidle_info_window, null);
-                                Icon icon = marker.getIcon();
-                                if (icon.equals(icona_parcheggio_libero) ||
-                                        icon.equals(icona_parcheggio_libero_5mins) ||
-                                            icon.equals(icona_parcheggio_libero_10mins) ||
-                                                icon.equals(icona_parcheggio_libero_20mins)) {
-                                    LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                                    String distanza = calculateDistance(marker.getPosition(), myLatLng);
+                                TextView title = (TextView) window.findViewById(R.id.info_title);
+                                title.setText(marker.getTitle());
 
-                                    TextView title = (TextView) window.findViewById(R.id.info_title);
-                                    title.setText(marker.getTitle());
-
-                                    TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
-                                    TextView distance = (TextView) window.findViewById(R.id.info_distance);
-                                    long markerID = marker.getId();
-                                    String date = getDateFromMarkerID(markerID);
-                                    if(icon.equals(icona_parcheggio_libero)){
-                                        date = "< 5";
-                                    }
-                                    if(icon.equals(icona_parcheggio_libero_5mins)){
-                                        date = "> 5";
-                                    }
-                                    if(icon.equals(icona_parcheggio_libero_10mins)){
-                                        date = "> 10";
-                                    }
-                                    if(icon.equals(icona_parcheggio_libero_20mins)){
-                                        date = "> 20";
-                                    }
-                                    if(isItalian()){
-                                        minutes.setText("Libero da:    " + date + " minuti");
-                                        distance.setText("Distanza(linea d'aria):      " + distanza);
-                                    }
-                                    else {
-                                        minutes.setText("Since:    " + date + " minutes");
-                                        distance.setText("Distance:      " + distanza);
-                                    }
-
-                                    Button nav = (Button) window.findViewById(R.id.info_navigation);
-                                    nav.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            destination = Point.fromLngLat(
-                                                    marker.getPosition().getLongitude(),
-                                                    marker.getPosition().getLatitude());
-                                            launchNavigation();
-                                        }
-                                    });
+                                TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
+                                TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                                long markerID = marker.getId();
+                                String date = getDateFromMarkerID(markerID);
+                                if(icon.equals(icona_parcheggio_libero)){
+                                    date = "< 5";
                                 }
-                                if(marker.getIcon().equals(mIcon)){
-                                    return null;
+                                if(icon.equals(icona_parcheggio_libero_5mins)){
+                                    date = "> 5";
+                                }
+                                if(icon.equals(icona_parcheggio_libero_10mins)){
+                                    date = "> 10";
+                                }
+                                if(icon.equals(icona_parcheggio_libero_20mins)){
+                                    date = "> 20";
+                                }
+                                if(isItalian()){
+                                    minutes.setText("Libero da:    " + date + " minuti");
+                                    distance.setText("Distanza(linea d'aria):      " + distanza);
+                                }
+                                else {
+                                    minutes.setText("Since:    " + date + " minutes");
+                                    distance.setText("Distance:      " + distanza);
                                 }
 
-                                return window;
+                                Button nav = (Button) window.findViewById(R.id.info_navigation);
+                                nav.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        destination = Point.fromLngLat(
+                                                marker.getPosition().getLongitude(),
+                                                marker.getPosition().getLatitude());
+                                        launchNavigation();
+                                    }
+                                });
                             }
-                        });
-                        // to test MQTT
-                        /*Date today = new Date();
-                        PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
-                        EventHandler peh = new EventHandler(pts,PredictIO.DEPARTED_EVENT);
-                        Thread t5 = new Thread(peh);
-                        t5.start();*/
+                            if(marker.getIcon().equals(mIcon)){
+                                return null;
+                            }
 
-                        // Customize map with markers, polylines, etc.
-                        // Camera Position definisce la posizione della telecamera
-                        position = new CameraPosition.Builder()
-                                .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                                .zoom(17) // Sets the zoom to level 17
-                                .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
-                                .tilt(0) // Set the camera tilt to 20 degrees
-                                .build(); // Builds the CameraPosition object from the builder
-                        if(isItalian()){
-                            me = mapboxMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                                    .title("Tu")
-                                    .setIcon(mIcon));
-
-
-
+                            return window;
                         }
-                        else {
-                            // add marker aggiunge un marker sulla mappa con data posizione e titolo
-                            me = mapboxMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                                    .title("You")
-                                    .setIcon(mIcon));
-                        }
+                    });
+                    // to test MQTT
+                    /*Date today = new Date();
+                    PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",today,mLastLocation,today,null,null,null,null,false);
+                    EventHandler peh = new EventHandler(pts,PredictIO.DEPARTED_EVENT);
+                    Thread t5 = new Thread(peh);
+                    t5.start();*/
 
-                        mapboxMap.animateCamera(CameraUpdateFactory
-                                .newCameraPosition(position), 5000);
+                    // Customize map with markers, polylines, etc.
+                    // Camera Position definisce la posizione della telecamera
+                    position = new CameraPosition.Builder()
+                            .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                            .zoom(17) // Sets the zoom to level 17
+                            .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
+                            .tilt(0) // Set the camera tilt to 20 degrees
+                            .build(); // Builds the CameraPosition object from the builder
+                    if(isItalian()){
+                        me = mapboxMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                                .title("Tu")
+                                .setIcon(mIcon));
 
-                        mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
-                            @Override
-                            public void onScroll() {
-                                //Log.w("SCROLL LISTENER","scrolling...");
-                                isCameraFollowing = false;
-                            }
-                        });
-
-                        mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
-                            @Override
-                            public void onFling() {
-                                //Log.w("FLING LISTENER","flinging...");
-                                isCameraFollowing = false;
-                            }
-                        });
-
-                        mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
-                            @Override
-                            public void onMapLongClick(@NonNull LatLng point) {
-                                //Log.w("LONG CLICK LISTENER","long clicking...");
-
-                                /*mapboxMap.addMarker(new MarkerOptions()
-                                        .setIcon(icona_parcheggio_libero)
-                                        .position(point)
-                                        .setTitle("Parcheggio libero"));*/
-
-                                //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
-
-                                // TEST STUFF
-                                Date d = new Date();
-                                Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                                EventHandler peh = new EventHandler(p);
-                                Thread t5 = new Thread(peh);
-                                t5.start();
-                            }
-                        });
-
-                        /*mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
-                            @Override
-                            public void onMapClick(@NonNull LatLng point) {
-                                mapboxMap.addMarker(new MarkerOptions()
-                                        .setIcon(icona_parcheggio_libero_5mins)
-                                        .position(point)
-                                        .setTitle("Parcheggio libero"));
-                            }
-                        });*/
-
-                        mMap = mapboxMap;
-                        //renderEvents(events, mapboxMap);
 
 
                     }
+                    else {
+                        // add marker aggiunge un marker sulla mappa con data posizione e titolo
+                        me = mapboxMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                                .title("You")
+                                .setIcon(mIcon));
+                    }
 
-                });
-                // Swipe-left Menu
-                mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-                mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
+                    mapboxMap.animateCamera(CameraUpdateFactory
+                            .newCameraPosition(position), 5000);
 
-                if(isItalian()){
-                    Menu m = mDrawerNav.getMenu();
-                    m.findItem(R.id.db).setTitle("Profilo");
-                    m.findItem(R.id.mycar).setTitle("La tua macchina");
-                    m.findItem(R.id.settings).setTitle("Impostazioni");
+                    mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
+                        @Override
+                        public void onScroll() {
+                            //Log.w("SCROLL LISTENER","scrolling...");
+                            isCameraFollowing = false;
+                        }
+                    });
+
+                    mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
+                        @Override
+                        public void onFling() {
+                            //Log.w("FLING LISTENER","flinging...");
+                            isCameraFollowing = false;
+                        }
+                    });
+
+                    mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                        @Override
+                        public void onMapLongClick(@NonNull LatLng point) {
+                            //Log.w("LONG CLICK LISTENER","long clicking...");
+
+                            /*mapboxMap.addMarker(new MarkerOptions()
+                                    .setIcon(icona_parcheggio_libero)
+                                    .position(point)
+                                    .setTitle("Parcheggio libero"));*/
+
+                            //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
+
+                            // TEST STUFF
+                            Date d = new Date();
+                            Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                            PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                            EventHandler peh = new EventHandler(p);
+                            Thread t5 = new Thread(peh);
+                            t5.start();
+                        }
+                    });
+
+                    /*mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                        @Override
+                        public void onMapClick(@NonNull LatLng point) {
+                            mapboxMap.addMarker(new MarkerOptions()
+                                    .setIcon(icona_parcheggio_libero_5mins)
+                                    .position(point)
+                                    .setTitle("Parcheggio libero"));
+                        }
+                    });*/
+                    //renderEvents(events, mapboxMap);
+                    final Thread shared = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            events = sharedPreferences.getStringSet("events",new HashSet<String>());
+                            language = sharedPreferences.getInt("language",0);
+                            Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
+                            checkEvents(events);
+                            Log.w("RENDER THREAD", "Starting render task");
+                            renderEvents(events,getmMap());
+                            Log.w("RENDER THREAD", "End render task");
+                        }
+                    });
+                    shared.start();
+
                 }
 
-                mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this,mDrawerLayout,
-                        R.string.drawer_open, R.string.drawer_close) {
-                    /**
-                     * Called when a drawer has settled in a completely closed state.
-                     */
-                    public void onDrawerClosed(View view) {
-                        super.onDrawerClosed(view);
-                        //getActionBar().setTitle("Settings");
-                        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            });
+            // Swipe-left Menu
+            mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+            mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
+
+            if(isItalian()){
+                Menu m = mDrawerNav.getMenu();
+                m.findItem(R.id.db).setTitle("Profilo");
+                m.findItem(R.id.mycar).setTitle("La tua macchina");
+                m.findItem(R.id.settings).setTitle("Impostazioni");
+            }
+
+            mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this,mDrawerLayout,
+                    R.string.drawer_open, R.string.drawer_close) {
+                /**
+                 * Called when a drawer has settled in a completely closed state.
+                 */
+                public void onDrawerClosed(View view) {
+                    super.onDrawerClosed(view);
+                    //getActionBar().setTitle("Settings");
+                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                }
+
+                /**
+                 * Called when a drawer has settled in a completely open state.
+                 */
+                public void onDrawerOpened(View drawerView) {
+                    super.onDrawerOpened(drawerView);
+                    //getActionBar().setTitle("Settings");
+                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                }
+            };
+
+            // Set the drawer toggle as the DrawerListener
+            mDrawerLayout.addDrawerListener(mActionBarDrawerToggle);
+
+            // Set the list's click listener
+            mDrawerNav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.logout:
+                            signOut();
+                            break;
+
+                        case R.id.db:
+                            dashboard();
+                            break;
+
+                        case R.id.mycar:
+                            myCar();
+                            break;
+
+                        case R.id.settings:
+                            settings();
+                            break;
+
+                        case R.id.feedback:
+                            feedback_activity();
+                            break;
+
+                        // TODO: inserire le funzioni per tutti gli altri tasti qui
+                        // case R.id.bottoneEsempio:
+                        //      buttonStuff....
                     }
+                    return true;
+                }
+            });
 
-                    /**
-                     * Called when a drawer has settled in a completely open state.
-                     */
-                    public void onDrawerOpened(View drawerView) {
-                        super.onDrawerOpened(drawerView);
-                        //getActionBar().setTitle("Settings");
-                        invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                    }
-                };
+            View drawerHeader = mDrawerNav.getHeaderView(0);
+            // Profile Image nel Menu laterale
 
-                // Set the drawer toggle as the DrawerListener
-                mDrawerLayout.addDrawerListener(mActionBarDrawerToggle);
+            ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
+            TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
+            TextView email = drawerHeader.findViewById(R.id.menu_email);
+            final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
+            if (image_uri.contains(".jpg") || image_uri.contains(".png"))
+                profile_img.setImageBitmap(getImageBitmap(image_uri));
 
-                // Set the list's click listener
-                mDrawerNav.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.logout:
-                                signOut();
-                                break;
+            // Display Name nel Menu laterale
+            display_name.setText(LoginActivity.getUser().getDisplayName());
 
-                            case R.id.db:
-                                dashboard();
-                                break;
+            // Email nel Menu laterale
+            email.setText(LoginActivity.getUser().getEmail());
 
-                            case R.id.mycar:
-                                myCar();
-                                break;
-
-                            case R.id.settings:
-                                settings();
-                                break;
-
-                            case R.id.feedback:
-                                feedback_activity();
-                                break;
-
-                            // TODO: inserire le funzioni per tutti gli altri tasti qui
-                            // case R.id.bottoneEsempio:
-                            //      buttonStuff....
-                        }
-                        return true;
-                    }
-                });
-
-                View drawerHeader = mDrawerNav.getHeaderView(0);
-                // Profile Image nel Menu laterale
-
-                ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
-                TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
-                TextView email = drawerHeader.findViewById(R.id.menu_email);
-                final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
-                if (image_uri.contains(".jpg") || image_uri.contains(".png"))
-                    profile_img.setImageBitmap(getImageBitmap(image_uri));
-
-                // Display Name nel Menu laterale
-                display_name.setText(LoginActivity.getUser().getDisplayName());
-
-                // Email nel Menu laterale
-                email.setText(LoginActivity.getUser().getEmail());
 
 
 
@@ -653,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         Log.w("onResume()","resuming...");
         mapView.onResume();
-        checkEvents(events);
+        //checkEvents(events);
         //activatePredictIOTracker();
         if(!fromNewIntent) {
             mLastLocation = getLastLocation();
@@ -666,6 +663,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onPause();
         Log.w("onPause()","stopping...");
         mapView.onPause();
+        editor.putBoolean("colorThreadIsRunning", false);
+        Log.w(TAG,"We have: "+ events);
+        editor.putStringSet("events",events);
+        editor.commit();
+        Log.w(TAG,"Saving sharedPrefs");
     }
 
     @Override
@@ -673,9 +675,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
         mapView.onStop();
         Log.w("onStop()","stopping...");
-        editor.putBoolean("colorThreadIsRunning", false);
-        editor.putStringSet("events",events);
-        editor.commit();
+
         /*Task<Void> task = activityRecognitionClient.removeActivityUpdates(getActivityDetectionPendingIntent());
         task.addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -1039,7 +1039,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private synchronized void checkEvents(Set<String> events){
-        Log.w(TAG,"Checking events...");
+        //Log.w(TAG,"Checking events... : " + events);
         Iterator<String> it = events.iterator();
         String now = new Date().toString();
 
@@ -1070,7 +1070,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
-        Log.w(TAG,"Rendering events...");
+        //Log.w(TAG,"Rendering events...: " + events);
         Iterator<String> it = events.iterator();
         if(mapboxMap == null) return;
         while(it.hasNext()){
