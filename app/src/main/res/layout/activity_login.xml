@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@drawable/login_bg_with_map"
+    android:background="@drawable/login_bg_2"
     android:scaleType="center"
     tools:context="app.parkidle.LoginActivity">
 
