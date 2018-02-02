@@ -560,6 +560,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         });
         render.start();
+        
+        ColorManager colorManager = new ColorManager();
+        Thread colorThread = new Thread(colorManager);
+        colorThread.setName("ColorEvaluationThread");
+        colorThread.setPriority(Thread.NORM_PRIORITY);
+        colorThread.run();
+        Log.w(TAG,"COLOR THREAD:");
 
     }
 
@@ -1085,13 +1092,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         }
         Log.w(TAG,"Render DONE...");
-        ColorManager colorManager = new ColorManager();
-        Thread colorThread = new Thread(colorManager);
-        colorThread.setName("ColorEvaluationThread");
-        colorThread.setPriority(Thread.NORM_PRIORITY);
-        colorThread.run();
-        Log.w(TAG,"COLOR THREAD:");
-
     }
 
     /**

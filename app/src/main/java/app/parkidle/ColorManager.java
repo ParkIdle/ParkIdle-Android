@@ -40,7 +40,6 @@ public class ColorManager extends Activity implements Runnable {
     @Override
     public void run() {
 
-
         while (true) {
             Log.w("COLOR: ", "STARTED");
             map = MainActivity.getmMap();
