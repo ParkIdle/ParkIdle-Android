@@ -401,11 +401,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             public void onMapLongClick(@NonNull LatLng point) {
                                 //Log.w("LONG CLICK LISTENER","long clicking...");
 
-                                mapboxMap.addMarker(new MarkerOptions()
+                                /*mapboxMap.addMarker(new MarkerOptions()
                                         .setIcon(icona_parcheggio_libero)
                                         .position(point)
-                                        .setTitle("Parcheggio libero"));
-
+                                        .setTitle("Parcheggio libero"));*/
 
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
@@ -419,7 +418,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             }
                         });
 
-                        mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
+                        /*mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                             @Override
                             public void onMapClick(@NonNull LatLng point) {
                                 mapboxMap.addMarker(new MarkerOptions()
@@ -427,20 +426,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                         .position(point)
                                         .setTitle("Parcheggio libero"));
                             }
-                        });
+                        });*/
 
-                /*mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(@NonNull Marker marker) {
-                        if (marker.getIcon() == icona_parcheggio_libero) {
-                            destination = Point.fromLngLat(
-                                    marker.getPosition().getLongitude(),
-                                    marker.getPosition().getLatitude());
-                            launchNavigation();
-                        }
-                        return true;
-                    }
-                });*/
                         mMap = mapboxMap;
                         //renderEvents(events, mapboxMap);
 
@@ -451,23 +438,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Swipe-left Menu
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
-
-                Thread render = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
-                                try {
-                                    shared.join();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                                checkEvents(events);
-                                renderEvents(events,getmMap());
-                                Log.w("RENDER THREAD", "Starting render task");
-
-                            }
-                        });
-                render.start();
 
                 if(isItalian()){
                     Menu m = mDrawerNav.getMenu();
@@ -573,6 +543,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
             startActivity(tutorial);
         }
+
+        Thread render = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
+                try {
+                    shared.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                checkEvents(events);
+                renderEvents(events,getmMap());
+                Log.w("RENDER THREAD", "Starting render task");
+
+            }
+        });
+        render.start();
 
     }
 
