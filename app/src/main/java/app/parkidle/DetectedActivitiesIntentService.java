@@ -195,7 +195,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Log.w(TAG, "[x] Sei arrivato!");
                 saveParking();
                 Date now = new Date();
-                Location l = MainActivity.getMyLocation();
+                l = MainActivity.getMyLocation();
                 Double latitude = l.getLatitude();
                 Double longitude = l.getLongitude();
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
@@ -213,6 +213,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             editor.putFloat("latpark", (float) l.getLatitude());
             editor.putFloat("longpark", (float) l.getLongitude());
             editor.apply();
+            Log.w(TAG,"Parcheggio salvato");
         }
     }
 

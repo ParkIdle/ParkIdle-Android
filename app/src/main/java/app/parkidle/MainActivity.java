@@ -1064,6 +1064,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void renderEvents(Set<String> events,MapboxMap mapboxMap){
         Log.w(TAG,"Rendering events...");
         Iterator<String> it = events.iterator();
+        if(mapboxMap == null) return;
         while(it.hasNext()){
             // event -> "UUID-event-date-latitude-longitude"
             String e = it.next();
