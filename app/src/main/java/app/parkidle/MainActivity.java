@@ -573,7 +573,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         longpark = sharedPreferences.getFloat("longpark",0);
         if(latpark==0 && longpark==0){
             if(isItalian())
-                Toast.makeText(this, "Parcheggio non salvato", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Parcheggio non salvato(sii paziente ci stiamo lavorando)", Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(this, "Your car position is not saved", Toast.LENGTH_SHORT).show();
         }

@@ -207,14 +207,16 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     public void saveParking() {
         //salvataggio parcheggio
+        Log.w(TAG,"Sto salvando il parcheggio...");
         if(editor == null)
             editor = sharedPreferences.edit();
         if(l != null) {
             editor.putFloat("latpark", (float) l.getLatitude());
             editor.putFloat("longpark", (float) l.getLongitude());
             editor.apply();
-            Log.w(TAG,"Parcheggio salvato");
+            Log.w(TAG,"Parcheggio salvato!");
         }
+        Log.w(TAG,"Parcheggio non salvato...");
     }
 
     private synchronized void addDetectedActivity(String activity){
