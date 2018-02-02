@@ -282,15 +282,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     @Override
                     public void onMapReady(final MapboxMap mapboxMap) {
 
-                        // MqttSubscribe dopo che la mappa viene assegnata in modo
-                        // da evitare NullPointerException quando inserisco un marker
-                        // di un parcheggio rilevato
-                        mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), mapboxMap,MainActivity.this);
-                        Thread mqttThread = new Thread(mMQTTSubscribe);
-                        mqttThread.setName("MqttThread");
-                        mqttThread.setPriority(Thread.NORM_PRIORITY);
-                        mqttThread.run();
-
                         mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                             @Nullable
                             @Override
@@ -529,6 +520,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
 
 
+        // MqttSubscribe dopo che la mappa viene assegnata in modo
+        // da evitare NullPointerException quando inserisco un marker
+        // di un parcheggio rilevato
+        mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), getmMap(),MainActivity.this);
+        Thread mqttThread = new Thread(mMQTTSubscribe);
+        mqttThread.setName("MqttThread");
+        mqttThread.setPriority(Thread.NORM_PRIORITY);
+        mqttThread.run();
         /*
         // attivo PredictIO
         activatePredictIOTracker();
