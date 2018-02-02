@@ -304,14 +304,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                                     TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
                                     TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                                    long markerID = marker.getId();
+                                    String date = getDateFromMarkerID(markerID);
                                     if(isItalian()){
-                                        long markerID = marker.getId();
-                                        String date = getDateFromMarkerID(markerID);
                                         minutes.setText("Libero da:    " + date + " minuti");
                                         distance.setText("Distanza:      " + distanza);
                                     }
                                     else {
-                                        minutes.setText("Since:    " + "x minutes");
+                                        minutes.setText("Since:    " + date + " minutes");
                                         distance.setText("Distance:      " + distanza);
                                     }
 
@@ -327,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     });
                                 }
                                 if(marker.getIcon().equals(mIcon)){
-                                    //TODO: window marker personale
+                                    return null;
                                 }
 
                                 return window;
