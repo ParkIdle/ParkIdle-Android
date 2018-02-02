@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -28,7 +29,7 @@ import static app.parkidle.MainActivity.icona_parcheggio_libero;
  * Created by simonestaffa on 23/11/17.
  */
 
-public class MQTTSubscribe implements MqttCallback,Runnable{
+public class MQTTSubscribe implements MqttCallback{
 
 
     private MqttClient client;
@@ -46,13 +47,14 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
         this.context = context;
     }
 
-    @Override
+    /*@Override
     public void run() {
         subscribe();
-    }
+    }*/
 
     public void subscribe() {
         try {
+
             Log.w(TAG,"Subscribing....");
             // TODO: inserire Mosquitto Broker hostato su AWS
             client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
@@ -69,6 +71,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             client.subscribe("server/arrival"); // same
             Log.w(TAG,"Successfully subscribed");
             MainActivity.MQTTClient = client;
+
         } catch (MqttException e) {
             e.printStackTrace();
         }
@@ -85,6 +88,24 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             throws Exception {
         Log.w(TAG,"Message arrived....");
 
+        Event event = parseMqttMessage(message);
+        //Log.w(TAG,event.toString());
+        if(event.getEvent().equals("DEPARTED")) {
+
+
+            final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
+                    .position(new LatLng(event.getLatitude(), event.getLongitude()))
+                    .title("Empty parking spot").setIcon(icona_parcheggio_libero));
+
+            notification(event.getLatitude(),event.getLongitude());
+            long ID = Long.valueOf(event.getID()).longValue();
+            m.setId(ID);
+
+        }
+        else if(event.getEvent().equals("ARRIVAL")){
+            // TODO:
+            Log.w(TAG, "Arrival Event just received");
+        }
         boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
         if(!isRunningColor) {
             ColorManager colorManager = new ColorManager();
@@ -93,25 +114,6 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             colorThread.setPriority(Thread.NORM_PRIORITY);
             colorThread.run();
             Log.w(TAG,"COLOR THREAD:");
-        }
-
-        Event event = parseMqttMessage(message);
-        if(event.getEvent().equals("DEPARTED")) {
-
-            final Marker m = mapboxMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(event.getLatitude(), event.getLongitude()))
-                    .title("Empty parking spot").setIcon(icona_parcheggio_libero));
-
-            notification(event.getLatitude(),event.getLongitude());
-            long ID = Long.valueOf(event.getID()).longValue();
-            m.setId(ID);
-
-
-
-        }
-        else if(event.getEvent().equals("ARRIVAL")){
-            // TODO:
-            Log.w(TAG, "Arrival Event just received");
         }
     }
 

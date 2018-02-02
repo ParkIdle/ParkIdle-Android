@@ -28,6 +28,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Looper;
 import android.os.Parcel;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -186,9 +187,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private double latpark;
     private double longpark;
 
-
-
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
@@ -240,41 +238,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
         shared.start();
 
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
+            // icona
+            mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
+            icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
+            icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_white70x70);
+            icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
+            icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
+            icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
 
-                // icona
-                mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
-                icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
-                icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_white70x70);
-                icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
-                icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
-                icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
+            //Prendo l'istanza di MapBox(API Maps) e inserisco la key
+            Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
+            // mapView sarebbe la vista della mappa e l'associo ad un container in XML
+            mapView = (MapView) findViewById(R.id.mapView);
+            // creo la mappa
+            mapView.onCreate(savedInstanceState);
 
-                //Prendo l'istanza di MapBox(API Maps) e inserisco la key
-                Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
-                // mapView sarebbe la vista della mappa e l'associo ad un container in XML
-                mapView = (MapView) findViewById(R.id.mapView);
-                // creo la mappa
-                mapView.onCreate(savedInstanceState);
+            ftb = findViewById(R.id.center_camera); // tasto per recenterCamera()
+            ftb.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) { // imposto il listener per il tasto
+                    // Code here executes on main thread after user presses button
+                    recenterCamera();
 
-                ftb = findViewById(R.id.center_camera); // tasto per recenterCamera()
-                ftb.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) { // imposto il listener per il tasto
-                        // Code here executes on main thread after user presses button
-                        recenterCamera();
+                }
+            });
 
-                    }
-                });
-
-                nearestPSpot = findViewById(R.id.nearest_parking_spot);
-                nearestPSpot.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        nearestParkingSpot();
-                    }
-                });
+            nearestPSpot = findViewById(R.id.nearest_parking_spot);
+            nearestPSpot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    nearestParkingSpot();
+                }
+            });
 
                 // preparo la mappa
                 //prepareMap(mapView);
@@ -407,12 +401,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                                 // TEST STUFF
-                                //Date d = new Date();
-                                //Event p = new Event("TEST","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                                //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                                /*EventHandler peh = new EventHandler(p);
+                                Date d = new Date();
+                                Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                                EventHandler peh = new EventHandler(p);
                                 Thread t5 = new Thread(peh);
-                                t5.start();*/
+                                t5.start();
                             }
                         });
 
@@ -516,18 +510,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 // Email nel Menu laterale
                 email.setText(LoginActivity.getUser().getEmail());
-            }
-        });
+
 
 
         // MqttSubscribe dopo che la mappa viene assegnata in modo
         // da evitare NullPointerException quando inserisco un marker
         // di un parcheggio rilevato
         mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), getmMap(),MainActivity.this);
-        Thread mqttThread = new Thread(mMQTTSubscribe);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                mMQTTSubscribe.subscribe();
+            }
+        });
+        t.start();
+        /*Thread mqttThread = new Thread(mMQTTSubscribe);
         mqttThread.setName("MqttThread");
         mqttThread.setPriority(Thread.NORM_PRIORITY);
-        mqttThread.run();
+        mqttThread.run();*/
         /*
         // attivo PredictIO
         activatePredictIOTracker();
@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         Log.w("onResume()","resuming...");
         mapView.onResume();
-        //checkEvents(events);
+        checkEvents(events);
         //activatePredictIOTracker();
         if(!fromNewIntent) {
             mLastLocation = getLastLocation();

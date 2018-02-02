@@ -36,7 +36,6 @@ public class ColorManager extends Activity implements Runnable {
     private Marker MMM;
     private Iterator<String> checkIterator;
 
-
     @Override
     public synchronized void run() {
         while (true) {
