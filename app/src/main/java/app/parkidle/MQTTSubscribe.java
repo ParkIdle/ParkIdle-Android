@@ -84,12 +84,17 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
     public void messageArrived(String topic, MqttMessage message) // viene chiamato quando arriva un messaggio
             throws Exception {
         Log.w(TAG,"Message arrived....");
-        /*if(topic.equals("server/departed")) {
-            Log.w(TAG, "Departed: " + message.toString());
+
+        boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
+        if(!isRunningColor) {
+            ColorManager colorManager = new ColorManager();
+            Thread colorThread = new Thread(colorManager);
+            colorThread.setName("ColorEvaluationThread");
+            colorThread.setPriority(Thread.NORM_PRIORITY);
+            colorThread.run();
+            Log.w(TAG,"COLOR THREAD:");
         }
-        if(topic.equals("server/arrival")){
-            Log.w(TAG, "Arrival: " + message.toString());
-        }*/
+
 
         Event event = parseMqttMessage(message);
         if(event.getEvent().equals("DEPARTED")) {
@@ -101,6 +106,9 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             notification(event.getLatitude(),event.getLongitude());
             long ID = Long.valueOf(event.getID()).longValue();
             m.setId(ID);
+
+
+
         }
         else if(event.getEvent().equals("ARRIVAL")){
             // TODO:

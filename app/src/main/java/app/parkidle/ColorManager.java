@@ -39,27 +39,15 @@ public class ColorManager extends Activity implements Runnable {
 
     @Override
     public void run() {
-
         while (true) {
-            Log.w("COLOR: ", "STARTED");
             map = MainActivity.getmMap();
             if(map == null){
-                try {
-                    Thread.sleep( 3 * 60 * 1000);
-                    continue;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                MainActivity.editor.putBoolean("colorThreadIsRunning", false);
+                return;
             }
+            MainActivity.editor.putBoolean("colorThreadIsRunning", true);
             listMarker = map.getMarkers();
-            if(listMarker.isEmpty()){
-                try {
-                    Thread.sleep( 3 * 60 * 1000);
-                    continue;
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            Log.w("COLOR: ", "STARTED");
             it = listMarker.iterator();
             while (it.hasNext()) {
                 MMM = it.next();
@@ -84,4 +72,6 @@ public class ColorManager extends Activity implements Runnable {
             }
         }
     }
+
+
 }

@@ -554,19 +554,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     e.printStackTrace();
                 }
                 checkEvents(events);
-                renderEvents(events,getmMap());
                 Log.w("RENDER THREAD", "Starting render task");
+                renderEvents(events,getmMap());
+                Log.w("RENDER THREAD", "End render task");
+
 
             }
         });
         render.start();
-        
-        ColorManager colorManager = new ColorManager();
-        Thread colorThread = new Thread(colorManager);
-        colorThread.setName("ColorEvaluationThread");
-        colorThread.setPriority(Thread.NORM_PRIORITY);
-        colorThread.run();
-        Log.w(TAG,"COLOR THREAD:");
 
     }
 
@@ -674,6 +669,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
         mapView.onStop();
         Log.w("onStop()","stopping...");
+        editor.putBoolean("colorThreadIsRunning", false);
         editor.putStringSet("events",events);
         editor.commit();
         /*Task<Void> task = activityRecognitionClient.removeActivityUpdates(getActivityDetectionPendingIntent());
