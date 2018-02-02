@@ -247,4 +247,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         long hasho = (long)((lat*15661+lon*27773)/33911);
         return ""+hasho;
     }
+
+    private void updateRequestInterval(long millis){
+        MainActivity.newRequestMillis(millis);
+    }
 }

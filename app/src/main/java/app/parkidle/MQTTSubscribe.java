@@ -94,7 +94,7 @@ public class MQTTSubscribe implements MqttCallback,Runnable{
             colorThread.run();
             Log.w(TAG,"COLOR THREAD:");
         }
-                
+
         Event event = parseMqttMessage(message);
         if(event.getEvent().equals("DEPARTED")) {
 

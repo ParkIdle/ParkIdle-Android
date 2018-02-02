@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static LinkedList<String> detectedActivities; // mantiene le precedenti 4 activities
 
     private GoogleApiClient mApiClient;
-    private ActivityRecognitionClient activityRecognitionClient;
+    public static ActivityRecognitionClient activityRecognitionClient;
 
     private DrawerLayout mDrawerLayout;
     private NavigationView mDrawerNav;
@@ -570,8 +570,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         render.start();*/
 
     }
-
-
 
     public void myCar(){
 
@@ -1262,6 +1260,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         return "?";
     }
+
 }
 
 
