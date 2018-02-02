@@ -664,11 +664,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onPause();
         Log.w("onPause()","stopping...");
         mapView.onPause();
-        editor.putBoolean("colorThreadIsRunning", false);
-        Log.w(TAG,"We have: "+ events);
-        editor.putStringSet("events",events);
-        editor.commit();
-        Log.w(TAG,"Saving sharedPrefs");
+
     }
 
     @Override
@@ -676,6 +672,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStop();
         mapView.onStop();
         Log.w("onStop()","stopping...");
+        editor.putBoolean("colorThreadIsRunning", false);
+        Log.w(TAG,"We have: "+ events);
+        editor.putStringSet("events",events);
+        editor.commit();
+        Log.w(TAG,"Saving sharedPrefs");
 
         /*Task<Void> task = activityRecognitionClient.removeActivityUpdates(getActivityDetectionPendingIntent());
         task.addOnSuccessListener(new OnSuccessListener<Void>() {
