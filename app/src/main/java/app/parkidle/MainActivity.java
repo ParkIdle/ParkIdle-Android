@@ -281,11 +281,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         // MqttSubscribe dopo che la mappa viene assegnata in modo
                         // da evitare NullPointerException quando inserisco un marker
                         // di un parcheggio rilevato
-                        //mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), mapboxMap,MainActivity.this);
-                        //Thread mqttThread = new Thread(mMQTTSubscribe);
-                        //mqttThread.setName("MqttThread");
-                        //mqttThread.setPriority(Thread.NORM_PRIORITY);
-                        //mqttThread.run();
+                        mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), mapboxMap,MainActivity.this);
+                        Thread mqttThread = new Thread(mMQTTSubscribe);
+                        mqttThread.setName("MqttThread");
+                        mqttThread.setPriority(Thread.NORM_PRIORITY);
+                        mqttThread.run();
 
                         mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                             @Nullable
@@ -304,12 +304,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                                     TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
                                     TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                                    long markerID = marker.getId();
+                                    String date = getDateFromMarkerID(markerID);
                                     if(isItalian()){
-                                        minutes.setText("Libero da:    " + "x minuti");
+                                        minutes.setText("Libero da:    " + date + " minuti");
                                         distance.setText("Distanza:      " + distanza);
                                     }
                                     else {
-                                        minutes.setText("Since:    " + "x minutes");
+                                        minutes.setText("Since:    " + date + " minutes");
                                         distance.setText("Distance:      " + distanza);
                                     }
 
@@ -325,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     });
                                 }
                                 if(marker.getIcon().equals(mIcon)){
-                                    //TODO: window marker personale
+                                    return null;
                                 }
 
                                 return window;
@@ -1231,6 +1233,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         startActivity(i);
     }
 
+    private String getDateFromMarkerID(long id){
+        Iterator<String> it = events.iterator();
+
+        while(it.hasNext()){
+            String e = it.next();
+            String[] split = e.split("-");
+            if(split[0].equals(String.valueOf(id))) {
+                return split[1];
+            }
+        }
+        return "?";
+    }
 }
 
 
