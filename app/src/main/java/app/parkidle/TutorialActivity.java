@@ -11,7 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-
+import android.widget.Toast;
 
 
 public class TutorialActivity extends AppCompatActivity {
@@ -30,6 +30,9 @@ public class TutorialActivity extends AppCompatActivity {
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(this);
 
         viewPager.setAdapter(viewPagerAdapter);
+
+        Toast.makeText(this, "scorrere destra/sinistra per vedere tutto il tutorial, ma puoi anche cliccare 'indietro' e uscire da esso.", Toast.LENGTH_SHORT).show();
+
 
     }
 
