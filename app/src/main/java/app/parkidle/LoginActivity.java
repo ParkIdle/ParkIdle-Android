@@ -110,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
 
-                findViewById(R.id.sign_in_parkidle).setOnClickListener(new View.OnClickListener() {
+                /*findViewById(R.id.sign_in_parkidle).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         switch (v.getId()){
@@ -119,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
                                 break;
                         }
                     }
-                });
+                });*/
 
                 // Animazione logo ParkIdle
                 ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
