@@ -191,9 +191,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
-
-
-
         super.onCreate(savedInstanceState);
         Log.w("onCreate()","creating...");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -294,8 +291,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 final View window; // Creating an instance for View Object
                                 LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                                 window = inflater.inflate(R.layout.parkidle_info_window, null);
-
-                                if (marker.getIcon().equals(icona_parcheggio_libero)) {
+                                Icon icon = marker.getIcon();
+                                if (icon.equals(icona_parcheggio_libero) ||
+                                        icon.equals(icona_parcheggio_libero_5mins) ||
+                                            icon.equals(icona_parcheggio_libero_10mins) ||
+                                                icon.equals(icona_parcheggio_libero_20mins)) {
                                     LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                                     String distanza = calculateDistance(marker.getPosition(), myLatLng);
 
@@ -306,9 +306,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                     TextView distance = (TextView) window.findViewById(R.id.info_distance);
                                     long markerID = marker.getId();
                                     String date = getDateFromMarkerID(markerID);
+                                    if(icon.equals(icona_parcheggio_libero)){
+                                        date = "< 5";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_5mins)){
+                                        date = "> 5";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_10mins)){
+                                        date = "> 10";
+                                    }
+                                    if(icon.equals(icona_parcheggio_libero_20mins)){
+                                        date = "> 20";
+                                    }
                                     if(isItalian()){
                                         minutes.setText("Libero da:    " + date + " minuti");
-                                        distance.setText("Distanza:      " + distanza);
+                                        distance.setText("Distanza(linea d'aria):      " + distanza);
                                     }
                                     else {
                                         minutes.setText("Since:    " + date + " minutes");
@@ -389,10 +401,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             public void onMapLongClick(@NonNull LatLng point) {
                                 //Log.w("LONG CLICK LISTENER","long clicking...");
 
-                                mapboxMap.addMarker(new MarkerOptions()
+                                /*mapboxMap.addMarker(new MarkerOptions()
                                         .setIcon(icona_parcheggio_libero)
                                         .position(point)
-                                        .setTitle("Parcheggio libero"));
+                                        .setTitle("Parcheggio libero"));*/
 
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
@@ -400,41 +412,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 //Date d = new Date();
                                 //Event p = new Event("TEST","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                                 //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                        /*EventHandler peh = new EventHandler(p);
-                        Thread t5 = new Thread(peh);
-                        t5.start();*/
+                                /*EventHandler peh = new EventHandler(p);
+                                Thread t5 = new Thread(peh);
+                                t5.start();*/
                             }
                         });
 
-                /*mapboxMap.setOnMarkerClickListener(new MapboxMap.OnMarkerClickListener() {
-                    @Override
-                    public boolean onMarkerClick(@NonNull Marker marker) {
-                        if (marker.getIcon() == icona_parcheggio_libero) {
-                            destination = Point.fromLngLat(
-                                    marker.getPosition().getLongitude(),
-                                    marker.getPosition().getLatitude());
-                            launchNavigation();
-                        }
-                        return true;
-                    }
-                });*/
-                        mMap = mapboxMap;
-                        checkEvents(events);
-                        //renderEvents(events, mapboxMap);
-                        /*Thread render = new Thread(new Runnable() {
+                        /*mapboxMap.addOnMapClickListener(new MapboxMap.OnMapClickListener() {
                             @Override
-                            public void run() {
-                                try {
-                                    Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
-                                    //check.join();
-                                    Log.w("RENDER THREAD", "Starting render task");
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-
+                            public void onMapClick(@NonNull LatLng point) {
+                                mapboxMap.addMarker(new MarkerOptions()
+                                        .setIcon(icona_parcheggio_libero_5mins)
+                                        .position(point)
+                                        .setTitle("Parcheggio libero"));
                             }
                         });*/
-                        //render.start();
+
+                        mMap = mapboxMap;
+                        //renderEvents(events, mapboxMap);
+
 
                     }
 
@@ -548,6 +544,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             startActivity(tutorial);
         }
 
+        Thread render = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.w("RENDER THREAD", "Waiting for CHECK THREAD...");
+                try {
+                    shared.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                checkEvents(events);
+                renderEvents(events,getmMap());
+                Log.w("RENDER THREAD", "Starting render task");
+
+            }
+        });
+        render.start();
+        
+        ColorManager colorManager = new ColorManager();
+        Thread colorThread = new Thread(colorManager);
+        colorThread.setName("ColorEvaluationThread");
+        colorThread.setPriority(Thread.NORM_PRIORITY);
+        colorThread.run();
+        Log.w(TAG,"COLOR THREAD:");
+
     }
 
 
@@ -567,12 +587,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             isCameraFollowing=false;
             if(isItalian()) {
                 Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .position(new LatLng(latpark, longpark))
                         .title("La tua macchina")
                         .setIcon(icona_whereiparked));
             }else{
                 Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                        .position(new LatLng(new LatLng(latpark, longpark)))
                         .title("Your Car")
                         .setIcon(icona_whereiparked));
             }
@@ -1018,7 +1038,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return mMap;
     }
 
-    private synchronized void checkEvents(Set<String> events){
+    private void checkEvents(Set<String> events){
         Log.w(TAG,"Checking events...");
         Iterator<String> it = events.iterator();
         String now = new Date().toString();
@@ -1043,12 +1063,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
         Log.w(TAG,"Check DONE...");
-        renderEvents(events,getmMap());
-
-
     }
 
-    private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
+    private void renderEvents(Set<String> events,MapboxMap mapboxMap){
         Log.w(TAG,"Rendering events...");
         Iterator<String> it = events.iterator();
         while(it.hasNext()){
@@ -1075,13 +1092,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         }
         Log.w(TAG,"Render DONE...");
-        ColorManager colorManager = new ColorManager();
-        Thread colorThread = new Thread(colorManager);
-        colorThread.setName("ColorEvaluationThread");
-        colorThread.setPriority(Thread.NORM_PRIORITY);
-        colorThread.run();
-        Log.w(TAG,"COLOR THREAD:");
-
     }
 
     /**
