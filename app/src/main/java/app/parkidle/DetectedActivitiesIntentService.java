@@ -193,11 +193,11 @@ public class DetectedActivitiesIntentService extends IntentService {
                 }
                 // creo l'evento di arrivo
                 Log.w(TAG, "[x] Sei arrivato!");
-                saveParking();
-                Date now = new Date();
                 l = MainActivity.getMyLocation();
                 Double latitude = l.getLatitude();
                 Double longitude = l.getLongitude();
+                saveParking();
+                Date now = new Date();
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
             }
