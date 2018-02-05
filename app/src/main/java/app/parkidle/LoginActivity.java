@@ -195,6 +195,7 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         else {
+            Log.w(TAG,"Procedo con l'accesso...");
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             currentUser = user;

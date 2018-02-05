@@ -60,7 +60,6 @@ public class DetectedActivitiesIntentService extends IntentService {
     @SuppressWarnings("unchecked")
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.w(TAG,"HANDLING INTENT");
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 
         // Get the list of the probable activities associated with the current state of the
@@ -104,7 +103,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                     activity = "UNKNOWN";
                     break;
             }
-            Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
+            //Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
             if(da.getConfidence() > maxConfidence){
                 maxConfidence = da.getConfidence();
                 maxActivity = activity;
@@ -121,12 +120,12 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
     private void createEvent(String activity) {
-        Log.w(TAG,"Creating event...");;
+        Log.w(TAG,"Vediamo se è un evento valido...");;
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");
         if (split.length != 5) {
-            Log.w(TAG, "[!] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
+            Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
 
@@ -166,18 +165,18 @@ public class DetectedActivitiesIntentService extends IntentService {
             for(int i = 1; i < split.length; i++){
                 if(i < 3){
                     if(split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")){
-                        Log.w(TAG,"Le activity 2-3 sono inVehicle o onBicycle: CHIUDO");
+                        Log.w(TAG,"[NO] Le activity 2-3 sono inVehicle o onBicycle: CHIUDO");
                         return;
                     }
                 }
                 else {
                     if(!split[i].equals("IN VEHICLE") && !split[i].equals("ON BICYCLE")) {
-                        Log.w(TAG, "La " + (i+1) + " non è 'IN VEHICLE o BICYCLE'");
+                        Log.w(TAG, "[NO] La " + (i+1) + " non è 'IN VEHICLE o BICYCLE'");
                         return;
                     }
                 }
             }
-            Log.w(TAG,"[x] Sei partito!");
+            Log.w(TAG,"[SI] Sei partito!");
             Date now = new Date();
             l = MainActivity.getMyLocation();
             if(l==null){
@@ -195,7 +194,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
         else{
-            Log.w(TAG,"[0] Vediamo se sei arrivato...");
+            Log.w(TAG,"[?] Vediamo se sei arrivato...");
             if(split[0].equals("IN VEHICLE") || split[0].equals("ON BICYCLE")) {
                 for (int i = 1; i < split.length; i++) {
                     if (split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
@@ -204,10 +203,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                     }
                 }
                 // creo l'evento di arrivo
-                Log.w(TAG, "[x] Sei arrivato!");
+                Log.w(TAG, "[SI] Sei arrivato!");
                 l = MainActivity.getMyLocation();
                 if(l==null){
-                    Log.w(TAG,"La location è null non posso inviare l'evento (arrivo)");
+                    Log.w(TAG,"[!] La location è null non posso inviare l'evento (arrivo)");
                     return;
                 }
                 Double latitude = l.getLatitude();

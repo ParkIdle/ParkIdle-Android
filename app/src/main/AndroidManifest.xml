@@ -34,7 +34,8 @@
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
 
-        <service android:name=".DetectedActivitiesIntentService" />
+        <service android:name=".DetectedActivitiesIntentService"
+            android:exported="false"/>
         <service
             android:name="io.predict.sdk.detection.services.PIOMainService"
             android:exported="false" />
@@ -47,6 +48,9 @@
         <service
             android:name="io.predict.sdk.detection.services.PIOComService"
             android:exported="false" />
+        <service
+            android:name=".MQTTSubscribe"
+            android:exported="false"/>
 
         <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
             <intent-filter>
