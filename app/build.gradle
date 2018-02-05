@@ -8,12 +8,11 @@ android {
         applicationId "app.parkidle"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
+        versionCode 1
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -21,6 +20,8 @@ android {
         }
     }
     useLibrary 'org.apache.http.legacy'
+    productFlavors {
+    }
 }
 
 dependencies {
@@ -48,7 +49,6 @@ dependencies {
     compile 'com.bugfender.sdk:android:1.+'
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
-
     // Mapbox SDK dependency
     compile('com.mapbox.mapboxsdk:mapbox-android-sdk:5.2.1') {
         transitive = true
@@ -59,12 +59,10 @@ dependencies {
     }
     compile 'com.mapzen.android:lost:3.0.2'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
-
     // MQTT Dependencies
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'
     compile 'org.eclipse.paho:org.eclipse.paho.android.service:1.1.1'
     testCompile 'junit:junit:4.12'
-
     compile 'com.squareup.okhttp3:okhttp:3.9.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.1'
     compile 'com.squareup.okhttp3:okhttp-urlconnection:3.9.1'
