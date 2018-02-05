@@ -91,10 +91,17 @@ import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ConcurrentModificationException;
@@ -119,6 +126,8 @@ import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
+
+    public static String mosquittoBrokerAWS;
 
     public static int language; //0 italian, 1 english
     public static int metric; //0 metri, 1 miglia
@@ -233,6 +242,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
         icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
+
+        GetServerURITask gsut = new GetServerURITask();
+        gsut.execute();
+        try {
+            mosquittoBrokerAWS = gsut.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
 
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
         runOnUiThread(new Runnable() {
@@ -1322,6 +1341,42 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
     }
 
 }
+
+class GetServerURITask extends AsyncTask<Void, Void, String> {
+    private final String TAG = "GetServerURITask";
+
+    protected String doInBackground(Void... v) {
+        String url = "https://parkidle.github.io/serveruri.html";
+            try {
+                URL obj = new URL(url);
+                HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+                // optional default is GET
+                con.setRequestMethod("GET");
+
+
+                int responseCode = con.getResponseCode();
+                Log.w(TAG,"\nGetting server IP from: " + url);
+                Log.w(TAG,"Response Code : " + responseCode);
+
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(con.getInputStream()));
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+                return response.toString();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        return "";
+    }
+
+}
+
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {
     // Method is used to interpolate the marker animation.

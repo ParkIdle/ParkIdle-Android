@@ -31,7 +31,7 @@ public class EventHandler implements Runnable{
 
     private Event event;
     private final String TAG = "EventHandler";
-    private final String myServerURL = "http://ec2-35-177-216-151.eu-west-2.compute.amazonaws.com:3000/pioevent";
+    private String myServerURL = "http://ec2-35-177-216-151.eu-west-2.compute.amazonaws.com:3000/pioevent";
 
     public EventHandler(Event event){
         this.event = event;
@@ -41,6 +41,7 @@ public class EventHandler implements Runnable{
     public void run() { // la run crea la connessione con il server e invia la POST
         try {
             Log.w(TAG,"Creating connection...");
+            myServerURL = "http://"+MainActivity.mosquittoBrokerAWS+":3000/pioevent";
             URL url = new URL(myServerURL);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setDoOutput(true);

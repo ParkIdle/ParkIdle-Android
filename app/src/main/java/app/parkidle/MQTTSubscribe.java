@@ -36,8 +36,8 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
     private MqttClient client;
     private final String TAG = "MQTTSubscribe";
-
-    private final String mosquittoBrokerAWS = "tcp://ec2-35-177-216-151.eu-west-2.compute.amazonaws.com:1883";
+    private String serverIP;
+    private String mosquittoBrokerAWS;
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private String deviceIdentifier;
 
@@ -63,6 +63,8 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
     public void subscribe() {
         try {
+            serverIP = MainActivity.mosquittoBrokerAWS;
+            mosquittoBrokerAWS = "tcp://"+serverIP+":1883";
             Log.w(TAG,"Subscribing....");
             // TODO: inserire Mosquitto Broker hostato su AWS
             client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
