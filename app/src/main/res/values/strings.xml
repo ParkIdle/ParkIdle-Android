@@ -14,4 +14,8 @@
         <item name="kilometri">Kilometri</item>
         <item name="miglia">Miglia </item>
     </string-array>
+    <string-array name="language_options">
+        <item name="italian">Italian</item>
+        <item name="english">English </item>
+    </string-array>
 </resources>
