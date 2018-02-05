@@ -102,12 +102,13 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
 
             final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
-                    .position(new LatLng(event.getLatitude(), event.getLongitude()))
-                    .title("Empty parking spot").setIcon(icona_parcheggio_libero));
+                        .position(new LatLng(event.getLatitude(), event.getLongitude()))
+                        .title("Parcheggio Libero").setIcon(icona_parcheggio_libero));
+
 
             notification(event.getLatitude(),event.getLongitude());
             long ID = Long.valueOf(event.getID()).longValue();
-            m.setId(ID);
+            //m.setId(ID);
 
         }
         else if(event.getEvent().equals("ARRIVAL")){
@@ -115,14 +116,14 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             Log.w(TAG, "Arrival Event just received");
         }
         boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
-        if(!isRunningColor) {
+        /*if(!isRunningColor) {
             ColorManager colorManager = new ColorManager();
             Thread colorThread = new Thread(colorManager);
             colorThread.setName("ColorEvaluationThread");
             colorThread.setPriority(Thread.NORM_PRIORITY);
             colorThread.run();
             Log.w(TAG,"COLOR THREAD:");
-        }
+        }*/
     }
 
     @Override

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Handler;
 import android.util.Log;
 
 import com.mapbox.mapboxsdk.annotations.Icon;
@@ -22,7 +23,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by Andrea on 22/01/2018.
  */
 
-public class ColorManager extends Activity implements Runnable {
+public class ColorManager implements Runnable {
 
     private List<Marker> markers;
     private SQLiteOpenHelper mDbHelper;
@@ -38,7 +39,6 @@ public class ColorManager extends Activity implements Runnable {
 
     @Override
     public synchronized void run() {
-        while (true) {
             map = MainActivity.getmMap();
             if(map == null){
                 MainActivity.editor.putBoolean("colorThreadIsRunning", false);
@@ -56,21 +56,15 @@ public class ColorManager extends Activity implements Runnable {
                     String markerSearcher = checkIterator.next();
                     String[] event = markerSearcher.split("-");
                     if (event[0] == markerID) {
-                        Log.d("MarkerFound: ", "Evaluating Marker color");
+                        Log.w("MarkerFound: ", "Evaluating Marker color");
                         MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
                     }
                 }
             }
-
             Log.w("COLOR: ", "DONE");
 
-            try {
-                Thread.sleep( 3 * 60 * 1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+
         }
-    }
 
 
 }

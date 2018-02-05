@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.Parcel;
 import android.provider.Settings;
@@ -104,6 +105,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -195,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(final Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Log.w("onCreate()","creating...");
+        Log.w(TAG,"creating...");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -218,7 +221,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         checkGPSEnabled(locationManager); // controllo lo stato del GPS
         mLastLocation = getLastLocation(); // localizzo
 
-
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -231,18 +233,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
         icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
-
-        events = sharedPreferences.getStringSet("events", new HashSet<String>());
-
-        CheckEventsTask cet = new CheckEventsTask();
-        cet.execute(events);
-        try {
-            events = cet.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
 
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
         runOnUiThread(new Runnable() {
@@ -278,63 +268,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     @Override
                     public void onMapReady(final MapboxMap mapboxMap) {
                         mMap = mapboxMap;
-                        mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
-                            @Nullable
-                            @Override
-                            public View getInfoWindow(@NonNull final Marker marker) {
-                                final View window; // Creating an instance for View Object
-                                LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                window = inflater.inflate(R.layout.parkidle_info_window, null);
-                                Icon icon = marker.getIcon();
-                                if (!icon.equals(mIcon)) {
-                                    LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                                    String distanza = calculateDistance(marker.getPosition(), myLatLng);
-
-                                    TextView title = (TextView) window.findViewById(R.id.info_title);
-                                    title.setText(marker.getTitle());
-
-                                    TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
-                                    TextView distance = (TextView) window.findViewById(R.id.info_distance);
-                                    long markerID = marker.getId();
-                                    String date = getDateFromMarkerID(markerID);
-                                    if (icon.equals(icona_parcheggio_libero)) {
-                                        date = "< 5";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_5mins)) {
-                                        date = "> 5";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_10mins)) {
-                                        date = "> 10";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_20mins)) {
-                                        date = "> 20";
-                                    }
-                                    if (isItalian()) {
-                                        minutes.setText("Libero da:    " + date + " minuti");
-                                        distance.setText("Distanza(linea d'aria):      " + distanza);
-                                    } else {
-                                        minutes.setText("Since:    " + date + " minutes");
-                                        distance.setText("Distance:      " + distanza);
-                                    }
-
-                                    Button nav = (Button) window.findViewById(R.id.info_navigation);
-                                    nav.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            destination = Point.fromLngLat(
-                                                    marker.getPosition().getLongitude(),
-                                                    marker.getPosition().getLatitude());
-                                            launchNavigation();
-                                        }
-                                    });
-                                }
-                                else if (icon.equals(mIcon)) {
-                                    return null;
-                                }
-
-                                return window;
-                            }
-                        });
 
                         // Camera Position definisce la posizione della telecamera
                         position = new CameraPosition.Builder()
@@ -384,24 +317,88 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             /*mapboxMap.addMarker(new MarkerOptions()
                                     .setIcon(icona_parcheggio_libero)
                                     .position(point)
-                                    .setTitle("Parcheggio libero"));*/
+                                    .setTitle("Parcheggio libero"))*/
 
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                                 // TEST STUFF
-                            /*Date d = new Date();
-                            Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                            PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                            EventHandler peh = new EventHandler(p);
-                            Thread t5 = new Thread(peh);
-                            t5.start();*/
+                                Date d = new Date();
+                                Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                                EventHandler peh = new EventHandler(p);
+                                Thread t5 = new Thread(peh);
+                                t5.start();
                             }
                         });
                         if(!events.isEmpty()) {
                             Log.w("RENDER THREAD", "Starting render task");
-                            renderEvents(events, getmMap());
+                            renderEvents(events, mapboxMap);
                             Log.w("RENDER THREAD", "End render task");
+                            setRepeatingAsyncTask(mapboxMap,events);
                         }else Log.w(TAG,"Nessun evento da renderizzare");
+
+                        mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
+                            @Nullable
+                            @Override
+                            public View getInfoWindow(@NonNull final Marker marker) {
+                                final View window; // Creating an instance for View Object
+                                LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                                window = inflater.inflate(R.layout.parkidle_info_window, null);
+                                Icon icon = marker.getIcon();
+                                if (!icon.equals(mIcon)) {
+
+                                    LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                                    String distanza = calculateDistance(marker.getPosition(), myLatLng);
+
+                                    TextView title = (TextView) window.findViewById(R.id.info_title);
+                                    title.setText(marker.getTitle());
+
+                                    TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
+                                    TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                                    long markerID = marker.getId();
+                                    String date = getDateFromMarkerID(markerID);
+                                    if (icon.equals(icona_parcheggio_libero)) {
+                                        date = "< 5";
+                                    }
+                                    if (icon.equals(icona_parcheggio_libero_5mins)) {
+                                        date = "> 5";
+                                    }
+                                    if (icon.equals(icona_parcheggio_libero_10mins)) {
+                                        date = "> 10";
+                                    }
+                                    if (icon.equals(icona_parcheggio_libero_20mins)) {
+                                        date = "> 20";
+                                    }
+                                    if (isItalian()) {
+                                        minutes.setText("Libero da:    " + date + " minuti");
+                                        distance.setText("Distanza(linea d'aria):      " + distanza);
+                                    } else {
+                                        minutes.setText("Since:    " + date + " minutes");
+                                        distance.setText("Distance:      " + distanza);
+                                    }
+
+                                    Button nav = (Button) window.findViewById(R.id.info_navigation);
+                                    nav.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            destination = Point.fromLngLat(
+                                                    marker.getPosition().getLongitude(),
+                                                    marker.getPosition().getLatitude());
+                                            launchNavigation();
+                                        }
+                                    });
+                                    return window;
+                                }
+                                else if (icon.equals(mIcon)) {
+                                    return null;
+                                }
+
+                                return window;
+                            }
+
+
+                        });
+
                     }
 
                 });
@@ -533,7 +530,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
             startActivity(tutorial);
         }
-
         /*Thread render = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -625,6 +621,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStart();
         Log.w(TAG,"Starting...");
         mapView.onStart();
+        events = sharedPreferences.getStringSet("events", new HashSet<String>());
+        CheckEventsTask cet = new CheckEventsTask();
+        cet.execute(events);
+        try {
+            events = cet.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         /*if(currentUser != null){
             return;
         }else{
@@ -993,7 +999,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
         //Log.w(TAG,"Rendering events...: " + events);
         Iterator<String> it = events.iterator();
-        if(mapboxMap == null) return;
+        if(mapboxMap == null){
+            Log.w(TAG,"Cannot RENDER, Map is null");
+            return;
+        }
         while(it.hasNext()){
             // event -> "UUID-event-date-latitude-longitude"
             String e = it.next();
@@ -1163,7 +1172,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-
     private void feedback_activity(){
         Intent i = new Intent(this,FeedBackActivity.class);
         startActivity(i);
@@ -1180,6 +1188,66 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
         }
         return "?";
+    }
+
+    private void setRepeatingAsyncTask(final MapboxMap map,final Set<String> events) {
+
+        final Handler handler = new Handler();
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    public void run() {
+                        try {
+                            ColorManagerTask colorTask = new ColorManagerTask(map);
+                            colorTask.execute(events);
+                        } catch (Exception e) {
+                            // error, do something
+                        }
+                    }
+                });
+            }
+        };
+
+        timer.schedule(task, 0, 3*60*1000);  // interval of 3 minute
+
+    }
+}
+
+class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
+    private final String TAG = "ColorManagerTask";
+    private final MapboxMap map;
+
+    public ColorManagerTask(MapboxMap map){
+        this.map = map;
+    }
+
+    protected Void doInBackground(Set<String>... events) {
+        if(map != null){
+            MainActivity.editor.putBoolean("colorThreadIsRunning", true);
+            List<Marker> listMarker = map.getMarkers();
+            Log.w("COLOR: ", "STARTED");
+            Iterator<Marker> it = listMarker.iterator();
+            while (it.hasNext()) {
+                Marker MMM = it.next();
+                String markerID = String.valueOf(MMM.getId());
+                Iterator<String> checkIterator = events[0].iterator();
+                while (checkIterator.hasNext()) {
+                    String markerSearcher = checkIterator.next();
+                    String[] event = markerSearcher.split("-");
+                    if (event[0] == markerID) {
+                        Log.d("MarkerFound: ", "Evaluating Marker color");
+                        MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+                    }
+                }
+            }
+            Log.w("COLOR: ", "DONE");
+            return null;
+        }
+        Log.w("COLOR: ", "Map is null");
+        return null;
+
     }
 
 }
