@@ -2,6 +2,14 @@ apply plugin: 'com.android.application'
 //apply plugin: 'com.google.gms.google-services'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'Parkidle_key1'
+            keyPassword 'parkidle2017sams@@'
+            storeFile file('D:/Utenti/Andrea/GitHub/Parkidle Android Key/Parkidle.jks')
+            storePassword 'parkidle2017sams@@'
+        }
+    }
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
     defaultConfig {
@@ -17,6 +25,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
     useLibrary 'org.apache.http.legacy'
