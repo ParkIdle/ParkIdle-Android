@@ -111,8 +111,8 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         }
         //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
-        if(activity.equals("UNKNOWN") || activity.equals("TILTING")) {
-            Log.w(TAG,activity + " non tenuta in considerazione.");
+        if(maxActivity.equals("UNKNOWN") || maxActivity.equals("TILTING")) {
+            Log.w(TAG,maxActivity + " non tenuta in considerazione.");
             return;
         }
         addDetectedActivity(maxActivity);
