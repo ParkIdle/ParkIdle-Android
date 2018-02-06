@@ -16,10 +16,10 @@ android {
         applicationId "app.parkidle"
         minSdkVersion 22
         targetSdkVersion 26
-        versionName '1.1'
+        versionName '1.1.1'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
-        versionCode 2
+        versionCode 3
     }
     buildTypes {
         release {
