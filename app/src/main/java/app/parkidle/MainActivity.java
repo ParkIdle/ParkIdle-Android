@@ -60,6 +60,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bugfender.sdk.Bugfender;
+import com.crashlytics.android.Crashlytics;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -117,6 +118,8 @@ import java.util.TimerTask;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.services.common.Crash;
 import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
@@ -220,6 +223,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());
 
+        final Fabric fabric = new Fabric.Builder(this)
+                .kits(new Crashlytics())
+                .debuggable(true)           // Enables Crashlytics debugger
+                .build();
+        Fabric.with(fabric);
+
+
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
@@ -249,8 +259,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mosquittoBrokerAWS = gsut.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         } catch (ExecutionException e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         }
 
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
@@ -354,7 +366,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             renderEvents(events, mapboxMap);
                             Log.w("RENDER THREAD", "End render task");
                             setRepeatingAsyncTask(mapboxMap,events);
-                        }else Log.w(TAG,"Nessun evento da renderizzare");
+                        }else{
+                            Log.w(TAG,"Nessun evento da renderizzare");
+                        }
 
                         mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                             @Nullable
@@ -504,8 +518,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         profile_img.setImageBitmap(pbt.get());
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                        Crashlytics.logException(e);
                     } catch (ExecutionException e) {
                         e.printStackTrace();
+                        Crashlytics.logException(e);
                     }
                 }
                 // Display Name nel Menu laterale
@@ -640,6 +656,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onStart();
         Log.w(TAG,"Starting...");
         mapView.onStart();
+
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
         CheckEventsTask cet = new CheckEventsTask();
         cet.execute(events);
@@ -647,8 +664,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             events = cet.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         } catch (ExecutionException e) {
             e.printStackTrace();
+            Crashlytics.logException(e);
         }
         /*if(currentUser != null){
             return;

@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 //apply plugin: 'com.google.gms.google-services'
+apply plugin: 'io.fabric'
 
 android {
     signingConfigs {
         config {
             keyAlias 'Parkidle_key1'
             keyPassword 'parkidle2017sams@@'
-            storeFile file('D:/Utenti/Andrea/GitHub/Parkidle Android Key/Parkidle.jks')
+            storeFile file('/Users/simonestaffa/AndroidStudioProjects/keys/Parkidle.jks')
             storePassword 'parkidle2017sams@@'
         }
     }
@@ -75,6 +76,10 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.9.1'
     compile 'com.squareup.okhttp3:logging-interceptor:3.9.1'
     compile 'com.squareup.okhttp3:okhttp-urlconnection:3.9.1'
+
+    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+        transitive = true
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
