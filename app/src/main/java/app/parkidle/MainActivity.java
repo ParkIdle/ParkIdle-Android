@@ -1061,6 +1061,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .title("Free Parking Spot")
                         .setIcon(parkingIconEvaluator(e)));
                 m.setId(ID);
+
             }
 
         }
@@ -1277,6 +1278,7 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
                     if (event[0] == markerID) {
                         Log.d("MarkerFound: ", "Evaluating Marker color");
                         MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+                        map.updateMarker(MMM);
                     }
                 }
             }

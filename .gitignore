@@ -15,3 +15,6 @@ app/src/main/java/app/parkidle/ColorManager.java
 app/src/main/java/app/parkidle/DatabasedMarker.java
 app/release/Release Flavor.apk
 app/release/output.json
+app/google-services.json
+app/release/app-release.apk
+app/release/output.json
