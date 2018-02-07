@@ -1,5 +1,7 @@
 package app.parkidle;
 
+import android.support.v4.view.PagerAdapter;
+
 /**
  * Created by Andrea on 29/12/2017.
  */
@@ -28,9 +30,7 @@ public class TutorialActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewPager);
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(this);
-
         viewPager.setAdapter(viewPagerAdapter);
-
         Toast.makeText(this, "Scorri da destra verso sinistra, ma puoi anche cliccare 'indietro' e uscire da esso.", Toast.LENGTH_LONG).show();
 
 

@@ -17,7 +17,9 @@ public class ViewPagerAdapter extends PagerAdapter {
 
     private Context context;
     private LayoutInflater layoutInflater;
-    private Integer [] images = {R.drawable.slide1,R.drawable.slide2,R.drawable.slide3,R.drawable.slide4,R.drawable.slide5};
+    private Integer [] images = {R.drawable.slide12,R.drawable.slide22};
+    private Integer [] images2 = {R.drawable.slide11,R.drawable.slide21};
+
 
     public ViewPagerAdapter(Context context) {
         this.context = context;
@@ -37,9 +39,11 @@ public class ViewPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, final int position) {
 
         layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = layoutInflater.inflate(R.layout.custom_layout, null);
-        ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
+        View view = layoutInflater.inflate(R.layout.activity_custom_swip, null);
+        ImageView imageView = (ImageView) view.findViewById(R.id.swip_image_view);
+        ImageView imageView2 = (ImageView) view.findViewById(R.id.swip_image_view2);
         imageView.setImageResource(images[position]);
+        imageView2.setImageResource(images2[position]);
 
         ViewPager vp = (ViewPager) container;
         vp.addView(view, 0);
