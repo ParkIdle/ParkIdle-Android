@@ -1,3 +1,6 @@
+
+![ParkIdle_Miniature](https://github.com/ParkIdle/ParkIdle-Android/blob/master/documentation/screenshots/miniatura1024x500.png)
+
 ParkIdle is a **mobile application** that helps users finding an empty parking spots near them.
 
 ParkIdle is **fully-automated**, it doesn't require any manual reporting by the user.
