@@ -24,6 +24,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import static app.parkidle.MainActivity.calculateDistance;
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
 
 
@@ -107,8 +108,12 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
                         .position(new LatLng(event.getLatitude(), event.getLongitude()))
                         .title("Parcheggio Libero").setIcon(icona_parcheggio_libero));
 
+            LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
+            float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
 
-            notification(event.getLatitude(),event.getLongitude());
+            if ( distanza < SettingsActivity.seek_bar.getProgress()*1000) //aggiunto controllo distanza notifiche
+                notification(event.getLatitude(),event.getLongitude());
+
             long ID = Long.valueOf(event.getID()).longValue();
             //m.setId(ID);
 

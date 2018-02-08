@@ -17,7 +17,7 @@ import static app.parkidle.MainActivity.metric;
 
 public class SettingsActivity extends AppCompatActivity {
     //roba per il menù
-    private static SeekBar seek_bar;
+    public static SeekBar seek_bar;
     private static TextView text_view;
     private Spinner spinner_unita_misura;
     private ArrayAdapter adapter;

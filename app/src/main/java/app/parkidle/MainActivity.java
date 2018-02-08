@@ -1211,6 +1211,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return distance;
     }
 
+    public static float calculateDistanceInMeters(LatLng p1, LatLng p2) {
+        Double markerlat = p1.getLatitude();
+        Double mylat = p2.getLatitude();
+
+        Double markerlong = p1.getLongitude();
+        Double mylong = p2.getLongitude();
+
+        float[] results = new float[3]; //0 distance, 1 initial bearing, 2 final bearing
+        Location.distanceBetween(mylat, mylong, markerlat, markerlong, results);
+
+        return results[0];
+    }
+
     protected synchronized void buildGoogleApiClient() {
         mApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
