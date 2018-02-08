@@ -39,7 +39,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:ellipsize="end"
-            android:text="Visualizza parcheggi nel raggio di:" />
+            android:text="Notifica parcheggi nel raggio di:" />
 
         <SeekBar
             android:id="@+id/seek_Bar"
