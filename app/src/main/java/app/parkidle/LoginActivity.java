@@ -35,6 +35,7 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.mapbox.mapboxsdk.style.layers.Layer;
 
 public class LoginActivity extends AppCompatActivity {
     private final String OAuthUriFacebook = "https://parkidle-186720.firebaseapp.com/__/auth/handler";
@@ -69,6 +70,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Log.w(TAG,"Inizio procedura login");
         FirebaseApp.initializeApp(this);
+
 
         // inizialiting the Facebook options by the ID provided from Firebase
         mCallbackManager = CallbackManager.Factory.create();

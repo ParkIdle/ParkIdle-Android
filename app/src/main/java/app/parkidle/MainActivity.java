@@ -72,6 +72,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import com.mapbox.api.directions.v5.DirectionsCriteria;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.geojson.BoundingBox;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -87,9 +88,14 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.services.android.navigation.ui.v5.NavigationActivity;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.json.JSONObject;
@@ -112,6 +118,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -123,12 +130,16 @@ import io.fabric.sdk.android.services.common.Crash;
 import io.predict.PIOTripSegment;
 import io.predict.PredictIO;
 import io.predict.PredictIOStatus;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, Callback<DirectionsResponse> {
 
     public static String mosquittoBrokerAWS;
 
@@ -178,13 +189,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private MQTTSubscribe mMQTTSubscribe;
     public static MqttClient MQTTClient;
 
-    // sensori
-    private SensorManager mSensorManager;
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-    private float[] mGravity;
-    private float[] mGeomagnetic;
-    private float azimut = 0;
+
 
     // status boolean
     private boolean isCameraFollowing;
@@ -206,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private double latpark;
     private double longpark;
 
+
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
@@ -214,6 +220,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+
 
         setContentView(R.layout.activity_main);
 
@@ -343,12 +351,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                             @Override
                             public void onMapLongClick(@NonNull LatLng point) {
-                                //Log.w("LONG CLICK LISTENER","long clicking...");
+                              //  Log.w("LONG CLICK LISTENER","long clicking...");
 
                             /*mapboxMap.addMarker(new MarkerOptions()
                                     .setIcon(icona_parcheggio_libero)
                                     .position(point)
-                                    .setTitle("Parcheggio libero"))*/
+                                    .setTitle("Parcheggio libero"));
 
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
@@ -584,6 +592,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
         render.start();*/
 
+    }
+
+    public static void cambialingua(){
+        Layer mapText = mMap.getLayer("place-city-lg-n");
+        if (language==0)
+            mapText.setProperties(textField("{name_it}"));
+        else
+            mapText.setProperties(textField("{name}"));
     }
 
     public void myCar(){
@@ -904,10 +920,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     private void launchNavigation() {
-        if(metric==0)
-            this.unitType = DirectionsCriteria.METRIC;
-        else
-            this.unitType=DirectionsCriteria.IMPERIAL;
+        MapboxNavigationOptions mNavOptions;
+
+        if(metric==0) {
+            mNavOptions = MapboxNavigationOptions.builder()
+                    .unitType(1)
+                    .enableNotification(true)
+                    .enableOffRouteDetection(true)
+                    .build();
+
+        }
+
+        else{
+            mNavOptions= MapboxNavigationOptions.builder()
+                .unitType(0)
+                .enableNotification(true)
+                .enableOffRouteDetection(true)
+                .build();
+
+        }
         /*NavigationNotification mNavNotification = new NavigationNotification() {
             @Override
             public Notification getNotification() {
@@ -924,12 +955,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             }
         }*/
+        Locale lingua = Locale.ITALIAN;
 
-        MapboxNavigationOptions mNavOptions = MapboxNavigationOptions.builder()
-                .unitType(1)
-                .enableNotification(true)
-                .enableOffRouteDetection(true)
-                .build();
+        if (language==0) {
+            lingua = Locale.ITALIAN;
+        }
+        else if(language==1){
+            lingua= Locale.ENGLISH;
+        }
+
 
         NavigationViewOptions options = NavigationViewOptions.builder()
                 .origin(getOrigin())
@@ -940,6 +974,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .build();
 
         NavigationLauncher.startNavigation(this, options);
+
+                //startNavigation(this, options);
     }
 
     private void signOut() {
@@ -1250,6 +1286,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         };
 
         timer.schedule(task, 0, 3*60*1000);  // interval of 3 minute
+
+    }
+
+    @Override
+    public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+
+    }
+
+    @Override
+    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
 
     }
 }

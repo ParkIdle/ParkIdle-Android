@@ -98,6 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
                         spinner.setSelection(position);
                         MainActivity.editor.putInt("language",position);
                         MainActivity.editor.apply();
+                        MainActivity.cambialingua();
                         Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
 
@@ -118,7 +119,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                         TextView spinner_dialog_text=(TextView) view;
                         Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
-                        if(text1.equals("kilometri")) metric=0;
+                        if(text1.equals("Kilometri")) metric=0;
                         else metric=1;
                     }
 
