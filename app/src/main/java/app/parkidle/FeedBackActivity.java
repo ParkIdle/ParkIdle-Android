@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -32,7 +33,7 @@ public class FeedBackActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                TextInputLayout box_parere = findViewById(R.id.textInputLayout);
+                final TextInputLayout box_parere = findViewById(R.id.textInputLayout);
                 TextView titolo = findViewById(R.id.text_feedback_desc);
                 titolo.setText("Salve! Ti ringraziamo per voler contribuire al migliorare la nostra applicazione!" +
                         "  In questo semplice form potete inserire problemi o eventuali bug che avete riscontrato durante" +
@@ -50,6 +51,8 @@ public class FeedBackActivity extends AppCompatActivity {
                             final String message = feedback_text.getText().toString();
                             MainActivity.MQTTClient.publish("client/feedbacks",new MqttMessage(message.getBytes()));
                             Log.w(TAG,"Feedback successfully published");
+                            Toast.makeText(FeedBackActivity.this, "Feedback successfully published!", Toast.LENGTH_SHORT).show();
+                            feedback_text.setText("");
                         } catch (MqttException e) {
                             e.printStackTrace();
                         }
