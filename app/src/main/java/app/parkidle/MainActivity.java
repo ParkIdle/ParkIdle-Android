@@ -567,7 +567,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         // Controllo del Tutorial
         boo = sharedPreferences.getBoolean("done",true);
-        if (boo){
+
+        //TODO: boo
+        if (true){
             editor.putBoolean("done",false);
             editor.apply();
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);

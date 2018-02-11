@@ -31,9 +31,6 @@ public class TutorialActivity extends AppCompatActivity {
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(viewPagerAdapter);
-        Toast.makeText(this, "Scorri da destra verso sinistra, ma puoi anche cliccare 'indietro' e uscire da esso.", Toast.LENGTH_LONG).show();
-
-
     }
 
 }
