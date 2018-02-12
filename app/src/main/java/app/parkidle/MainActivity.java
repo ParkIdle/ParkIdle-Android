@@ -351,22 +351,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                             @Override
                             public void onMapLongClick(@NonNull LatLng point) {
-                              //  Log.w("LONG CLICK LISTENER","long clicking...");
+                              Log.w("LONG CLICK LISTENER","long clicking...");
 
-                            /*mapboxMap.addMarker(new MarkerOptions()
+                                Marker m = mapboxMap.addMarker(new MarkerOptions()
                                     .setIcon(icona_parcheggio_libero)
                                     .position(point)
                                     .setTitle("Parcheggio libero"));
 
                                 //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
-                                // TEST STUFF
-                                /*Date d = new Date();
-                                Event p = new Event("12345","DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                                PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                                //TEST STUFF
+                                Date d = new Date();
+                                Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                                //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                                 EventHandler peh = new EventHandler(p);
                                 Thread t5 = new Thread(peh);
-                                t5.start();*/
+                                t5.start();
+
                             }
                         });
                         if(!events.isEmpty()) {
@@ -568,8 +569,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // Controllo del Tutorial
         boo = sharedPreferences.getBoolean("done",true);
 
-        //TODO: boo
-        if (true){
+        if (boo){
             editor.putBoolean("done",false);
             editor.apply();
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
@@ -1262,6 +1262,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    private String markerIdHashcode(Double lat, Double lon){
+        long hasho = (long)((lat*15661+lon*27773)/33911);
+        return ""+hasho;
+    }
+
     private void feedback_activity(){
         Intent i = new Intent(this,FeedBackActivity.class);
         startActivity(i);
@@ -1290,7 +1295,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 handler.post(new Runnable() {
                     public void run() {
                         try {
-                            ColorManagerTask colorTask = new ColorManagerTask(map);
+                            ColorManagerTask colorTask = new ColorManagerTask();
                             colorTask.execute(events);
                         } catch (Exception e) {
                             // error, do something
@@ -1317,14 +1322,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
     private final String TAG = "ColorManagerTask";
-    private final MapboxMap map;
+    private MapboxMap map;
 
-    public ColorManagerTask(MapboxMap map){
-        this.map = map;
+    public ColorManagerTask(){
     }
 
     protected Void doInBackground(Set<String>... events) {
+
+        this.map = MainActivity.getmMap();
         if(map != null){
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+            Log.w("COLOR THREAD", "CHIAMATO");
+
             MainActivity.editor.putBoolean("colorThreadIsRunning", true);
             List<Marker> listMarker = map.getMarkers();
             Log.w("COLOR: ", "STARTED");
@@ -1332,6 +1346,8 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
             while (it.hasNext()) {
                 Marker MMM = it.next();
                 String markerID = String.valueOf(MMM.getId());
+                Log.w("COLOR: ", markerID+" are going to be colorEvaluated");
+
                 Iterator<String> checkIterator = events[0].iterator();
                 while (checkIterator.hasNext()) {
                     String markerSearcher = checkIterator.next();
