@@ -209,7 +209,7 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         withGoogle = true;
         withFacebook = false;
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        final AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -222,7 +222,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                            Toast.makeText(LoginActivity.this, "Authentication failed: " + credential.toString(),
                                     Toast.LENGTH_SHORT).show();
                             Crashlytics.logException(task.getException());
                             updateUI(null);
