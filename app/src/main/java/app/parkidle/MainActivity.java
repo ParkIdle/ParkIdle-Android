@@ -1188,13 +1188,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds2 = time2.split(":")[2];
 
         if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5){
+            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10) ){
                 return icona_parcheggio_libero_5mins;
             }
-            else if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10){
+            else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
                 return icona_parcheggio_libero_10mins;
             }
-            else if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 20){
+            else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 20) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 30)){
                 return icona_parcheggio_libero_20mins;
             }
             return icona_parcheggio_libero;
