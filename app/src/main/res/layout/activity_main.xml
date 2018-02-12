@@ -22,19 +22,6 @@
         mapbox:mapbox_uiRotateGestures="false" >
 
         <android.support.design.widget.FloatingActionButton
-            android:id="@+id/nearest_parking_spot"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|right"
-            android:layout_marginBottom="60dp"
-            android:layout_marginRight="13dp"
-            android:clickable="true"
-            mapbox:backgroundTint="#4CAF50"
-            mapbox:fabSize="mini"
-            mapbox:rippleColor="@color/parkIdleGrey"
-            mapbox:srcCompat="@drawable/ic_local_parking_black_24dp" />
-
-        <android.support.design.widget.FloatingActionButton
             android:id="@+id/center_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,11 +29,28 @@
             android:layout_marginBottom="15dp"
             android:layout_marginRight="13dp"
             android:clickable="true"
+            android:hapticFeedbackEnabled="true"
             android:onClick="recenterCamera"
             mapbox:backgroundTint="#4CAF50"
             mapbox:fabSize="mini"
             mapbox:rippleColor="@color/parkIdleGrey"
-            mapbox:srcCompat="@drawable/ic_my_location_black_24dp" />
+            mapbox:srcCompat="@drawable/ricentro" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/nearest_parking_spot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="60dp"
+            android:layout_marginRight="13dp"
+            android:clickable="true"
+            android:contextClickable="false"
+            android:cropToPadding="false"
+            android:defaultFocusHighlightEnabled="false"
+            android:hapticFeedbackEnabled="true"
+            mapbox:backgroundTint="#4CAF50"
+            mapbox:fabSize="mini"
+            mapbox:srcCompat="@drawable/parcheggio" />
     </com.mapbox.mapboxsdk.maps.MapView>
 
     <android.support.design.widget.NavigationView
