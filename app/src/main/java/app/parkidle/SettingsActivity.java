@@ -43,6 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void seekbar(){
         seek_bar=(SeekBar)findViewById(R.id.seek_Bar);
         text_view=(TextView)findViewById(R.id.text_view);
+        seek_bar.setProgress(MainActivity.sharedPreferences.getInt("progressKm",50));
         text_view.setText(seek_bar.getProgress()+"km");
 
 
@@ -64,6 +65,7 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         text_view.setText(progress_value+" km");
+                        MainActivity.editor.putInt("progressKm",progress_value);
 
                     }
                 }
