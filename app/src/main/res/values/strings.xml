@@ -10,6 +10,8 @@
     <string name="google_button_text">Continue with Google</string>
     <string name="you_en">You</string>
     <string name="you_it">Sei qui</string>
+    <string name="loading1">Signin in..</string>
+    <string name="loading">Stiamo caricando le informazioni del tuo profilo...</string>
     <string-array name="spinner_options">
         <item name="kilometri">Kilometri</item>
         <item name="miglia">Miglia </item>

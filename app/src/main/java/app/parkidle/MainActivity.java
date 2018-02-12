@@ -11,6 +11,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -136,6 +137,7 @@ import retrofit2.Response;
 
 import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
+
 import static app.parkidle.LoginActivity.mGoogleApiClient;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
@@ -210,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //shared prefs per salvare il parcheggio
     private double latpark;
     private double longpark;
+
+
 
 
     @Override
@@ -594,7 +598,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
         render.start();*/
 
-    }
+
+
+    }//qua finisce oncreate
 
     public static void cambialingua(){
         Layer mapText = mMap.getLayer("place-city-lg-n");
@@ -672,6 +678,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onStart() {
         super.onStart();
+
+
+
         Log.w(TAG,"Starting...");
         mapView.onStart();
 
@@ -983,6 +992,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void signOut() {
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
+
         FirebaseAuth instance = FirebaseAuth.getInstance();
         instance.signOut();
         mAuth.signOut();
@@ -990,9 +1000,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         LoginManager.getInstance().logOut(); // disconnect from facebook
         currentUser = null;
         activityRecognitionClient.removeActivityUpdates(getActivityDetectionPendingIntent());
+
+
         Intent i = new Intent(MainActivity.this,LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
+
         if (customizerThread != null) {
             customizerThread.interrupt();
         }
@@ -1368,6 +1381,8 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
     }
 
 }
+
+
 
 class ProfileBitmapTask extends AsyncTask<String, Integer, Bitmap> {
     private final String TAG = "ProfileBitmapTask";

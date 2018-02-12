@@ -9,6 +9,9 @@
     tools:context="app.parkidle.LoginActivity">
 
 
+
+
+
     <ImageView
         android:id="@+id/splashscreen"
         android:layout_width="263dp"

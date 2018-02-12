@@ -1,14 +1,21 @@
 package app.parkidle;
 
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
@@ -37,6 +44,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 
+import java.util.function.ToDoubleBiFunction;
+
+import io.predict.sdk.detection.services.testapp.SensorLoggerService;
+
 public class LoginActivity extends AppCompatActivity {
     private final String OAuthUriFacebook = "https://parkidle-186720.firebaseapp.com/__/auth/handler";
     private final String idAppFacebook = "156734918407060";
@@ -59,14 +70,20 @@ public class LoginActivity extends AppCompatActivity {
     public static GoogleApiClient mGoogleApiClient;
     private CallbackManager mCallbackManager;
 
+
+
+    public ProgressDialog mDialog;
+
     private static boolean withGoogle;
     private static boolean withFacebook;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
+
 
         Log.w(TAG,"Inizio procedura login");
         FirebaseApp.initializeApp(this);
@@ -107,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         switch (v.getId()){
                             case R.id.sign_in_button:
+                                mDialog.show();
                                 signIn_google();
                                 break;
                         }
@@ -131,6 +149,9 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        //inizializzo il dialog che segnala all'utente lo stato delle operazione nella login
+        mDialog = new ProgressDialog(this);
+
         // inizialiting the Google options by the ID provided from Firebase
         // Configure Google Sign In
         google_options = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -146,6 +167,9 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleApiClient.connect();
 
         mAuth = FirebaseAuth.getInstance();
+
+
+
 
 
     }//qua finisce on create
@@ -178,6 +202,12 @@ public class LoginActivity extends AppCompatActivity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 //currentAccount = account;
                 firebaseAuthWithGoogle(account);
+
+                //oltre all'accesso faccio partire il box dialog
+
+
+                mDialog.setMessage("Stiamo raccogliendo le tue informazioni..");
+                mDialog.show();
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 //Log.w(TAG, "Google sign in failed" + e.getStatusCode());
@@ -186,6 +216,8 @@ public class LoginActivity extends AppCompatActivity {
                 // ...
             }
         }else{
+            mDialog.setMessage("Stiamo raccogliendo le tue informazioni..");
+            mDialog.show();
             mCallbackManager.onActivityResult(requestCode,resultCode,data);
         }
 
@@ -199,6 +231,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         else {
             Log.w(TAG,"Procedo con l'accesso...");
+
             Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             currentUser = user;
@@ -207,6 +240,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+
         withGoogle = true;
         withFacebook = false;
         final AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -218,6 +252,7 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            mDialog.dismiss();
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -225,6 +260,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "Authentication failed: " + credential.toString(),
                                     Toast.LENGTH_SHORT).show();
                             Crashlytics.logException(task.getException());
+                            mDialog.dismiss();
                             updateUI(null);
                         }
 
@@ -246,13 +282,16 @@ public class LoginActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = mAuth.getCurrentUser();
+                            mDialog.dismiss();
                             updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                            mDialog.dismiss();
                             updateUI(null);
+
 
                         }
 
@@ -260,6 +299,10 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
+
+
 
     private void parkIdle_signIn(){
         Intent i = new Intent(this,ParkIdleAccountActivity.class);
@@ -278,4 +321,8 @@ public class LoginActivity extends AppCompatActivity {
         return currentUser;
     }
 
+
+
+
 }
+
