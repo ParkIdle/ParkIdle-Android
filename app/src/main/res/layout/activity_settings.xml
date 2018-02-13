@@ -85,6 +85,28 @@
 
         </android.support.v7.widget.AppCompatSpinner>
 
+        <TextView
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="Indirizzo di casa"
+            android:textSize="14sp" />
+
+        <EditText
+            android:id="@+id/indirizzo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPostalAddress" />
+
+        <Button
+            android:id="@+id/trovabutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trova" />
+
 
     </LinearLayout>
 

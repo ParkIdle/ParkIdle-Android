@@ -25,6 +25,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -206,13 +208,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static Icon icona_parcheggio_libero_20mins; // parcheggio libero (segna eventi departed)
 
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
-
-    private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
-    private String deviceIdentifier;
+    public static Icon house_icon;
+    //private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
+    //private String deviceIdentifier;
 
     //shared prefs per salvare il parcheggio
     private double latpark;
     private double longpark;
+
+    //shared pref per salvare casa
+    private double lathouse;
+    private double longhouse;
 
 
 
@@ -261,6 +267,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // icona
         mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
         icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
+        house_icon =IconFactory.getInstance(MainActivity.this).fromResource((R.drawable.houseicon));
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_white70x70);
         icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
@@ -458,6 +465,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     m.findItem(R.id.db).setTitle("Profilo");
                     m.findItem(R.id.mycar).setTitle("La tua macchina");
                     m.findItem(R.id.settings).setTitle("Impostazioni");
+                    m.findItem(R.id.myhouse).setTitle("Casa");
                 }
 
                 mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, mDrawerLayout,
@@ -507,6 +515,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                             case R.id.feedback:
                                 feedback_activity();
+                                break;
+
+                            case R.id.myhouse:
+                                myhouse();
                                 break;
 
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
@@ -646,6 +658,47 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .newCameraPosition(position), null);
         }
     }
+
+
+    public void myhouse(){
+
+        lathouse =Double.parseDouble(sharedPreferences.getString("lathouse","0"));
+        longhouse = Double.parseDouble(sharedPreferences.getString("longhouse","0"));
+
+        if(lathouse==0 && longhouse==0){
+            if(isItalian())
+                Toast.makeText(this, "Casa non salvata (Inseriscila nelle impostazioni)", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Home not saved (Add it in the settings menù)", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            LatLng casa =new LatLng(lathouse,longhouse);
+            isCameraFollowing=false;
+
+            if(isItalian()) {
+                Marker casamarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(lathouse, longhouse))
+                        .title("Casa")
+                        .setIcon(house_icon));
+            }else{
+                Marker casamarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(new LatLng(lathouse, longhouse)))
+                        .title("Home")
+                        .setIcon(house_icon));
+            }
+            mDrawerLayout.closeDrawers();
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(casa) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(mLastLocation.getBearing()) // degree - azimut
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), null);
+        }
+    }
+
+
 
     /* Called whenever we call invalidateOptionsMenu() */
     @Override
@@ -1378,6 +1431,7 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
                         Log.d("MarkerFound: ", "Evaluating Marker color");
                         MMM.setIcon(parkingIconEvaluator(markerSearcher));
                         map.updateMarker(MMM);
+
                     }
                 }
             }
