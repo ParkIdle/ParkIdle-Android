@@ -139,6 +139,7 @@ import static app.parkidle.LoginActivity.currentUser;
 import static app.parkidle.LoginActivity.mAuth;
 
 import static app.parkidle.LoginActivity.mGoogleApiClient;
+import static app.parkidle.MainActivity.parkingIconEvaluator;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, Callback<DirectionsResponse> {
@@ -391,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                                 window = inflater.inflate(R.layout.parkidle_info_window, null);
                                 Icon icon = marker.getIcon();
-                                if (!icon.equals(mIcon)) {
+                                if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
 
                                     LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                                     String distanza = calculateDistance(marker.getPosition(), myLatLng);
@@ -1188,8 +1189,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds2 = time2.split(":")[2];
 
         if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10) ){
-                return icona_parcheggio_libero_5mins;
+            if (true){
+                return icona_parcheggio_libero_20mins;
             }
             else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
                 return icona_parcheggio_libero_10mins;
@@ -1308,7 +1309,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 handler.post(new Runnable() {
                     public void run() {
                         try {
-                            ColorManagerTask colorTask = new ColorManagerTask();
+                            ColorManagerTask colorTask = new ColorManagerTask(map);
                             colorTask.execute(events);
                         } catch (Exception e) {
                             // error, do something
@@ -1337,12 +1338,13 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
     private final String TAG = "ColorManagerTask";
     private MapboxMap map;
 
-    public ColorManagerTask(){
+    public ColorManagerTask(MapboxMap m){
+        this.map = m;
     }
 
     protected Void doInBackground(Set<String>... events) {
 
-        this.map = MainActivity.getmMap();
+        Log.w("COLOR THREAD", "CHIAMATO");
         if(map != null){
             Log.w("COLOR THREAD", "CHIAMATO");
             Log.w("COLOR THREAD", "CHIAMATO");
@@ -1365,9 +1367,16 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
                 while (checkIterator.hasNext()) {
                     String markerSearcher = checkIterator.next();
                     String[] event = markerSearcher.split("-");
+                    //Log.d("MarkerFound: ", "Evaluating Marker color");
+                    MMM.setIcon(parkingIconEvaluator(markerSearcher));
+                    map.removeMarker(MMM);
+                    Marker j = map.addMarker(new MarkerOptions().position(MMM.getPosition())
+                            .title("Free Parking Spot")
+                            .setIcon(parkingIconEvaluator(markerSearcher)));
+                    j.setId(MMM.getId());
                     if (event[0] == markerID) {
                         Log.d("MarkerFound: ", "Evaluating Marker color");
-                        MMM.setIcon(MainActivity.parkingIconEvaluator(markerSearcher));
+                        MMM.setIcon(parkingIconEvaluator(markerSearcher));
                         map.updateMarker(MMM);
                     }
                 }
