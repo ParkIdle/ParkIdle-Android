@@ -25,6 +25,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -659,8 +661,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public void myhouse(){
 
-        lathouse = sharedPreferences.getFloat("lathouse",0);
-        longhouse = sharedPreferences.getFloat("lathouse",0);
+        lathouse =Double.parseDouble(sharedPreferences.getString("lathouse","0"));
+        longhouse = Double.parseDouble(sharedPreferences.getString("longhouse","0"));
+
         if(lathouse==0 && longhouse==0){
             if(isItalian())
                 Toast.makeText(this, "Casa non salvata (Inseriscila nelle impostazioni)", Toast.LENGTH_SHORT).show();
@@ -668,16 +671,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Toast.makeText(this, "Home not saved (Add it in the settings menù)", Toast.LENGTH_SHORT).show();
         }
         else{
-            LatLng casa =new LatLng(lathouse,lathouse);
+            LatLng casa =new LatLng(lathouse,longhouse);
             isCameraFollowing=false;
+
             if(isItalian()) {
-                Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(latpark, longpark))
+                Marker casamarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(lathouse, longhouse))
                         .title("Casa")
                         .setIcon(house_icon));
             }else{
-                Marker parkmarker = mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(new LatLng(latpark, longpark)))
+                Marker casamarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(new LatLng(lathouse, longhouse)))
                         .title("Home")
                         .setIcon(house_icon));
             }
@@ -692,6 +696,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .newCameraPosition(position), null);
         }
     }
+
+
 
     /* Called whenever we call invalidateOptionsMenu() */
     @Override

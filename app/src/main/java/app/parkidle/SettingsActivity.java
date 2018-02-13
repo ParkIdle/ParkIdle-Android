@@ -1,17 +1,32 @@
 package app.parkidle;
 
 import android.content.ClipData;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.mapbox.api.geocoding.v5.MapboxGeocoding;
+
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.List;
 
 import static app.parkidle.MainActivity.metric;
 
@@ -22,6 +37,35 @@ public class SettingsActivity extends AppCompatActivity {
     private Spinner spinner_unita_misura;
     private ArrayAdapter adapter;
     private Switch switch_risparmio_batteria;
+    private Button trovabutton;
+    private EditText indirizzo;
+
+    public void geocoding(String posizione){
+        Geocoder geoc= new Geocoder(this);
+        try {
+            List<Address> list = geoc.getFromLocationName(posizione,1);
+            if (list.isEmpty()){
+                Toast.makeText(this, "Impossibile trovare indirizzo", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            Address add= list.get(0);
+            String locality = add.getLocality();
+            if(MainActivity.language==0)
+                Toast.makeText(this, "La tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Home is in " + locality, Toast.LENGTH_SHORT).show();
+            double lat=add.getLatitude();
+            double longi=add.getLongitude();
+            //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
+
+            MainActivity.editor.putString("lathouse", String.valueOf(lat));
+            MainActivity.editor.putString("longhouse",  String.valueOf(longi));
+
+        } catch (IOException e) {
+            Toast.makeText(this, "Impossibile trovare luogo", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
 
     public void switch_batteria(){
         switch_risparmio_batteria=(Switch) findViewById(R.id.switch1);
@@ -38,6 +82,23 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
+
+    public void trovabutton(){
+        indirizzo=(EditText) findViewById((R.id.indirizzo));
+        trovabutton=(Button) findViewById(R.id.trovabutton);
+        trovabutton.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(indirizzo.getText().equals("")) {
+                    Toast.makeText(SettingsActivity.this, "Inserisci un indirizzo", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    geocoding(indirizzo.getText().toString());
+                }
+            }
+        });
+    }
+
 
 
     public void seekbar(){
@@ -110,6 +171,7 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
                 seekbar();
+                trovabutton();
                 switch_batteria();
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
                 spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
