@@ -175,6 +175,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private DatabasedMarker dtb;
     private boolean boo;
 
+    public static ProgressDialog logout_dialog;
+
     public static final String accessToken = "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA";
 
     // map stuff
@@ -1047,6 +1049,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
 
+
+
         FirebaseAuth instance = FirebaseAuth.getInstance();
         instance.signOut();
         mAuth.signOut();
@@ -1059,6 +1063,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Intent i = new Intent(MainActivity.this,LoginActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
+
+
 
         if (customizerThread != null) {
             customizerThread.interrupt();

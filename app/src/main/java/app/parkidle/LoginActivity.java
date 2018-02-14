@@ -71,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
 
 
-
+    //esce a schermo nei caricamenti dei login
     public ProgressDialog mDialog;
 
     private static boolean withGoogle;
@@ -177,6 +177,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
         // Check if user is signed in (non-null) and update UI accordingly.
         currentUser = mAuth.getCurrentUser();
         //currentAccount = GoogleSignIn.getLastSignedInAccount(this);
