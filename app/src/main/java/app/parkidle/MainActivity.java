@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -300,7 +300,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
-                Log.w(TAG,"Check these: " + events);
+                //Log.w(TAG,"Check these: " + events);
+                //checkEvents(events);
+                //Log.w(TAG,"We have: " + events);
                 CheckEventsTask cet = new CheckEventsTask();
                 cet.execute(events);
                 try {
@@ -332,39 +334,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             .title("You")
                             .setIcon(mIcon));
                 }
-                Iterator<String> it = events.iterator();
-                if(mapboxMap == null){
-                    Log.w(TAG + "(Renderer)","Cannot RENDER, Map is null");
-                    return;
-                }
-                while(it.hasNext()){
-                    // event -> "UUID-event-date-latitude-longitude"
-                    String e = it.next();
-                    String[] event = e.split("-");
-                    LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
-                    long ID = Long.valueOf(event[0]).longValue();
-                    if(isItalian()){
-                        Marker m = mapboxMap.addMarker(new MarkerOptions()
-                                .position(point)
-                                .title("Parcheggio libero")
-                                .setIcon(parkingIconEvaluator(e)));
-                        m.setId(ID);
 
-                    }
-                    else {
-                        Marker m = mapboxMap.addMarker(new MarkerOptions()
-                                .position(point)
-                                .title("Free Parking Spot")
-                                .setIcon(parkingIconEvaluator(e)));
-                        m.setId(ID);
-
-                    }
-
-                }
                 Log.w(TAG + "(Renderer)","Render DONE...");
                 if(!events.isEmpty()) {
                     Log.w(TAG, "Starting render task: " + events);
-                    //renderEvents(events, getmMap());
+                    renderEvents(events, getmMap());
                     Log.w(TAG, "End render task");
                     //setRepeatingAsyncTask(getmMap(),events);
                 }else{
@@ -406,10 +380,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //TEST STUFF
                         Date d = new Date();
                         Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                        //EventHandler peh = new EventHandler(p);
-                        //Thread t5 = new Thread(peh);
-                        //t5.start();
+                        EventHandler peh = new EventHandler(p);
+                        Thread t5 = new Thread(peh);
+                        t5.start();
 
                     }
                 });
@@ -854,8 +829,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onBackPressed() {
         //super.onBackPressed(); // se commento questo, il tasto back non funziona piu
-        //finishAffinity();
-        Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
+        finishAffinity();
+        //Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
     }
 
     @SuppressLint("MissingPermission")
@@ -962,7 +937,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         float[] results = new float[3];
         while (it.hasNext()) {
             Marker aux = it.next();
-            if (!aux.getIcon().equals(mIcon) || !aux.getIcon().equals(house_icon)) {
+            if (!aux.getIcon().equals(mIcon) && !aux.getIcon().equals(house_icon)) {
                 Double markerLat = aux.getPosition().getLatitude();
                 Double markerLng = aux.getPosition().getLongitude();
                 Location.distanceBetween(myLat, myLng, markerLat, markerLng, results);
@@ -1091,8 +1066,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //if (isWithGoogle())
         //if (LoginActivity.getUser() != null) {
 
-
-
         FirebaseAuth instance = FirebaseAuth.getInstance();
         instance.signOut();
         mAuth.signOut();
@@ -1180,25 +1153,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
                         events.remove(e);
                 }
-                else{
-                    LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
-                    long ID = Long.valueOf(event[0]).longValue();
-                    if(isItalian()){
-                        markerList.add(new MarkerOptions()
-                                .position(point)
-                                .title("Parcheggio libero")
-                                .setIcon(parkingIconEvaluator(e))
-                        );
-
-                    }
-                    else {
-                        markerList.add(new MarkerOptions()
-                                .position(point)
-                                .title("Free Parking Spot")
-                                .setIcon(parkingIconEvaluator(e)));
-
-                    }
-                }
             }catch(ConcurrentModificationException e){
                 return;
             }
@@ -1224,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .position(point)
                         .title("Parcheggio libero")
                         .setIcon(parkingIconEvaluator(e)));
-                m.setId(ID);
+                //m.setId(ID); DA PROBLEMI PER CLICCARE I MARKER
 
             }
             else {
@@ -1232,7 +1186,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .position(point)
                         .title("Free Parking Spot")
                         .setIcon(parkingIconEvaluator(e)));
-                m.setId(ID);
+                //m.setId(ID); DA PROBLEMI PER CLICCARE MARKER
 
             }
 
@@ -1309,12 +1263,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds2 = time2.split(":")[2];
 
         if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            /*if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10)){
+            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10)){
                 return icona_parcheggio_libero_5mins;
-            }*/
-            if(true){
-                return icona_parcheggio_libero_20mins;
             }
+            /*if(true){
+                return icona_parcheggio_libero_20mins;
+            }*/
             else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
                 return icona_parcheggio_libero_10mins;
             }
