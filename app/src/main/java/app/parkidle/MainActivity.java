@@ -370,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
 
-                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                        /*Marker m = mapboxMap.addMarker(new MarkerOptions()
                                 .setIcon(icona_parcheggio_libero)
                                 .position(point)
                                 .setTitle("Parcheggio libero"));
@@ -384,7 +384,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start();
+                        t5.start();*/
 
                     }
                 });
@@ -396,19 +396,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         final View window; // Creating an instance for View Object
                         LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         window = inflater.inflate(R.layout.parkidle_info_window, null);
+
+                        Button nav = (Button) window.findViewById(R.id.info_navigation);
+                        nav.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                destination = Point.fromLngLat(
+                                        marker.getPosition().getLongitude(),
+                                        marker.getPosition().getLatitude());
+                                launchNavigation();
+                            }
+                        });
+
+                        LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                        String distanza = calculateDistance(marker.getPosition(), myLatLng);
                         Icon icon = marker.getIcon();
                         if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
-
-                            LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                            String distanza = calculateDistance(marker.getPosition(), myLatLng);
 
                             TextView title = (TextView) window.findViewById(R.id.info_title);
                             title.setText(marker.getTitle());
 
                             TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
                             TextView distance = (TextView) window.findViewById(R.id.info_distance);
-                            long markerID = marker.getId();
-                            String date = getDateFromMarkerID(markerID);
+                            String date = "";
+                            //long markerID = marker.getId();
+                            //String date = getDateFromMarkerID(markerID);
                             if (icon.equals(icona_parcheggio_libero)) {
                                 date = "< 5";
                             }
@@ -421,6 +433,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             if (icon.equals(icona_parcheggio_libero_20mins)) {
                                 date = "> 20";
                             }
+
                             if (isItalian()) {
                                 minutes.setText("Libero da:    " + date + " minuti");
                                 distance.setText("Distanza(linea d'aria):      " + distanza);
@@ -429,21 +442,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 distance.setText("Distance:      " + distanza);
                             }
 
-                            Button nav = (Button) window.findViewById(R.id.info_navigation);
-                            nav.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    destination = Point.fromLngLat(
-                                            marker.getPosition().getLongitude(),
-                                            marker.getPosition().getLatitude());
-                                    launchNavigation();
-                                }
-                            });
+
                             return window;
                         }
                         else if (icon.equals(mIcon)) {
                             return null;
                         }
+                        else if (icon.equals(house_icon) || icon.equals(icona_whereiparked)){
+
+
+                            TextView title = (TextView) window.findViewById(R.id.info_title);
+                            title.setText(marker.getTitle());
+
+                            TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
+                            TextView distance = (TextView) window.findViewById(R.id.info_distance);
+
+                            if (isItalian()) {
+                                minutes.setText("");
+                                distance.setText("Distanza(linea d'aria):      " + distanza);
+                            } else {
+                                minutes.setText("");
+                                distance.setText("Distance:      " + distanza);
+                            }
+                            return window;
+                        }
+
 
                         return window;
                     }
@@ -655,15 +678,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Toast.makeText(this, "Your car position is not saved", Toast.LENGTH_SHORT).show();
         }
         else{
-            LatLng parcheggio =new LatLng(latpark,longpark);
+            LatLng parcheggio = new LatLng(latpark,longpark);
             isCameraFollowing=false;
             if(isItalian()) {
-                Marker parkmarker = mMap.addMarker(new MarkerOptions()
+                Marker parkmarker = getmMap().addMarker(new MarkerOptions()
                         .position(new LatLng(latpark, longpark))
                         .title("La tua macchina")
                         .setIcon(icona_whereiparked));
             }else{
-                Marker parkmarker = mMap.addMarker(new MarkerOptions()
+                Marker parkmarker = getmMap().addMarker(new MarkerOptions()
                         .position(new LatLng(new LatLng(latpark, longpark)))
                         .title("Your Car")
                         .setIcon(icona_whereiparked));
@@ -675,7 +698,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .bearing(mLastLocation.getBearing()) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
-            mMap.animateCamera(CameraUpdateFactory
+            getmMap().animateCamera(CameraUpdateFactory
                     .newCameraPosition(position), null);
         }
     }
@@ -844,6 +867,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // makeUseOfNewLocation(location);
                 // update my position
                 //drawMarker(location);
+                mLastLocation = location;
                 LatLng point = new LatLng(location.getLatitude(),location.getLongitude());
                 if (isCameraFollowing) {
                     if(getmMap() != null) {
