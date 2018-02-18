@@ -7,7 +7,7 @@ android {
         config {
             keyAlias 'Parkidle_key1'
             keyPassword 'parkidle2017sams@@'
-            storeFile file('/Users/Matteo/Desktop/Parkidle.jks')
+            storeFile file('C:/Users/misui/Documents/GitHub/Parkidle.jks')
             storePassword 'parkidle2017sams@@'
         }
     }
@@ -17,10 +17,10 @@ android {
         applicationId "app.parkidle"
         minSdkVersion 22
         targetSdkVersion 26
-        versionName '1.2'
+        versionName '1.2.1'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
-        versionCode 4
+        versionCode 5
     }
     buildTypes {
         release {
