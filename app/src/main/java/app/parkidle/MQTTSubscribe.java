@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.SeekBar;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -111,7 +112,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
             float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
 
-            if ( distanza < SettingsActivity.seek_bar.getProgress()*1000) //aggiunto controllo distanza notifiche
+            if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
                 notification(event.getLatitude(),event.getLongitude());
 
             long ID = Long.valueOf(event.getID()).longValue();
@@ -122,7 +123,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             // TODO:
             Log.w(TAG, "Arrival Event just received");
         }
-        boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
+        //boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
         /*if(!isRunningColor) {
             ColorManager colorManager = new ColorManager();
             Thread colorThread = new Thread(colorManager);
