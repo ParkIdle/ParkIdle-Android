@@ -122,7 +122,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             // TODO:
             Log.w(TAG, "Arrival Event just received");
         }
-        boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
+        //boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
         /*if(!isRunningColor) {
             ColorManager colorManager = new ColorManager();
             Thread colorThread = new Thread(colorManager);

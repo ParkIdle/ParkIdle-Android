@@ -189,11 +189,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private Marker me; // ha sempre come riferimento il mio Marker
     private String unitType;
     private String mapStyleJSON = null;
+    private List<MarkerOptions> markerList;
 
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
     public static MqttClient MQTTClient;
-
 
 
     // status boolean
@@ -227,12 +227,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onCreate(final Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        Log.w(TAG,"creating...");
+        Log.w(TAG,"OnCreate()");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-
 
         setContentView(R.layout.activity_main);
 
@@ -285,16 +283,207 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             Crashlytics.logException(e);
         }
 
+        events = sharedPreferences.getStringSet("events", new HashSet<String>());
+
+        //Prendo l'istanza di MapBox(API Maps) e inserisco la key
+        Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
+        // mapView sarebbe la vista della mappa e l'associo ad un container in XML
+        mapView = (MapView) findViewById(R.id.mapView);
+        // creo la mappa
+        mapView.onCreate(savedInstanceState);
+
+        // preparo la mappa
+        //prepareMap(mapView);
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final MapboxMap mapboxMap) {
+                mMap = mapboxMap;
+                Log.w(TAG,"Check these: " + events);
+                CheckEventsTask cet = new CheckEventsTask();
+                cet.execute(events);
+                try {
+                    events = cet.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                }
+                // Camera Position definisce la posizione della telecamera
+                position = new CameraPosition.Builder()
+                        .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 17
+                        .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                if (isItalian()) {
+                    me = mapboxMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                            .title("Tu")
+                            .setIcon(mIcon));
+
+                } else {
+                    // add marker aggiunge un marker sulla mappa con data posizione e titolo
+                    me = mapboxMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                            .title("You")
+                            .setIcon(mIcon));
+                }
+                Iterator<String> it = events.iterator();
+                if(mapboxMap == null){
+                    Log.w(TAG + "(Renderer)","Cannot RENDER, Map is null");
+                    return;
+                }
+                while(it.hasNext()){
+                    // event -> "UUID-event-date-latitude-longitude"
+                    String e = it.next();
+                    String[] event = e.split("-");
+                    LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
+                    long ID = Long.valueOf(event[0]).longValue();
+                    if(isItalian()){
+                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title("Parcheggio libero")
+                                .setIcon(parkingIconEvaluator(e)));
+                        m.setId(ID);
+
+                    }
+                    else {
+                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                                .position(point)
+                                .title("Free Parking Spot")
+                                .setIcon(parkingIconEvaluator(e)));
+                        m.setId(ID);
+
+                    }
+
+                }
+                Log.w(TAG + "(Renderer)","Render DONE...");
+                if(!events.isEmpty()) {
+                    Log.w(TAG, "Starting render task: " + events);
+                    //renderEvents(events, getmMap());
+                    Log.w(TAG, "End render task");
+                    //setRepeatingAsyncTask(getmMap(),events);
+                }else{
+                    Log.w(TAG,"Nessun evento da renderizzare");
+                }
+                editor.remove("events");
+
+                mapboxMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 5000);
+
+                mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
+                    @Override
+                    public void onScroll() {
+                        //Log.w("SCROLL LISTENER","scrolling...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
+                    @Override
+                    public void onFling() {
+                        //Log.w("FLING LISTENER","flinging...");
+                        isCameraFollowing = false;
+                    }
+                });
+
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(@NonNull LatLng point) {
+                        Log.w("LONG CLICK LISTENER","long clicking...");
+
+                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                                .setIcon(icona_parcheggio_libero)
+                                .position(point)
+                                .setTitle("Parcheggio libero"));
+
+                        //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
+
+                        //TEST STUFF
+                        Date d = new Date();
+                        Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
+                        //EventHandler peh = new EventHandler(p);
+                        //Thread t5 = new Thread(peh);
+                        //t5.start();
+
+                    }
+                });
+
+                mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
+                    @Nullable
+                    @Override
+                    public View getInfoWindow(@NonNull final Marker marker) {
+                        final View window; // Creating an instance for View Object
+                        LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                        window = inflater.inflate(R.layout.parkidle_info_window, null);
+                        Icon icon = marker.getIcon();
+                        if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
+
+                            LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+                            String distanza = calculateDistance(marker.getPosition(), myLatLng);
+
+                            TextView title = (TextView) window.findViewById(R.id.info_title);
+                            title.setText(marker.getTitle());
+
+                            TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
+                            TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                            long markerID = marker.getId();
+                            String date = getDateFromMarkerID(markerID);
+                            if (icon.equals(icona_parcheggio_libero)) {
+                                date = "< 5";
+                            }
+                            if (icon.equals(icona_parcheggio_libero_5mins)) {
+                                date = "> 5";
+                            }
+                            if (icon.equals(icona_parcheggio_libero_10mins)) {
+                                date = "> 10";
+                            }
+                            if (icon.equals(icona_parcheggio_libero_20mins)) {
+                                date = "> 20";
+                            }
+                            if (isItalian()) {
+                                minutes.setText("Libero da:    " + date + " minuti");
+                                distance.setText("Distanza(linea d'aria):      " + distanza);
+                            } else {
+                                minutes.setText("Since:    " + date + " minutes");
+                                distance.setText("Distance:      " + distanza);
+                            }
+
+                            Button nav = (Button) window.findViewById(R.id.info_navigation);
+                            nav.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    destination = Point.fromLngLat(
+                                            marker.getPosition().getLongitude(),
+                                            marker.getPosition().getLatitude());
+                                    launchNavigation();
+                                }
+                            });
+                            return window;
+                        }
+                        else if (icon.equals(mIcon)) {
+                            return null;
+                        }
+
+                        return window;
+                    }
+
+
+
+                });
+
+
+            }
+
+        });
+
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                //Prendo l'istanza di MapBox(API Maps) e inserisco la key
-                Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
-                // mapView sarebbe la vista della mappa e l'associo ad un container in XML
-                mapView = (MapView) findViewById(R.id.mapView);
-                // creo la mappa
-                mapView.onCreate(savedInstanceState);
 
                 ftb = findViewById(R.id.center_camera); // tasto per recenterCamera()
                 ftb.setOnClickListener(new View.OnClickListener() {
@@ -313,149 +502,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
 
-                // preparo la mappa
-                //prepareMap(mapView);
-                mapView.getMapAsync(new OnMapReadyCallback() {
-                    @Override
-                    public void onMapReady(final MapboxMap mapboxMap) {
-                        mMap = mapboxMap;
-
-                        // Camera Position definisce la posizione della telecamera
-                        position = new CameraPosition.Builder()
-                                .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                                .zoom(17) // Sets the zoom to level 17
-                                .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
-                                .tilt(0) // Set the camera tilt to 20 degrees
-                                .build(); // Builds the CameraPosition object from the builder
-                        if (isItalian()) {
-                            me = mapboxMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                                    .title("Tu")
-                                    .setIcon(mIcon));
-
-                        } else {
-                            // add marker aggiunge un marker sulla mappa con data posizione e titolo
-                            me = mapboxMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-                                    .title("You")
-                                    .setIcon(mIcon));
-                        }
-
-                        mapboxMap.animateCamera(CameraUpdateFactory
-                                .newCameraPosition(position), 5000);
-
-                        mapboxMap.addOnScrollListener(new MapboxMap.OnScrollListener() {
-                            @Override
-                            public void onScroll() {
-                                //Log.w("SCROLL LISTENER","scrolling...");
-                                isCameraFollowing = false;
-                            }
-                        });
-
-                        mapboxMap.addOnFlingListener(new MapboxMap.OnFlingListener() {
-                            @Override
-                            public void onFling() {
-                                //Log.w("FLING LISTENER","flinging...");
-                                isCameraFollowing = false;
-                            }
-                        });
-
-                        mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
-                            @Override
-                            public void onMapLongClick(@NonNull LatLng point) {
-                              Log.w("LONG CLICK LISTENER","long clicking...");
-
-                                Marker m = mapboxMap.addMarker(new MarkerOptions()
-                                    .setIcon(icona_parcheggio_libero)
-                                    .position(point)
-                                    .setTitle("Parcheggio libero"));
-
-                                //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
-
-                                //TEST STUFF
-                                Date d = new Date();
-                                Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                                //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
-                                EventHandler peh = new EventHandler(p);
-                                Thread t5 = new Thread(peh);
-                                t5.start();
-
-                            }
-                        });
-                        if(!events.isEmpty()) {
-                            Log.w("RENDER THREAD", "Starting render task");
-                            renderEvents(events, mapboxMap);
-                            Log.w("RENDER THREAD", "End render task");
-                            setRepeatingAsyncTask(mapboxMap,events);
-                        }else{
-                            Log.w(TAG,"Nessun evento da renderizzare");
-                        }
-
-                        mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
-                            @Nullable
-                            @Override
-                            public View getInfoWindow(@NonNull final Marker marker) {
-                                final View window; // Creating an instance for View Object
-                                LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                                window = inflater.inflate(R.layout.parkidle_info_window, null);
-                                Icon icon = marker.getIcon();
-                                if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
-
-                                    LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-                                    String distanza = calculateDistance(marker.getPosition(), myLatLng);
-
-                                    TextView title = (TextView) window.findViewById(R.id.info_title);
-                                    title.setText(marker.getTitle());
-
-                                    TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
-                                    TextView distance = (TextView) window.findViewById(R.id.info_distance);
-                                    long markerID = marker.getId();
-                                    String date = getDateFromMarkerID(markerID);
-                                    if (icon.equals(icona_parcheggio_libero)) {
-                                        date = "< 5";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_5mins)) {
-                                        date = "> 5";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_10mins)) {
-                                        date = "> 10";
-                                    }
-                                    if (icon.equals(icona_parcheggio_libero_20mins)) {
-                                        date = "> 20";
-                                    }
-                                    if (isItalian()) {
-                                        minutes.setText("Libero da:    " + date + " minuti");
-                                        distance.setText("Distanza(linea d'aria):      " + distanza);
-                                    } else {
-                                        minutes.setText("Since:    " + date + " minutes");
-                                        distance.setText("Distance:      " + distanza);
-                                    }
-
-                                    Button nav = (Button) window.findViewById(R.id.info_navigation);
-                                    nav.setOnClickListener(new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            destination = Point.fromLngLat(
-                                                    marker.getPosition().getLongitude(),
-                                                    marker.getPosition().getLatitude());
-                                            launchNavigation();
-                                        }
-                                    });
-                                    return window;
-                                }
-                                else if (icon.equals(mIcon)) {
-                                    return null;
-                                }
-
-                                return window;
-                            }
-
-
-                        });
-
-                    }
-
-                });
                 // Swipe-left Menu
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
@@ -560,8 +606,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
-
-
         // MqttSubscribe dopo che la mappa viene assegnata in modo
         // da evitare NullPointerException quando inserisco un marker
         // di un parcheggio rilevato
@@ -588,7 +632,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (boo){
             editor.putBoolean("done",false);
-            editor.apply();
+            editor.commit();
             Intent tutorial = new Intent(MainActivity.this,TutorialActivity.class);
             startActivity(tutorial);
         }
@@ -733,23 +777,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onStart() {
         super.onStart();
 
-
-
-        Log.w(TAG,"Starting...");
+        Log.w(TAG,"OnStart(): " + events);
         mapView.onStart();
 
-        events = sharedPreferences.getStringSet("events", new HashSet<String>());
-        CheckEventsTask cet = new CheckEventsTask();
-        cet.execute(events);
-        try {
-            events = cet.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
+
         /*if(currentUser != null){
             return;
         }else{
@@ -760,7 +791,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onResume() {
         super.onResume();
-        //Log.w("onResume()","resuming...");
+        Log.w(TAG,"OnResume(): " + events);
         mapView.onResume();
         //checkEvents(events);
         //activatePredictIOTracker();
@@ -773,7 +804,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onPause() {
         super.onPause();
-        //Log.w("onPause()","stopping...");
+        Log.w(TAG,"OnPause(): " + events);
+        editor.remove("events");
+        editor.putStringSet("events",events);
+        editor.commit();
         mapView.onPause();
 
     }
@@ -782,12 +816,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onStop() {
         super.onStop();
         mapView.onStop();
-        Log.w(TAG,"Stopping...");
-        editor.putBoolean("colorThreadIsRunning", false);
+        Log.w(TAG,"OnStop(): " + events);
+       // editor.putBoolean("colorThreadIsRunning", false);
         //Log.w(TAG,"We have: "+ events);
+        editor.remove("events");
         editor.putStringSet("events",events);
         editor.commit();
-        Log.w(TAG,"Saving sharedPrefs");
+        Log.w(TAG,"Saving sharedPrefs: " + events);
     }
 
     @Override
@@ -799,6 +834,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.w(TAG,"OnDestroy(): " + events);
+        editor.remove("events");
+        editor.putStringSet("events",events);
+        editor.commit();
+        Log.w(TAG,"Saving sharedPrefs: " + events);
+
         mapView.onDestroy();
     }
 
@@ -811,7 +852,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onBackPressed() {
         //super.onBackPressed(); // se commento questo, il tasto back non funziona piu
-        finishAffinity();
+        //finishAffinity();
+        Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
     }
 
     @SuppressLint("MissingPermission")
@@ -918,7 +960,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         float[] results = new float[3];
         while (it.hasNext()) {
             Marker aux = it.next();
-            if (!aux.getIcon().equals(mIcon)) {
+            if (!aux.getIcon().equals(mIcon) || !aux.getIcon().equals(house_icon)) {
                 Double markerLat = aux.getPosition().getLatitude();
                 Double markerLng = aux.getPosition().getLongitude();
                 Location.distanceBetween(myLat, myLng, markerLat, markerLng, results);
@@ -1132,6 +1174,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
                         events.remove(e);
                 }
+                else{
+                    LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
+                    long ID = Long.valueOf(event[0]).longValue();
+                    if(isItalian()){
+                        markerList.add(new MarkerOptions()
+                                .position(point)
+                                .title("Parcheggio libero")
+                                .setIcon(parkingIconEvaluator(e))
+                        );
+
+                    }
+                    else {
+                        markerList.add(new MarkerOptions()
+                                .position(point)
+                                .title("Free Parking Spot")
+                                .setIcon(parkingIconEvaluator(e)));
+
+                    }
+                }
             }catch(ConcurrentModificationException e){
                 return;
             }
@@ -1139,11 +1200,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.w(TAG,"Check DONE...");
     }
 
-    private synchronized void renderEvents(Set<String> events,MapboxMap mapboxMap){
+    private void renderEvents(Set<String> events,MapboxMap mapboxMap){
         //Log.w(TAG,"Rendering events...: " + events);
         Iterator<String> it = events.iterator();
         if(mapboxMap == null){
-            Log.w(TAG,"Cannot RENDER, Map is null");
+            Log.w(TAG + "(Renderer)","Cannot RENDER, Map is null");
             return;
         }
         while(it.hasNext()){
@@ -1170,7 +1231,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
         }
-        Log.w(TAG,"Render DONE...");
+        Log.w(TAG + "(Renderer)","Render DONE...");
     }
 
     /**
@@ -1242,7 +1303,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds2 = time2.split(":")[2];
 
         if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            if (true){
+            /*if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10)){
+                return icona_parcheggio_libero_5mins;
+            }*/
+            if(true){
                 return icona_parcheggio_libero_20mins;
             }
             else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
@@ -1251,7 +1315,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 20) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 30)){
                 return icona_parcheggio_libero_20mins;
             }
-            return icona_parcheggio_libero;
+            else return icona_parcheggio_libero;
         }
         return icona_parcheggio_libero;
     }
@@ -1388,7 +1452,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 }
 
 class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
-    private final String TAG = "ColorManagerTask";
+    private final String TAG = "Main";
     private MapboxMap map;
 
     public ColorManagerTask(MapboxMap m){
@@ -1396,6 +1460,10 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
     }
 
     protected Void doInBackground(Set<String>... events) {
+
+        if(map.equals(MainActivity.getmMap())){
+            Log.w(TAG + "(Map Equalizer)","Maps are equals!");
+        }
 
         Log.w("COLOR THREAD", "CHIAMATO");
         if(map != null){
@@ -1407,38 +1475,37 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
             Log.w("COLOR THREAD", "CHIAMATO");
             Log.w("COLOR THREAD", "CHIAMATO");
 
-            MainActivity.editor.putBoolean("colorThreadIsRunning", true);
+            //MainActivity.editor.putBoolean("colorThreadIsRunning", true);
             List<Marker> listMarker = map.getMarkers();
-            Log.w("COLOR: ", "STARTED");
+            Log.w(TAG + "(ColorManager)", "STARTED");
             Iterator<Marker> it = listMarker.iterator();
             while (it.hasNext()) {
                 Marker MMM = it.next();
                 String markerID = String.valueOf(MMM.getId());
-                Log.w("COLOR: ", markerID+" are going to be colorEvaluated");
+                Log.w(TAG + "(ColorManager)", markerID+" is going to be colorEvaluated");
 
                 Iterator<String> checkIterator = events[0].iterator();
                 while (checkIterator.hasNext()) {
                     String markerSearcher = checkIterator.next();
                     String[] event = markerSearcher.split("-");
                     //Log.d("MarkerFound: ", "Evaluating Marker color");
-                    MMM.setIcon(parkingIconEvaluator(markerSearcher));
+                    /*MMM.setIcon(parkingIconEvaluator(markerSearcher));
                     map.removeMarker(MMM);
                     Marker j = map.addMarker(new MarkerOptions().position(MMM.getPosition())
-                            .title("Free Parking Spot")
+                            .title("Parcheggio libero")
                             .setIcon(parkingIconEvaluator(markerSearcher)));
-                    j.setId(MMM.getId());
-                    if (event[0] == markerID) {
-                        Log.d("MarkerFound: ", "Evaluating Marker color");
+                    j.setId(MMM.getId());*/
+                    if (event[0].equals(markerID)) {
+                        Log.w(TAG + "(ColorManager)", "Marker found -> Evaluating Marker color");
                         MMM.setIcon(parkingIconEvaluator(markerSearcher));
                         map.updateMarker(MMM);
-
                     }
                 }
             }
-            Log.w("COLOR: ", "DONE");
+            Log.w(TAG + "(ColorManager)", "DONE");
             return null;
         }
-        Log.w("COLOR: ", "Map is null");
+        Log.w(TAG + "(ColorManager)", "Map is null");
         return null;
 
     }
@@ -1475,10 +1542,11 @@ class ProfileBitmapTask extends AsyncTask<String, Integer, Bitmap> {
 }
 
 class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
-    private final String TAG = "CheckEventsTask";
+    private final String TAG = "Main";
 
     protected Set<String> doInBackground(Set<String>... events) {
-        Log.w(TAG,"Checking events..");
+
+        Log.w(TAG + "(CheckTask)","Checking events..");
         int count = events.length;
         for (int i = 0; i < count; i++) {
             Iterator<String> it = events[i].iterator();
@@ -1504,13 +1572,13 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                             events[i].remove(e);
                     }
                 } catch (ConcurrentModificationException e) {
-                    Log.w(TAG,"WARNING! -> Exception: " + e.getMessage());
+                    Log.w(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());
                     return null;
                 }
             }
-            Log.w(TAG, "Check DONE...");
+            Log.w(TAG + "(CheckTask)", "Check DONE...");
 
-            return events[i];
+            return events[0];
         }
 
         return events[0];

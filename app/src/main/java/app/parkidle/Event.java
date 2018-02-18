@@ -28,7 +28,7 @@ public class Event {
         this.longitude = Double.valueOf(longitude);
         MainActivity.events.add(this.toString());
 
-        Log.w("Main","[NEW EVENT] -> " + this.toString());
+        Log.w("EVENTCLASS","[NEW EVENT] -> " + this.toString());
     }
 
     public String getID(){
