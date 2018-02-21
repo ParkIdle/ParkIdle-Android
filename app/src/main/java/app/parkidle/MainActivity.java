@@ -659,6 +659,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     }//qua finisce oncreate
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        int id = item.getItemId();
+        switch(id){
+            case android.R.id.home:
+                if(!mDrawerLayout.isDrawerOpen(Gravity.LEFT))
+                    mDrawerLayout.openDrawer(Gravity.LEFT);
+                else mDrawerLayout.closeDrawers();
+                break;
+        }
+        return true;
+    }
+
     public static void cambialingua(){
         Layer mapText = mMap.getLayer("place-city-lg-n");
         if (language==0)
