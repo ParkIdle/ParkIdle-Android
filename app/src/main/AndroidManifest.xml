@@ -106,8 +106,6 @@
 
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
-        <activity android:name=".ParkIdleAccountActivity" />
-        <activity android:name=".SignUpActivity"></activity>
     </application>
 
 </manifest>
