@@ -6,12 +6,14 @@ import android.animation.TypeEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import com.google.android.gms.actions.SearchIntents;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -656,7 +658,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         render.start();*/
 
 
-
+    Intent actualIntent = getIntent();
+    if(SearchIntents.ACTION_SEARCH.equals(actualIntent.getAction())){
+        String query = actualIntent.getStringExtra(SearchManager.QUERY);
+        char f = query.toLowerCase().charAt(0);
+        if(f=='p'){
+            nearestParkingSpot();
+        }
+    }
     }//qua finisce oncreate
 
     @Override

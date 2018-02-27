@@ -34,6 +34,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private String activitiesJson;
     private SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
     private SharedPreferences.Editor editor = MainActivity.editor;
+    private Date lastSignal;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -185,11 +186,13 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
-            Event event = new Event(markerIdHashcode(latitude,longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-            EventHandler eh = new EventHandler(event);
-            Thread handler = new Thread(eh);
-            handler.setName("EventHandler");
-            handler.start();
+            if(trafficCheck(now)) { //TRUE se non sei nel traffico, FALSE se sei nel traffico
+                Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+                EventHandler eh = new EventHandler(event);
+                Thread handler = new Thread(eh);
+                handler.setName("EventHandler");
+                handler.start();
+            }
         }
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
@@ -213,10 +216,56 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double longitude = l.getLongitude();
                 saveParking();
                 Date now = new Date();
+                setLastSignal(now);
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
-
             }
         }
+
+    }
+
+    public Date getLastSignal(){
+        return this.lastSignal;
+    }
+    public void setLastSignal(Date d){
+        this.lastSignal = d;
+        return;
+    }
+
+    public boolean trafficCheck(Date now){
+
+        if (getLastSignal()==null){
+            setLastSignal(now);
+            return true;
+        }
+
+        Log.w("trafficCHECK"," checking if we're in a traffic queue");
+        String now1 = now.toString();
+        String time1 = now1.split(" ")[3]; // current time
+        String hour1 = time1.split(":")[0];
+        String minutes1 = time1.split(":")[1];
+        String seconds1 = time1.split(":")[2];
+
+        String lastChecked = getLastSignal().toString();
+        String time2 = lastChecked.split(" ")[3]; // event time
+        String hour2 = time2.split(":")[0];
+        String minutes2 = time2.split(":")[1];
+        String seconds2 = time2.split(":")[2];
+
+        if((Integer.parseInt(hour1)==Integer.parseInt(hour2) && Integer.parseInt(minutes1)-Integer.parseInt(minutes2) > 20) ||
+                (Integer.parseInt(hour1) > Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 20 ) ||
+                (Integer.parseInt(hour1) < Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 20 )
+                ){                                                                                                                   //controllo che tra il LastSignal e la data attuale siano passati almeno 20 minuti
+
+            setLastSignal(now);
+            return true;
+        }
+
+        else{
+            setLastSignal(now);
+            return false;
+        }
+
+
 
     }
 
