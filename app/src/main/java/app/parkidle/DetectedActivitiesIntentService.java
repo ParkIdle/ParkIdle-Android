@@ -35,6 +35,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
     private SharedPreferences.Editor editor = MainActivity.editor;
     private Date lastSignal;
+    private Boolean parkedOnce=false;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -186,7 +187,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
-            if(trafficCheck(now)) { //TRUE se non sei nel traffico, FALSE se sei nel traffico
+            if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
+                parkedOnce=false;
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
                 EventHandler eh = new EventHandler(event);
                 Thread handler = new Thread(eh);
@@ -216,7 +218,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double longitude = l.getLongitude();
                 saveParking();
                 Date now = new Date();
-                setLastSignal(now);
+                if (!parkedOnce){
+                    parkedOnce = true; // non ti fà parcheggiare piu di una volta
+                    setLastSignal(now);
+                }
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
             }
         }

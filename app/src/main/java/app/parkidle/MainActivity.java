@@ -658,9 +658,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         render.start();*/
 
 
-    Intent actualIntent = getIntent();
-    if(SearchIntents.ACTION_SEARCH.equals(actualIntent.getAction())){
-        String query = actualIntent.getStringExtra(SearchManager.QUERY);
+    if(getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")){
+        String query = getIntent().getStringExtra(SearchManager.QUERY);
         char f = query.toLowerCase().charAt(0);
         if(f=='p'){
             nearestParkingSpot();
