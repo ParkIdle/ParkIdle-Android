@@ -153,7 +153,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (MainActivity.sharedPreferences.getString("lathouse","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longhouse","0").equals("0"))
             casa.setText("Casa non inserita, clicca per inserirla");
-        else casa.setText("Indirizzo di casa già inserito");
+        else casa.setText("Indirizzo di casa già inserito,clicca qui per cambiarlo");
 
     }
 
@@ -188,7 +188,7 @@ public class SettingsActivity extends AppCompatActivity {
         if (MainActivity.sharedPreferences.getString("latwork","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longwork","0").equals("0"))
             lavoro.setText("Posto di lavoro  non inserito, clicca per inserirlo");
-        else lavoro.setText("Indirizzo del posto di lavoro già inserito");
+        else lavoro.setText("Indirizzo del posto di lavoro già inserito, clicca qui per cambiarlo");
 
     }
 
