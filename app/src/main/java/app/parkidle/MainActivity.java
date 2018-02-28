@@ -213,12 +213,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
     public static Icon house_icon;
+    public static Icon work_icon;
+
     //private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
     //private String deviceIdentifier;
 
     //shared prefs per salvare il parcheggio
     private double latpark;
     private double longpark;
+    //shared pref per salvare posto di lavoro
+    private double latwork;
+    private double longwork;
 
     //shared pref per salvare casa
     private double lathouse;
@@ -274,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
         icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
-
+        work_icon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.workicon);
         GetServerURITask gsut = new GetServerURITask();
         gsut.execute();
         try {
@@ -450,7 +455,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         else if (icon.equals(mIcon)) {
                             return null;
                         }
-                        else if (icon.equals(house_icon) || icon.equals(icona_whereiparked)){
+                        else if (icon.equals(house_icon) || icon.equals(work_icon) ||icon.equals(icona_whereiparked)){
 
 
                             TextView title = (TextView) window.findViewById(R.id.info_title);
@@ -514,6 +519,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     m.findItem(R.id.mycar).setTitle("La tua macchina");
                     m.findItem(R.id.settings).setTitle("Impostazioni");
                     m.findItem(R.id.myhouse).setTitle("Casa");
+                    m.findItem(R.id.myjob).setTitle("Posto di lavoro");
                 }
 
                 mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, mDrawerLayout,
@@ -567,6 +573,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                             case R.id.myhouse:
                                 myhouse();
+                                break;
+
+                            case R.id.myjob:
+                                mywork();
                                 break;
 
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
@@ -763,6 +773,43 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    public void mywork(){
+
+        latwork =Double.parseDouble(sharedPreferences.getString("latwork","0"));
+        longwork = Double.parseDouble(sharedPreferences.getString("longwork","0"));
+
+        if(latwork==0 && longwork==0){
+            if(isItalian())
+                Toast.makeText(this, "Posto di lavoro non salvato (Inseriscilo nelle impostazioni)", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(this, "Work place not saved (Add it in the settings menù)", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            LatLng lavoro =new LatLng(latwork,longwork);
+            isCameraFollowing=false;
+
+            if(isItalian()) {
+                Marker workmarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(latwork, longwork))
+                        .title("Lavoro")
+                        .setIcon(work_icon));
+            }else{
+                Marker casamarker = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(new LatLng(latwork, longwork)))
+                        .title("Home")
+                        .setIcon(work_icon));
+            }
+            mDrawerLayout.closeDrawers();
+            CameraPosition position = new CameraPosition.Builder()
+                    .target(lavoro) // Sets the new camera position
+                    .zoom(17) // Sets the zoom to level 10
+                    .bearing(mLastLocation.getBearing()) // degree - azimut
+                    .tilt(0) // Set the camera tilt to 20 degrees
+                    .build(); // Builds the CameraPosition object from the builder
+            mMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(position), null);
+        }
+    }
 
 
     /* Called whenever we call invalidateOptionsMenu() */
@@ -982,7 +1029,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         float[] results = new float[3];
         while (it.hasNext()) {
             Marker aux = it.next();
-            if (!aux.getIcon().equals(mIcon) && !aux.getIcon().equals(house_icon)) {
+            if (!aux.getIcon().equals(mIcon) && !aux.getIcon().equals(house_icon) && !aux.getIcon().equals(work_icon)) {
                 Double markerLat = aux.getPosition().getLatitude();
                 Double markerLng = aux.getPosition().getLongitude();
                 Location.distanceBetween(myLat, myLng, markerLat, markerLng, results);
