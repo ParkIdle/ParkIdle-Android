@@ -222,12 +222,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private double latpark;
     private double longpark;
     //shared pref per salvare posto di lavoro
-    private double latwork;
-    private double longwork;
+    public static  double latwork;
+    public static double longwork;
 
     //shared pref per salvare casa
-    private double lathouse;
-    private double longhouse;
+    public static double lathouse;
+    public static double longhouse;
 
 
 
