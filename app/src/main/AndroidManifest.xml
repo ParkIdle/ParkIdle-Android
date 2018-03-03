@@ -89,7 +89,14 @@
 
         <!-- <service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
-        <activity android:name=".MainActivity"></activity>
+
+        <activity android:name=".MainActivity" >
+            <intent-filter>
+                <action android:name="com.google.android.gms.actions.SEARCH_ACTION"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
@@ -104,8 +111,6 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
-        <activity android:name=".ParkIdleAccountActivity" />
-        <activity android:name=".SignUpActivity" />
     </application>
 
 </manifest>

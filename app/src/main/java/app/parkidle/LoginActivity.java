@@ -305,10 +305,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
 
-    private void parkIdle_signIn(){
-        Intent i = new Intent(this,ParkIdleAccountActivity.class);
-        startActivity(i);
-    }
+
 
     public static boolean isWithGoogle() {
         return withGoogle;
