@@ -1116,6 +1116,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
+        mLastLocation = getLastLocation();
+        me = getmMap().addMarker(new MarkerOptions()
+                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+        .title("You")
+        .icon(mIcon));
+
         return getLastLocation();
     }
 
