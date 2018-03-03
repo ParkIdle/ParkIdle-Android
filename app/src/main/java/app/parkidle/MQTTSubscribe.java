@@ -106,6 +106,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             client.setCallback(this);
             client.subscribe("server/departed", 1); // mi sottoscrivo al topic server/departed
             client.subscribe("server/arrival",1); // same
+            client.subscribe("server/advice",1);
             Log.w(TAG,"Successfully subscribed!");
 
             //MainActivity.MQTTClient = client;
@@ -155,6 +156,10 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             // TODO:
             Log.w(TAG, "Arrival Event just received");
         }
+        else{
+            adviceNotification(message.toString());
+        }
+
         //boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
         /*if(!isRunningColor) {
             ColorManager colorManager = new ColorManager();
@@ -213,6 +218,42 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
                 .setContentTitle("There's a new empty parking spot near you!")
                 .setContentText("Click here to get there")
                 .setContentInfo("Parking Spot")
+                .setContentIntent(contentIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notificationBuilder.build());
+    }
+
+    private void adviceNotification(String msg){
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), MainActivity.NOTIFICATION_CHANNEL_ID);
+        int requestID = (int) System.currentTimeMillis();
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+
+        //**add this line**
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.putExtra("action","toNotifyAdvice");
+        notificationIntent.putExtra("message",msg);
+        //**edit this line to put requestID as requestCode**
+        PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(MainActivity.language == 0)
+            notificationBuilder.setAutoCancel(true)
+                    .setDefaults(Notification.DEFAULT_ALL)
+                    .setWhen(System.currentTimeMillis())
+                    .setSmallIcon(R.drawable.ic_local_parking_black_24dp)
+                    .setTicker("ParkIdle")
+                    .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26. check below update for 26 API
+                    .setContentTitle("Messaggio:")
+                    .setContentText(msg)
+                    .setContentIntent(contentIntent);
+        else notificationBuilder.setAutoCancel(true)
+                .setDefaults(Notification.DEFAULT_ALL)
+                .setWhen(System.currentTimeMillis())
+                .setSmallIcon(R.drawable.ic_local_parking_black_24dp)
+                .setTicker("ParkIdle")
+                .setPriority(Notification.PRIORITY_MAX) // this is deprecated in API 26 but you can still use for below 26. check below update for 26 API
+                .setContentTitle("Message")
+                .setContentText(msg)
                 .setContentIntent(contentIntent);
 
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
