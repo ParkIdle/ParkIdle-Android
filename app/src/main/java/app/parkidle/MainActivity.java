@@ -272,8 +272,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         // se ho gia i permessi posso chiedere di localizzarmi
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-        //checkGPSEnabled(locationManager); // controllo lo stato del GPS
-        //mLastLocation = getLastLocation(); // localizzo
+        checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        mLastLocation = getLastLocation(); // localizzo
 
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
@@ -325,7 +325,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
-                mLastLocation = checkGPSEnabled(locationManager);
                 //Log.w(TAG,"Check these: " + events);
                 //checkEvents(events);
                 //Log.w(TAG,"We have: " + events);
@@ -1014,7 +1013,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             }
 
             public void onProviderEnabled(String provider) {
-                //Toast.makeText(getBaseContext(), "onProviderEnabled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(), "onProviderEnabled", Toast.LENGTH_SHORT).show();
+                
             }
 
             public void onProviderDisabled(String provider) {
@@ -1101,7 +1101,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .newCameraPosition(position), null);
     }
 
-    public Location checkGPSEnabled(LocationManager locationManager) {
+    public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
@@ -1111,7 +1111,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
-        return getLastLocation();
     }
 
     private void buildAlertMessage() {
