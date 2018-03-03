@@ -190,6 +190,9 @@ public class DetectedActivitiesIntentService extends IntentService {
             if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
                 parkedOnce=false;
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+                MainActivity.parcheggisegnalati+=1;
+                MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+                MainActivity.editor.commit();
                 EventHandler eh = new EventHandler(event);
                 Thread handler = new Thread(eh);
                 handler.setName("EventHandler");

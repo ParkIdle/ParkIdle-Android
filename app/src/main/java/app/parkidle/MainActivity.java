@@ -237,7 +237,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //shared pref per salvare casa
     public static double lathouse;
     public static double longhouse;
-
+    //contatore parcheggi per punteggio
+    public static int parcheggisegnalati=0;
 
 
 
