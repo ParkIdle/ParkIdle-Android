@@ -33,9 +33,13 @@
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
-        <meta-data android:name="firebase_crashlytics_collection_enabled" android:value="false" />
-        <service android:name=".DetectedActivitiesIntentService"
-            android:exported="false"/>
+        <meta-data
+            android:name="firebase_crashlytics_collection_enabled"
+            android:value="false" />
+
+        <service
+            android:name=".DetectedActivitiesIntentService"
+            android:exported="false" />
         <service
             android:name="io.predict.sdk.detection.services.PIOMainService"
             android:exported="false" />
@@ -50,7 +54,7 @@
             android:exported="false" />
         <service
             android:name=".MQTTSubscribe"
-            android:exported="false"/>
+            android:exported="false" />
 
         <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
             <intent-filter>
@@ -85,10 +89,7 @@
 
         <!-- <service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
-        <activity android:name=".MainActivity" >
-
-        </activity>
-
+        <activity android:name=".MainActivity"></activity>
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
@@ -98,16 +99,13 @@
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
         <activity android:name=".ParkIdleAccountActivity" />
-        <activity android:name=".SignUpActivity"></activity>
+        <activity android:name=".SignUpActivity" />
     </application>
 
 </manifest>

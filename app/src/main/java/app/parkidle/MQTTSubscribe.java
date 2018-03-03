@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -17,12 +18,18 @@ import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 
+import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClientPersistence;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
+import org.eclipse.paho.client.mqttv3.internal.MqttPersistentData;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import static app.parkidle.MainActivity.calculateDistance;
@@ -36,7 +43,8 @@ import static app.parkidle.MainActivity.icona_parcheggio_libero;
 public class MQTTSubscribe extends IntentService implements MqttCallback{
 
 
-    private MqttClient client;
+    //private MqttClient client;
+    private MqttAsyncClient client;
     private final String TAG = "MQTTSubscribe";
     private String serverIP;
     private String mosquittoBrokerAWS;
@@ -67,25 +75,44 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         try {
             serverIP = MainActivity.mosquittoBrokerAWS;
             mosquittoBrokerAWS = "tcp://"+serverIP+":1883";
-            Log.w(TAG,"Subscribing....");
-            // TODO: inserire Mosquitto Broker hostato su AWS
-            client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
+            Log.w(TAG,"Subscribing...");
+
+            //client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
+            client = new MqttAsyncClient(mosquittoBrokerAWS, deviceIdentifier, new MemoryPersistence()); //client con buffer
             MqttConnectOptions options = new MqttConnectOptions();
-            options.setCleanSession(true);
-            //options.setAutomaticReconnect(true);
+            options.setCleanSession(false);
+            options.setAutomaticReconnect(true);
+            //preparo il buffer
+            DisconnectedBufferOptions dbo = new DisconnectedBufferOptions();
+            dbo.setPersistBuffer(true);
+            dbo.setBufferEnabled(true);
+            dbo.setBufferSize(1000);
+            dbo.setDeleteOldestMessages(true);
+            Log.w(TAG,"Connecting...");
+            //client.connect(options); // mi connetto al broker
+            try {
+                IMqttToken token = client.connect(options);
+                token.waitForCompletion();
+                //Log.w(TAG, token.toString());
+                Log.w(TAG, token.getException());
+                Log.w(TAG,"Connected!");
+            }catch(Exception e){
+                Log.w(TAG,e.getMessage());
+                client.reconnect();
+            }
             //options.setUserName("sgmzzqjb");
             //options.setPassword("1xCzGYi15ogy".toCharArray());
-            Log.w(TAG,"Connecting...");
-            client.connect(options); // mi connetto al broker
-            Log.w(TAG,"Connected!");
+            client.setBufferOpts(dbo);
             client.setCallback(this);
-            client.subscribe("server/departed"); // mi sottoscrivo al topic server/departed
-            client.subscribe("server/arrival"); // same
+            client.subscribe("server/departed", 1); // mi sottoscrivo al topic server/departed
+            client.subscribe("server/arrival",1); // same
             Log.w(TAG,"Successfully subscribed!");
-            MainActivity.MQTTClient = client;
+
+            //MainActivity.MQTTClient = client;
+            MainActivity.AsyncMQTTClient = client;
 
         } catch (MqttException e) {
-            e.printStackTrace();
+            Log.w(TAG,e.getMessage());
         }
     }
 
@@ -189,8 +216,8 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        deviceIdentifier = String.valueOf(intent.getDoubleExtra("deviceIdentifier",0.0));
-        Log.w(TAG,"Starting service...");
+        deviceIdentifier = intent.getStringExtra("deviceIdentifier");
+        Log.w(TAG,"Starting service with ID = " + deviceIdentifier + ".");
         subscribe();
     }
 }

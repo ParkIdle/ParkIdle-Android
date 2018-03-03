@@ -52,6 +52,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
@@ -65,7 +66,10 @@ import android.widget.Toast;
 import com.bugfender.sdk.Bugfender;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
@@ -100,6 +104,9 @@ import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
 
+import junit.framework.TestResult;
+
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.json.JSONObject;
 
@@ -147,6 +154,8 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, Callback<DirectionsResponse> {
 
     public static String mosquittoBrokerAWS;
+
+    public static String deviceIdentifier;
 
     public static int language; //0 italian, 1 english
     public static int metric; //0 metri, 1 miglia
@@ -196,7 +205,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //MQTT STUFF
     private MQTTSubscribe mMQTTSubscribe;
     public static MqttClient MQTTClient;
-
+    public static MqttAsyncClient AsyncMQTTClient;
 
     // status boolean
     private boolean isCameraFollowing;
@@ -242,12 +251,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());
 
-        final Fabric fabric = new Fabric.Builder(this)
+        /*final Fabric fabric = new Fabric.Builder(this)
                 .kits(new Crashlytics())
                 .debuggable(true)           // Enables Crashlytics debugger
                 .build();
-        Fabric.with(fabric);
-
+        Fabric.with(fabric);*/
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -263,6 +271,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         editor = sharedPreferences.edit();
         language = sharedPreferences.getInt("language",0);
+
+        deviceIdentifier = sharedPreferences.getString("deviceIdentifier","0");
+        if(deviceIdentifier.equals("0")){
+            deviceIdentifier = UUID.randomUUID().toString();
+            editor.putString("deviceIdentifier",deviceIdentifier);
+            editor.commit();
+        }
+        Log.w(TAG,"Device Identifier > " + deviceIdentifier);
 
         // icona
         mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
@@ -370,7 +386,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
 
-                        /*Marker m = mapboxMap.addMarker(new MarkerOptions()
+                        Marker m = mapboxMap.addMarker(new MarkerOptions()
                                 .setIcon(icona_parcheggio_libero)
                                 .position(point)
                                 .setTitle("Parcheggio libero"));
@@ -384,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start();*/
+                        t5.start();
 
                     }
                 });
@@ -610,7 +626,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // da evitare NullPointerException quando inserisco un marker
         // di un parcheggio rilevato
         Intent mqttSubscribeService = new Intent(this,MQTTSubscribe.class);
-        mqttSubscribeService.putExtra("deviceIdentifier",Math.random());
+        mqttSubscribeService.putExtra("deviceIdentifier",deviceIdentifier);
         startService(mqttSubscribeService);
         /*mMQTTSubscribe = new MQTTSubscribe(deviceIdentifier + Math.random(), getmMap(),MainActivity.this);
         Thread t = new Thread(new Runnable() {
@@ -660,6 +676,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }//qua finisce oncreate
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.action_bar_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
         switch(id){
@@ -667,6 +690,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if(!mDrawerLayout.isDrawerOpen(Gravity.LEFT))
                     mDrawerLayout.openDrawer(Gravity.LEFT);
                 else mDrawerLayout.closeDrawers();
+                break;
+            case R.id.refresh:
+                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+                CheckEventsTask cet = new CheckEventsTask();
+                cet.execute(events);
+                try {
+                    events = cet.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                    Crashlytics.logException(e);
+                }
+                ProgressDialog dialog = new ProgressDialog(this);
+                dialog.setMessage("Refreshing..");
+                dialog.show();
+                renderEvents(events,getmMap());
+                dialog.dismiss();
                 break;
         }
         return true;
@@ -1564,9 +1606,11 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                     String hour2 = time2.split(":")[0];
                     String minutes2 = time2.split(":")[1];
                     String seconds2 = time2.split(":")[2];
-                    if (Integer.parseInt(hour1) - Integer.parseInt(hour2) >= 1) {
+                    if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
                         if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
                             events[i].remove(e);
+                    }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
+                        events[i].remove(e);
                     }
                 } catch (ConcurrentModificationException e) {
                     Log.w(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());

@@ -49,7 +49,8 @@ public class FeedBackActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         try {
                             final String message = feedback_text.getText().toString();
-                            MainActivity.MQTTClient.publish("client/feedbacks",new MqttMessage(message.getBytes()));
+                            //MainActivity.MQTTClient.publish("client/feedbacks",new MqttMessage(message.getBytes()));
+                            MainActivity.AsyncMQTTClient.publish("client/feedbacks",new MqttMessage(message.getBytes()));
                             Log.w(TAG,"Feedback successfully published");
                             Toast.makeText(FeedBackActivity.this, "Feedback successfully published!", Toast.LENGTH_SHORT).show();
                             feedback_text.setText("");
