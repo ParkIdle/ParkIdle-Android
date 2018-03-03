@@ -340,6 +340,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     Crashlytics.logException(e);
                 }
                 // Camera Position definisce la posizione della telecamera
+                if(mLastLocation == null){
+                    Toast.makeText(MainActivity.this, "Location è null", Toast.LENGTH_SHORT).show();
+                }
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
