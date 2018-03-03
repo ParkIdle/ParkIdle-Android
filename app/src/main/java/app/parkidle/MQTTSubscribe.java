@@ -119,7 +119,12 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     @Override
     public void connectionLost(Throwable cause) { // viene chiamato quando MQTT lancia un eccezione e viene interrotta la connessione
         Log.w(TAG,"Connection lost...." + cause.toString());
-        subscribe();
+        try {
+            client.reconnect();
+        } catch (MqttException e) {
+            Log.w(TAG,"Reconnecting...");
+        }
+        //subscribe();
     }
 
     @Override
