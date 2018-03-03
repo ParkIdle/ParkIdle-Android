@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Looper;
@@ -89,7 +90,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             DisconnectedBufferOptions dbo = new DisconnectedBufferOptions();
             dbo.setPersistBuffer(true);
             dbo.setBufferEnabled(true);
-            dbo.setBufferSize(1000);
+            dbo.setBufferSize(50);
             dbo.setDeleteOldestMessages(true);
             Log.w(TAG,"Connecting...");
             //client.connect(options); // mi connetto al broker
@@ -109,7 +110,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             client.setCallback(this);
             client.subscribe("server/departed", 1); // mi sottoscrivo al topic server/departed
             client.subscribe("server/arrival",1); // same
-            client.subscribe("server/advice",1);
+            //client.subscribe("server/advice",1);
             Log.w(TAG,"Successfully subscribed!");
 
             //MainActivity.MQTTClient = client;
@@ -153,9 +154,9 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
                             .position(new LatLng(event.getLatitude(), event.getLongitude()))
                             .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
 
-                LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
+                LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
                 float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
-
+                Log.w(TAG," " + distanza + " - " + MainActivity.sharedPreferences.getInt("progressKm",50)*1000);
                 if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
                     notification(event.getLatitude(),event.getLongitude());
 
@@ -278,4 +279,9 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         Log.w(TAG,"Starting service with ID = " + deviceIdentifier + ".");
         subscribe();
     }
+
+    /*@Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        return Service.START_STICKY;
+    }*/
 }

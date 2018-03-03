@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -302,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         gsut.execute();
         try {
             mosquittoBrokerAWS = gsut.get();
+            Log.w(TAG, mosquittoBrokerAWS);
         } catch (InterruptedException e) {
             e.printStackTrace();
             Crashlytics.logException(e);
@@ -309,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             e.printStackTrace();
             Crashlytics.logException(e);
         }
+
 
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
 
@@ -611,6 +613,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 // Profile Image nel Menu laterale
 
                 ImageView profile_img = drawerHeader.findViewById(R.id.menu_photo);
+                profile_img.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dashboard();
+                    }
+                });
                 TextView display_name = drawerHeader.findViewById(R.id.menu_display_name);
                 TextView email = drawerHeader.findViewById(R.id.menu_email);
                 final String image_uri = LoginActivity.getUser().getPhotoUrl().toString();
@@ -955,6 +963,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.w(TAG,"Saving sharedPrefs: " + events);
 
         mapView.onDestroy();
+
     }
 
     @Override
@@ -1698,7 +1707,6 @@ class GetServerURITask extends AsyncTask<Void, Void, String> {
 
                 // optional default is GET
                 con.setRequestMethod("GET");
-
 
                 int responseCode = con.getResponseCode();
                 Log.w(TAG,"\nGetting server IP from: " + url);

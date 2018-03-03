@@ -20,7 +20,8 @@
         android:largeHeap="true"
         android:roundIcon="@mipmap/ic_launcher_official"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:persistent="true">
         <meta-data
             android:name="io.predict.sdk.API_KEY"
             android:value="f6ab56f0d12e76baee171486e8548cb5bf811d5e11d284f3016ea3711c809eeb" />

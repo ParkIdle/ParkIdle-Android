@@ -5,10 +5,12 @@ package app.parkidle;
  */
 
 import android.app.IntentService;
+import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -193,6 +196,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 MainActivity.parcheggisegnalati+=1;
                 MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
                 MainActivity.editor.commit();
+
                 EventHandler eh = new EventHandler(event);
                 Thread handler = new Thread(eh);
                 handler.setName("EventHandler");
@@ -311,4 +315,9 @@ public class DetectedActivitiesIntentService extends IntentService {
         long hasho = (long)((lat*15661+lon*27773)/33911);
         return ""+hasho;
     }
+
+    /*@Override
+    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
+        return Service.START_STICKY;
+    }*/
 }

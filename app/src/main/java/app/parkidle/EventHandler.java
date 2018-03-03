@@ -1,6 +1,7 @@
 package app.parkidle;
 
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
@@ -37,6 +38,9 @@ public class EventHandler implements Runnable{
         this.event = event;
     }
 
+    public EventHandler(){
+
+    }
     @Override
     public void run() { // la run crea la connessione con il server e invia la POST
         try {
@@ -83,9 +87,9 @@ public class EventHandler implements Runnable{
             conn.disconnect();
             Log.w(TAG,"POST Request completed!");
         }catch(ProtocolException e){
-            e.printStackTrace();
+            Log.w(TAG,e.getMessage());
         }catch(IOException e){
-            e.printStackTrace();
+            Log.w(TAG,e.getMessage());
         }
         return;
     }
@@ -119,4 +123,6 @@ public class EventHandler implements Runnable{
             e.printStackTrace();
         }
     }
+
+
 }
