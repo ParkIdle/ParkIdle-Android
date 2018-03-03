@@ -344,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     mLastLocation = getLastLocation();
                     Toast.makeText(MainActivity.this, "Location è null", Toast.LENGTH_SHORT).show();
                 }
+
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
                         .zoom(17) // Sets the zoom to level 17
@@ -351,6 +352,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 if (isItalian()) {
+                    Toast.makeText(MainActivity.this, "Disegno il marker su " + mLastLocation, Toast.LENGTH_SHORT).show();
                     me = mapboxMap.addMarker(new MarkerOptions()
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("Tu")
@@ -358,6 +360,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 } else {
                     // add marker aggiunge un marker sulla mappa con data posizione e titolo
+                    Toast.makeText(MainActivity.this, "Disegno il marker su " + mLastLocation, Toast.LENGTH_SHORT).show();
                     me = mapboxMap.addMarker(new MarkerOptions()
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("You")
