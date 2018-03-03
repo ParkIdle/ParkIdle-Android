@@ -34,6 +34,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import static app.parkidle.MainActivity.calculateDistance;
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
+import static app.parkidle.MainActivity.parkingIconEvaluator;
 
 
 /**
@@ -139,7 +140,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
             final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
                         .position(new LatLng(event.getLatitude(), event.getLongitude()))
-                        .title("Parcheggio Libero").setIcon(icona_parcheggio_libero));
+                        .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
 
             LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
             float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));

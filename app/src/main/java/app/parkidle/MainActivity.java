@@ -272,8 +272,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         // se ho gia i permessi posso chiedere di localizzarmi
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-        checkGPSEnabled(locationManager); // controllo lo stato del GPS
-        mLastLocation = getLastLocation(); // localizzo
+        //checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        //mLastLocation = getLastLocation(); // localizzo
+        mLastLocation = checkGPSEnabled(locationManager);
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -1098,7 +1099,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .newCameraPosition(position), null);
     }
 
-    public void checkGPSEnabled(LocationManager locationManager) {
+    public Location checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
@@ -1108,6 +1109,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
+        return getLastLocation();
     }
 
     private void buildAlertMessage() {
