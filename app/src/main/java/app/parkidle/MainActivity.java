@@ -274,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
         //checkGPSEnabled(locationManager); // controllo lo stato del GPS
         //mLastLocation = getLastLocation(); // localizzo
-        mLastLocation = checkGPSEnabled(locationManager);
+
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -325,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onMapReady(final MapboxMap mapboxMap) {
                 mMap = mapboxMap;
+                mLastLocation = checkGPSEnabled(locationManager);
                 //Log.w(TAG,"Check these: " + events);
                 //checkEvents(events);
                 //Log.w(TAG,"We have: " + events);
@@ -340,10 +341,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     Crashlytics.logException(e);
                 }
                 // Camera Position definisce la posizione della telecamera
-                if(mLastLocation == null){
-                    mLastLocation = getLastLocation();
-                    Toast.makeText(MainActivity.this, "Location è null", Toast.LENGTH_SHORT).show();
-                }
 
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
@@ -352,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 if (isItalian()) {
-                    Toast.makeText(MainActivity.this, "Disegno il marker su " + mLastLocation, Toast.LENGTH_SHORT).show();
                     me = mapboxMap.addMarker(new MarkerOptions()
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("Tu")
@@ -360,7 +356,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 } else {
                     // add marker aggiunge un marker sulla mappa con data posizione e titolo
-                    Toast.makeText(MainActivity.this, "Disegno il marker su " + mLastLocation, Toast.LENGTH_SHORT).show();
                     me = mapboxMap.addMarker(new MarkerOptions()
                             .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
                             .title("You")
@@ -1116,12 +1111,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
-        mLastLocation = getLastLocation();
-        me = getmMap().addMarker(new MarkerOptions()
-                .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
-        .title("You")
-        .icon(mIcon));
-
         return getLastLocation();
     }
 
