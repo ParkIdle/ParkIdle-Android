@@ -404,7 +404,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //TEST STUFF
                         Date d = new Date();
                         Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-
+                        parcheggisegnalati++;
+                        editor.putInt("parcheggiorank",parcheggisegnalati);
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);

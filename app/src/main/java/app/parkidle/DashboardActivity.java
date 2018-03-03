@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.QuickContactBadge;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,8 +34,23 @@ public class DashboardActivity extends AppCompatActivity{
 
         ProgressBar progressBar= findViewById(R.id.progressBarParking);
         TextView parcheggicount= findViewById(R.id.parkdone);
+        RatingBar ratingbar= findViewById(R.id.ratingBar);
+
         progressBar.setProgress(MainActivity.sharedPreferences.getInt("parcheggiorank",0));
         parcheggicount.setText("Parcheggi segnalati: "+ MainActivity.sharedPreferences.getInt("parcheggiorank",0) );
+        ratingbar.setRating(0);
+        ratingbar.setClickable(false);
+
+        if(MainActivity.sharedPreferences.getInt("parcheggiorank",0) > 10)
+            ratingbar.setRating(1);
+        else if(MainActivity.sharedPreferences.getInt("parcheggiorank",0) > 20)
+            ratingbar.setRating(2);
+        else if(MainActivity.sharedPreferences.getInt("parcheggiorank",0) > 50)
+            ratingbar.setRating(3);
+        else if (MainActivity.sharedPreferences.getInt("parcheggiorank",0) > 90)
+            ratingbar.setRating(4);
+        else if(MainActivity.sharedPreferences.getInt("parcheggiorank",0) > 110)
+            ratingbar.setRating(5);
 
 
         if(MainActivity.language == 0) Toast.makeText(this, "Work in progress\nQui potrai personalizzare il tuo profilo", Toast.LENGTH_SHORT).show();
