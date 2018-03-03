@@ -1,15 +1,19 @@
 package app.parkidle;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.QuickContactBadge;
 import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.Dash;
 
 /**
  * Created by misu on 04/01/18.
@@ -32,6 +36,7 @@ public class DashboardActivity extends AppCompatActivity{
         userBadge = findViewById(R.id.userBadge);
         userBadge.setImageBitmap(MainActivity.getImageBitmap(LoginActivity.getUser().getPhotoUrl().toString()));
 
+        //ranking dei parcheggi
         ProgressBar progressBar= findViewById(R.id.progressBarParking);
         TextView parcheggicount= findViewById(R.id.parkdone);
         RatingBar ratingbar= findViewById(R.id.ratingBar);
@@ -53,8 +58,17 @@ public class DashboardActivity extends AppCompatActivity{
             ratingbar.setRating(5);
 
 
+        userBadge.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(DashboardActivity.this, FullScreenImage.class);
+                DashboardActivity.this.startActivity(i);
+            }
+        });
+
         if(MainActivity.language == 0) Toast.makeText(this, "Work in progress\nQui potrai personalizzare il tuo profilo", Toast.LENGTH_SHORT).show();
         else Toast.makeText(this, "Work in progress\nHere you can customize your profile", Toast.LENGTH_SHORT).show();
+
     }
 
 
