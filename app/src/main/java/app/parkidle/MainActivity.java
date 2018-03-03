@@ -341,6 +341,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 }
                 // Camera Position definisce la posizione della telecamera
                 if(mLastLocation == null){
+                    mLastLocation = getLastLocation();
                     Toast.makeText(MainActivity.this, "Location è null", Toast.LENGTH_SHORT).show();
                 }
                 position = new CameraPosition.Builder()
