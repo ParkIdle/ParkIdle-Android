@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.annotations.MarkerOptions;
@@ -33,6 +34,7 @@ import org.eclipse.paho.client.mqttv3.internal.MqttPersistentData;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import static app.parkidle.MainActivity.calculateDistance;
+import static app.parkidle.MainActivity.events;
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
 import static app.parkidle.MainActivity.parkingIconEvaluator;
 
@@ -132,34 +134,41 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     @Override
     public void messageArrived(String topic, MqttMessage message) // viene chiamato quando arriva un messaggio
             throws Exception {
-        Log.w(TAG,"Message arrived....");
+        Log.w(TAG,"Message arrived from topic :"+ topic);
+                Toast.makeText(this, "Message arrived from topic :"+ topic, Toast.LENGTH_SHORT).show();
 
-        Event event = parseMqttMessage(message);
-        //Log.w(TAG,event.toString());
-        if(event.getEvent().equals("DEPARTED")) {
-
-
-            final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
-                        .position(new LatLng(event.getLatitude(), event.getLongitude()))
-                        .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
-
-            LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
-            float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
-
-            if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
-                notification(event.getLatitude(),event.getLongitude());
-
-            long ID = Long.valueOf(event.getID()).longValue();
-            //m.setId(ID);
-
-        }
-        else if(event.getEvent().equals("ARRIVAL")){
-            // TODO:
-            Log.w(TAG, "Arrival Event just received");
-        }
-        else{
+        if(topic=="server/advice"){
             adviceNotification(message.toString());
+            Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show();
+
         }
+
+        else{
+            Event event = parseMqttMessage(message);
+            //Log.w(TAG,event.toString());
+            if(event.getEvent().equals("DEPARTED")) {
+
+
+                final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
+                            .position(new LatLng(event.getLatitude(), event.getLongitude()))
+                            .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
+
+                LatLng me= new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
+                float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
+
+                if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
+                    notification(event.getLatitude(),event.getLongitude());
+
+                long ID = Long.valueOf(event.getID()).longValue();
+                //m.setId(ID);
+
+            }
+            else if(event.getEvent().equals("ARRIVAL")){
+                // TODO:
+                Log.w(TAG, "Arrival Event just received");
+            }
+        }
+
 
         //boolean isRunningColor = MainActivity.sharedPreferences.getBoolean("colorThreadIsRunning",false);
         /*if(!isRunningColor) {
@@ -185,6 +194,8 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
         return event;
     }
+
+
 
     private void notification(Double lat, Double lng){
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), MainActivity.NOTIFICATION_CHANNEL_ID);
