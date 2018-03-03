@@ -1014,7 +1014,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             public void onProviderEnabled(String provider) {
                 Toast.makeText(getBaseContext(), "onProviderEnabled", Toast.LENGTH_SHORT).show();
-                
+
             }
 
             public void onProviderDisabled(String provider) {

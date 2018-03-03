@@ -137,7 +137,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         Log.w(TAG,"Message arrived from topic :"+ topic);
                 Toast.makeText(this, "Message arrived from topic :"+ topic, Toast.LENGTH_SHORT).show();
 
-        if(topic=="server/advice"){
+        if(topic.equals("server/advice")){
             adviceNotification(message.toString());
             Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show();
 
