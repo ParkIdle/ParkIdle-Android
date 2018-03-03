@@ -119,7 +119,7 @@ public class SettingsActivity extends AppCompatActivity {
     public void seekbar(){
         seek_bar=(SeekBar)findViewById(R.id.seek_Bar);
         text_view=(TextView)findViewById(R.id.text_view);
-        seek_bar.setProgress(MainActivity.sharedPreferences.getInt("progressKm",50));
+        seek_bar.setProgress(MainActivity.sharedPreferences.getInt("progressKm",2));
         text_view.setText(seek_bar.getProgress()+"km");
 
 
