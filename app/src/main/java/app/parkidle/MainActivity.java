@@ -335,10 +335,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 try {
                     events = cet.get();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.w(TAG,e.getMessage());
                     Crashlytics.logException(e);
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    Log.w(TAG,e.getMessage());
                     Crashlytics.logException(e);
                 }
                 // Camera Position definisce la posizione della telecamera
@@ -722,16 +722,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 else mDrawerLayout.closeDrawers();
                 break;
             case R.id.refresh:
-                Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
+                List<Marker> mList = getmMap().getMarkers();
+                Iterator<Marker> it = mList.listIterator();
+                while (it.hasNext()){
+                    Marker m = it.next();
+                    if(!m.getIcon().equals(mIcon)) {
+                        getmMap().removeMarker(m);
+                    }
+                }
                 CheckEventsTask cet = new CheckEventsTask();
                 cet.execute(events);
                 try {
                     events = cet.get();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.w(TAG,e.getMessage());
                     Crashlytics.logException(e);
                 } catch (ExecutionException e) {
-                    e.printStackTrace();
+                    Log.w(TAG,e.getMessage());
                     Crashlytics.logException(e);
                 }
                 ProgressDialog dialog = new ProgressDialog(this);
@@ -921,6 +929,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mLastLocation = getLastLocation();
             fromNewIntent = false;
         }
+        checkGPSEnabled(locationManager);
     }
 
     @Override
@@ -1411,21 +1420,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         String seconds2 = time2.split(":")[2];
 
         if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 0){
-            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10)){
+            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 5)){
+                return icona_parcheggio_libero;
+            }
+            if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 5) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 10)){
                 return icona_parcheggio_libero_5mins;
             }
             /*if(true){
                 return icona_parcheggio_libero_20mins;
             }*/
-            else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
+            else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 10) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 20)){
                 return icona_parcheggio_libero_10mins;
             }
-            else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) > 20) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 30)){
+            /*else if ((Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 20) && (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) < 30)){
+                return icona_parcheggio_libero_20mins;
+            }*/
+            else return icona_parcheggio_libero_20mins;
+        }
+        else{
+            int a = 60 - Integer.parseInt(minutes2);
+            if(a + Integer.parseInt(minutes1) < 5){
+                return icona_parcheggio_libero;
+            }
+            else if (a + Integer.parseInt(minutes1) >= 5 && a + Integer.parseInt(minutes1) < 10){
+                return icona_parcheggio_libero_5mins;
+            }
+            else if (a + Integer.parseInt(minutes1) >= 10 && a + Integer.parseInt(minutes1) < 20){
+                return icona_parcheggio_libero_10mins;
+            }else{
                 return icona_parcheggio_libero_20mins;
             }
-            else return icona_parcheggio_libero;
         }
-        return icona_parcheggio_libero;
     }
 
     public static String calculateDistance(LatLng p1, LatLng p2) {

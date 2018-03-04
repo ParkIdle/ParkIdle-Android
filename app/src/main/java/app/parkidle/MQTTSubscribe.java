@@ -156,7 +156,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
 
                 LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
                 float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
-                Log.w(TAG," " + distanza + " - " + MainActivity.sharedPreferences.getInt("progressKm",50)*1000);
+                //Log.w(TAG," " + distanza + " - " + MainActivity.sharedPreferences.getInt("progressKm",50)*1000);
                 if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
                     notification(event.getLatitude(),event.getLongitude());
 
