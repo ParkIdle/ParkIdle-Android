@@ -289,9 +289,13 @@ public class SettingsActivity extends AppCompatActivity {
 
                         TextView spinner_dialog_text=(TextView) view;
                         Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
-                        if(text1.equals("Kilometri"))
+                        if(text1.equals("Kilometri")){
                             MainActivity.editor.putInt("metric",0);
-                        else  MainActivity.editor.putInt("metric",1);
+                            MainActivity.editor.commit();}
+                        else  {
+                            MainActivity.editor.putInt("metric",1);
+                            MainActivity.editor.commit();
+                        }
                     }
 
                     @Override
