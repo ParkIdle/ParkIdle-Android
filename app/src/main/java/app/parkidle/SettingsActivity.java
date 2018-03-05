@@ -64,7 +64,9 @@ public class SettingsActivity extends AppCompatActivity {
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
 
             MainActivity.editor.putString("lathouse", String.valueOf(lat));
+            MainActivity.editor.commit();
             MainActivity.editor.putString("longhouse",  String.valueOf(longi));
+            MainActivity.editor.commit();
 
         } catch (IOException e) {
             Toast.makeText(this, "Impossibile trovare luogo", Toast.LENGTH_SHORT).show();
@@ -91,7 +93,9 @@ public class SettingsActivity extends AppCompatActivity {
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
 
             MainActivity.editor.putString("latwork", String.valueOf(lat));
+            MainActivity.editor.commit();
             MainActivity.editor.putString("longwork",  String.valueOf(longi));
+            MainActivity.editor.commit();
 
         } catch (IOException e) {
             Toast.makeText(this, "Impossibile trovare luogo", Toast.LENGTH_SHORT).show();
@@ -142,6 +146,7 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         text_view.setText(progress_value+" km");
                         MainActivity.editor.putInt("progressKm",progress_value);
+                        MainActivity.editor.commit();
 
                     }
                 }
@@ -250,6 +255,7 @@ public class SettingsActivity extends AppCompatActivity {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
                         MainActivity.editor.putInt("language",position);
+                        MainActivity.editor.commit();
                         MainActivity.editor.apply();
                         MainActivity.cambialingua();
                         Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
@@ -269,6 +275,12 @@ public class SettingsActivity extends AppCompatActivity {
 
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
                 spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
+                if ( MainActivity.sharedPreferences.getInt("metric",0)==0) {
+                    spinner_unita_misura.setSelection(0);
+                }
+                else {
+                    spinner_unita_misura.setSelection(1);
+                }
                 spinner_unita_misura.setAdapter(adapter);
                 spinner_unita_misura.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
@@ -277,8 +289,9 @@ public class SettingsActivity extends AppCompatActivity {
 
                         TextView spinner_dialog_text=(TextView) view;
                         Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
-                        if(text1.equals("Kilometri")) metric=0;
-                        else metric=1;
+                        if(text1.equals("Kilometri"))
+                            MainActivity.editor.putInt("metric",0);
+                        else  MainActivity.editor.putInt("metric",1);
                     }
 
                     @Override

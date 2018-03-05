@@ -373,6 +373,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     Log.w(TAG,"Nessun evento da renderizzare");
                 }
                 editor.remove("events");
+                editor.commit();
 
                 mapboxMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(position), 5000);
@@ -410,6 +411,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                         parcheggisegnalati++;
                         editor.putInt("parcheggiorank",parcheggisegnalati);
+                        editor.commit();
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
