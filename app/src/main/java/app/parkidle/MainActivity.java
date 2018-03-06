@@ -976,7 +976,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }*/
         //checkGPSEnabled(locationManager);
         startService(new Intent(this, MQTTSubscribe.class));
-        startService(new Intent(this, MyLocationService.class));
+        if(MyLocationService.isLocationRunning == false)
+            startService(new Intent(this, MyLocationService.class));
     }
 
     @Override
@@ -1018,8 +1019,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         editor.putBoolean("isAppForeground",false);
         editor.commit();
         Log.w(TAG,"Saving sharedPrefs: " + events);
-
-
         mapView.onDestroy();
 
     }
