@@ -179,14 +179,15 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     @Override
     public void connectionLost(Throwable cause) { // viene chiamato quando MQTT lancia un eccezione e viene interrotta la connessione
         Log.w(TAG,"Connection lost...." + cause.toString());
-        //try {
+        try {
             Log.w(TAG,"Reconnecting...");
             //client.disconnectForcibly();
-            subscribe();
+            //subscribe();
+            client.connect();
 
-        //} catch (MqttException e) {
-
-        //}
+        } catch (MqttException e) {
+            Log.w(TAG,e.getMessage());
+        }
         //subscribe();
     }
 
@@ -235,7 +236,7 @@ public class MQTTSubscribe extends Service implements MqttCallback{
 
                 long ID = Long.valueOf(event.getID()).longValue();
                 //m.setId(ID);
-                notification(event.getLatitude(),event.getLongitude());
+                //notification(event.getLatitude(),event.getLongitude());
             }
             else if(event.getEvent().equals("ARRIVAL")){
                 // TODO:
