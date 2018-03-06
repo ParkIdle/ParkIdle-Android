@@ -260,11 +260,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());
 
-        /*final Fabric fabric = new Fabric.Builder(this)
+        final Fabric fabric = new Fabric.Builder(this)
                 .kits(new Crashlytics())
                 .debuggable(true)           // Enables Crashlytics debugger
                 .build();
-        Fabric.with(fabric);*/
+        Fabric.with(fabric);
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 17
+                        .zoom(16) // Sets the zoom to level 17
                         .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
@@ -1083,12 +1083,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (!isCameraFollowing) {
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
+                    .zoom(15) // Sets the zoom to level 10
                     .bearing(mLastLocation.getBearing()) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+                    .newCameraPosition(position), 3000);
             isCameraFollowing = true;
         }
     }
