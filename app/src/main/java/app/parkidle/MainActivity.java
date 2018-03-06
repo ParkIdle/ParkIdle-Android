@@ -627,6 +627,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             case R.id.myjob:
                                 mywork();
                                 break;
+                            case R.id.tutorial:
+                                startTutorial();
+                                break;
 
 
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
@@ -786,6 +789,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
     }
 
+    private void startTutorial(){
+        Intent i = new Intent(this,TutorialActivity.class);
+        startActivity(i);
+    }
     public static void cambialingua(){
         Layer mapText = mMap.getLayer("place-city-lg-n");
         if (language==0)
