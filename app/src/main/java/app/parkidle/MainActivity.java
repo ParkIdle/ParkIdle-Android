@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.w(TAG,"Device Identifier > " + deviceIdentifier);
 
         // icona
-        mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.marcatore_posizione100x100);
+        mIcon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.indicatore);
         icona_whereiparked = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.my_car_parked);
         house_icon =IconFactory.getInstance(MainActivity.this).fromResource((R.drawable.houseicon));
         icona_parcheggio_libero = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_white70x70);
