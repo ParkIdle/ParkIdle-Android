@@ -7,7 +7,11 @@ android {
         config {
             keyAlias 'Parkidle_key1'
             keyPassword 'parkidle2017sams@@'
+<<<<<<< HEAD
             storeFile file('/Users/Matteo/Desktop/Parkidle.jks')
+=======
+            storeFile file('F:/Utenti/Andrea/GitHub/Parkidle Android Key/Parkidle.jks')
+>>>>>>> 30af0f9f6d7de72389f6001d7283f859abceadbb
             storePassword 'parkidle2017sams@@'
         }
     }
