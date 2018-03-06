@@ -5,8 +5,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 public class GpsDialogActivity extends Activity {
 
@@ -27,7 +29,7 @@ public class GpsDialogActivity extends Activity {
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         isGpsEnabled = true;
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
 
                     }
                 })
@@ -43,13 +45,12 @@ public class GpsDialogActivity extends Activity {
         alert.show();
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         if(isGpsEnabled){
+            Log.w("GpsDialog","GPS IS ENABLED NOW");
             Intent i = new Intent(this,MyLocationService.class);
-            i.setAction("fromGpsDialog");
             startService(i);
             finish();
         }
