@@ -32,6 +32,8 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
@@ -247,6 +249,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
+
+        if(!isNetworkAvailable()){
+            Intent noConn = new Intent(this, NoConnectionActivity.class);
+            noConn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(noConn);
+            finish();
+        }
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -270,11 +280,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
-        // se ho gia i permessi posso chiedere di localizzarmi
-        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-        checkGPSEnabled(locationManager); // controllo lo stato del GPS
-        mLastLocation = getLastLocation(); // localizzo
-
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -298,6 +303,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
         icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
         work_icon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.workicon);
+
+        // se ho gia i permessi posso chiedere di localizzarmi
+        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        mLastLocation = getLastLocation(); // localizzo
+        
         GetServerURITask gsut = new GetServerURITask();
         gsut.execute();
         try {
@@ -697,7 +708,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
         render.start();*/
 
-
     if(getIntent().getAction() != null && getIntent().getAction().equals("com.google.android.gms.actions.SEARCH_ACTION")){
         String query = getIntent().getStringExtra(SearchManager.QUERY);
         char f = query.toLowerCase().charAt(0);
@@ -706,6 +716,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
     }//qua finisce oncreate
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -932,7 +949,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             fromNewIntent = false;
         }
         checkGPSEnabled(locationManager);
-    }
+        }
 
     @Override
     public void onPause() {
