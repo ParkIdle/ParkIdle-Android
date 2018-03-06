@@ -610,6 +610,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 mywork();
                                 break;
 
+
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
                             // case R.id.bottoneEsempio:
                             //      buttonStuff....
