@@ -255,9 +255,12 @@ public class SettingsActivity extends AppCompatActivity {
     public void sceglilingua(){
         Configuration conf = getResources().getConfiguration();
 
-        if (sharedPreferences.getInt("lingua",0)==0)
+        if (sharedPreferences.getInt("lingua",0)==0) {
+            Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
             conf.locale = new Locale("it"); //ita language locale
-        else{
+        }
+        else {
+            Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
             conf.locale=new Locale("en");
         }
     }

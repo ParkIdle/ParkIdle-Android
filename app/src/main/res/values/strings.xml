@@ -24,4 +24,9 @@
     <string name="lavoro_inserito">Workplace already added, click to change</string>
     <string name="casa_inserita"> Home address already added, click to change</string>
     <string name="casa_non_inserita">Home not added, click to add </string>
+    <string name="profilo">Profile</string>
+    <string name="macchina"> Your car </string>
+    <string name="impostazioni">Settings</string>
+    <string name="casa">Home</string>
+    <string name="posto_di_lavoro">Workplace</string>
 </resources>

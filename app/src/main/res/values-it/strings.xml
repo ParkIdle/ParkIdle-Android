@@ -24,4 +24,10 @@
     <string name="lavoro_inserito">Indirizzo del posto di lavoro già inserito, clicca qui per cambiarlo</string>
     <string name="casa_inserita"> Indirizzo di casa già inserito, clicca qui per cambiarlo </string>
     <string name="casa_non_inserita">Casa non inserita, clicca per inserirla </string>
+    <string name="profilo">Profilo</string>
+    <string name="macchina"> La tua macchina </string>
+    <string name="impostazioni">Impostazioni</string>
+    <string name="casa">Casa</string>
+    <string name="posto_di_lavoro">Posto di lavoro</string>
+
 </resources>
