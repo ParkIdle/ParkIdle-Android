@@ -18,6 +18,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -154,6 +155,7 @@ import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
 import static app.parkidle.MainActivity.parkingIconEvaluator;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
+import static io.predict.sdk.detection.services.PIOLocationService.getLastLocation;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, Callback<DirectionsResponse> {
 
@@ -197,11 +199,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private MapView mapView;
     private FloatingActionButton ftb; // bottone che se lo premi ricentra la camera sul mio Marker (vedi recenterCamera())
     private FloatingActionButton nearestPSpot; // bottone che se lo premi ti porta al parcheggio più vicino
-    private CameraPosition position; // la posizione dell'inquadratura (in base ad isCameraFollowing mi segue)
+    public static CameraPosition position; // la posizione dell'inquadratura (in base ad isCameraFollowing mi segue)
     private LocationManager locationManager; // gestisce la localizzazione
     public static Location mLastLocation; // la mia ultima localizzazione (costantemente aggiornata con onLocationChanged)
     public static Point destination; // my destination if I click on one free parking spot marker (it start navigation)
-    private Marker me; // ha sempre come riferimento il mio Marker
+    public static Marker me; // ha sempre come riferimento il mio Marker
     private String unitType;
     private String mapStyleJSON = null;
     private List<MarkerOptions> markerList;
@@ -212,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static MqttAsyncClient AsyncMQTTClient;
 
     // status boolean
-    private boolean isCameraFollowing;
+    public static boolean isCameraFollowing;
     private boolean isGpsEnabled;
 
     // icons
@@ -269,17 +271,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Bugfender.enableCrashReporting();
         Bugfender.setDeviceString("user.email",currentUser.getEmail());
 
-        /*final Fabric fabric = new Fabric.Builder(this)
+        final Fabric fabric = new Fabric.Builder(this)
                 .kits(new Crashlytics())
                 .debuggable(true)           // Enables Crashlytics debugger
                 .build();
-        Fabric.with(fabric);*/
+        Fabric.with(fabric);
 
         // controllo se ho i permessi per la FINE_LOCATION (precisione accurata nella localizzazione)
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
+
+        // se ho gia i permessi posso chiedere di localizzarmi
+        //locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        //checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        //mLastLocation = getLastLocation(); // localizzo
+
+        NotificationReceiver notificationReceiver = new NotificationReceiver();
+        IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
+        registerReceiver(notificationReceiver,filter);
+
+        startService(new Intent(this, MyLocationService.class));
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -305,9 +318,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         work_icon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.workicon);
 
         // se ho gia i permessi posso chiedere di localizzarmi
-        locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
-        checkGPSEnabled(locationManager); // controllo lo stato del GPS
-        mLastLocation = getLastLocation(); // localizzo
+        //locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
+        //checkGPSEnabled(locationManager); // controllo lo stato del GPS
+        //mLastLocation = getLastLocation(); // localizzo
         
         GetServerURITask gsut = new GetServerURITask();
         gsut.execute();
@@ -321,7 +334,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             e.printStackTrace();
             Crashlytics.logException(e);
         }
-
+        editor.putString("serverIP",mosquittoBrokerAWS);
+        editor.commit();
 
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
 
@@ -356,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                 position = new CameraPosition.Builder()
                         .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 17
+                        .zoom(16) // Sets the zoom to level 17
                         .bearing(mLastLocation.getBearing())// non funziona, ho provato altri 300 metodi deprecati ma non va - azimut here
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
@@ -911,7 +925,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted.
                     // ora posso chiedere di nuovo la localizzazione
-                    mLastLocation = getLastLocation();
+                    //mLastLocation = getLastLocation();
+                    startService(new Intent(this, MyLocationService.class));
                     //Toast.makeText(this, "GPS permission successfully granted!", Toast.LENGTH_LONG).show();
                 } else {
                     // User refused to grant permission. You can add AlertDialog here
@@ -925,7 +940,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onStart() {
         super.onStart();
-
+        editor.putBoolean("isAppForeground",true);
+        editor.commit();
         Log.w(TAG,"OnStart(): " + events);
         mapView.onStart();
 
@@ -944,12 +960,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mapView.onResume();
         //checkEvents(events);
         //activatePredictIOTracker();
-        if(!fromNewIntent) {
+        /*if(!fromNewIntent) {
             mLastLocation = getLastLocation();
             fromNewIntent = false;
-        }
-        checkGPSEnabled(locationManager);
-        }
+        }*/
+        //checkGPSEnabled(locationManager);
+        startService(new Intent(this, MQTTSubscribe.class));
+        startService(new Intent(this, MyLocationService.class));
+    }
 
     @Override
     public void onPause() {
@@ -987,8 +1005,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.w(TAG,"OnDestroy(): " + events);
         editor.remove("events");
         editor.putStringSet("events",events);
+        editor.putBoolean("isAppForeground",false);
         editor.commit();
         Log.w(TAG,"Saving sharedPrefs: " + events);
+
 
         mapView.onDestroy();
 
@@ -1007,7 +1027,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
     }
 
-    @SuppressLint("MissingPermission")
+    /*@SuppressLint("MissingPermission")
     public Location getLastLocation() {
         // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
@@ -1047,7 +1067,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 /*activatePredictIOTracker();
                 checkPredictIOStatus();
                 drawMarker(getLastLocation());*/
-            }
+                /*if(me == null){
+                    me = getmMap().addMarker(new MarkerOptions()
+                            .icon(mIcon)
+                            .position(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()))
+                            .title("You"));
+                }*/
+            /*}
 
             public void onProviderEnabled(String provider) {
                 Toast.makeText(getBaseContext(), "onProviderEnabled", Toast.LENGTH_SHORT).show();
@@ -1073,7 +1099,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
         return bestLocation;
-    }
+    }*/
 
 
 
@@ -1081,12 +1107,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (!isCameraFollowing) {
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
+                    .zoom(15) // Sets the zoom to level 10
                     .bearing(mLastLocation.getBearing()) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+                    .newCameraPosition(position), 3000);
             isCameraFollowing = true;
         }
     }
@@ -1113,7 +1139,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         float[] results = new float[3];
         while (it.hasNext()) {
             Marker aux = it.next();
-            if (!aux.getIcon().equals(mIcon) && !aux.getIcon().equals(house_icon) && !aux.getIcon().equals(work_icon)) {
+            if (!aux.getIcon().equals(mIcon) && !aux.getIcon().equals(house_icon) && !aux.getIcon().equals(work_icon) && !aux.getIcon().equals(icona_whereiparked)) {
                 Double markerLat = aux.getPosition().getLatitude();
                 Double markerLng = aux.getPosition().getLongitude();
                 Location.distanceBetween(myLat, myLng, markerLat, markerLng, results);
@@ -1138,7 +1164,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .newCameraPosition(position), null);
     }
 
-    public void checkGPSEnabled(LocationManager locationManager) {
+    /*public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             buildAlertMessage(); // costruisce un alert che propone di attivare il GPS
         }
@@ -1152,7 +1178,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private void buildAlertMessage() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Your GPS seems to be disabled, do you want to enable it?")
+        builder.setMessage("Il tuo GPS è disattivo. Per usare l'app è necessario attivarlo, vuoi farlo?")
                 .setCancelable(false)
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
@@ -1169,7 +1195,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         final AlertDialog alert = builder.create();
         alert.show();
-    }
+    }*/
 
     public static Point getOrigin() {
         return Point.fromLngLat(mLastLocation.getLongitude(), mLastLocation.getLatitude());
@@ -1704,6 +1730,10 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
             Iterator<String> it = events[i].iterator();
             String now = new Date().toString();
 
+            String day1 = now.split(" ")[2];
+            if(String.valueOf(day1.charAt(0)).equals("0")){
+                day1 = String.valueOf(day1.charAt(1));
+            }
             String time1 = now.split(" ")[3]; // current time
             String hour1 = time1.split(":")[0];
             String minutes1 = time1.split(":")[1];
@@ -1715,10 +1745,30 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                     String[] event = e.split("-");
                     String date = event[2];
 
+                    String day2 = date.split(" ")[2];
+                    if(String.valueOf(day2.charAt(0)).equals("0")){
+                        //Log.w(TAG,"DAY2: " + day2);
+                        day2 = String.valueOf(day2.charAt(1));
+                    }
                     String time2 = date.split(" ")[3]; // event time
                     String hour2 = time2.split(":")[0];
                     String minutes2 = time2.split(":")[1];
                     String seconds2 = time2.split(":")[2];
+                    // controllo il giorno
+                    if(Integer.parseInt(day1) > Integer.parseInt(day2)){
+                        if(!hour2.equals("23"))
+                            events[i].remove(e);
+                        else{
+                            if(24 - Integer.parseInt(hour2) - Integer.parseInt(hour1) < 0){
+                                events[i].remove(e);
+                            }else if(24 - Integer.parseInt(hour2) - Integer.parseInt(hour1) <= 1){
+                                if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                                    events[i].remove(e);
+                            }else{
+                                events[i].remove(e);
+                            }
+                        }
+                    }
                     if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
                         if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
                             events[i].remove(e);
@@ -1726,15 +1776,13 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                         events[i].remove(e);
                     }
                 } catch (ConcurrentModificationException e) {
-                    Log.w(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());
+                    Log.e(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());
                     return null;
                 }
             }
             Log.w(TAG + "(CheckTask)", "Check DONE...");
-
-            return events[0];
+            return events[i];
         }
-
         return events[0];
     }
 
@@ -1775,7 +1823,7 @@ class GetServerURITask extends AsyncTask<Void, Void, String> {
 }
 
 
-class LatLngEvaluator implements TypeEvaluator<LatLng> {
+/*class LatLngEvaluator implements TypeEvaluator<LatLng> {
     // Method is used to interpolate the marker animation.
 
     private LatLng latLng = new LatLng();
@@ -1790,4 +1838,4 @@ class LatLngEvaluator implements TypeEvaluator<LatLng> {
     }
 
 
-}
+}*/

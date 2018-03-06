@@ -26,7 +26,8 @@ public class Event {
         this.date = date;
         this.latitude = Double.valueOf(latitude);
         this.longitude = Double.valueOf(longitude);
-        if(this.event.equals("DEPARTED")) MainActivity.events.add(this.toString());
+        //if(this.event.equals("DEPARTED"))
+            //MainActivity.events.add(this.toString());
         Log.w("EVENTCLASS","[NEW EVENT] -> " + this.toString());
     }
 
