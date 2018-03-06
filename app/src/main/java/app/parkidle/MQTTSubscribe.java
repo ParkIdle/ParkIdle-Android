@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.IBinder;
 import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -34,17 +36,23 @@ import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.MqttPersistentData;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+
 import static app.parkidle.MainActivity.calculateDistance;
 import static app.parkidle.MainActivity.events;
+import static app.parkidle.MainActivity.getmMap;
 import static app.parkidle.MainActivity.icona_parcheggio_libero;
 import static app.parkidle.MainActivity.parkingIconEvaluator;
+import static app.parkidle.MainActivity.sharedPreferences;
 
 
 /**
  * Created by simonestaffa on 23/11/17.
  */
 
-public class MQTTSubscribe extends IntentService implements MqttCallback{
+public class MQTTSubscribe extends Service implements MqttCallback{
 
 
     //private MqttClient client;
@@ -54,14 +62,49 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     private String mosquittoBrokerAWS;
     private final String mMQTTBroker = "tcp://m23.cloudmqtt.com:15663"; // host CloudMQTT
     private String deviceIdentifier;
+    private boolean isConnected = false;
+    private Set<String> events;
+
+    @Override
+    public void onCreate() {
+        if(!isConnected) {
+            SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE);
+            deviceIdentifier = sharedPreferences.getString("deviceIdentifier", "0");
+            Log.w(TAG, "Starting service with ID = " + deviceIdentifier + ".");
+            subscribe();
+        }
+    }
 
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      *
      * @param name Used to name the worker thread, important only for debugging.
      */
-    public MQTTSubscribe() {
+    /*public MQTTSubscribe() {
         super("MQTTService");
+    }*/
+
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        //deviceIdentifier = intent.getStringExtra("deviceIdentifier");
+        return null;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //TODO do something useful
+        //deviceIdentifier = intent.getStringExtra("deviceIdentifier");
+        if(!isConnected) {
+            SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE);
+            deviceIdentifier = sharedPreferences.getString("deviceIdentifier", "0");
+
+            Log.w(TAG, "Starting service with ID = " + deviceIdentifier + ".");
+            subscribe();
+
+        }
+        return Service.START_STICKY;
     }
 
     /*public MQTTSubscribe(String deviceIdentifier, MapboxMap mapboxMap, Context context) {
@@ -78,6 +121,14 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     public void subscribe() {
         try {
             serverIP = MainActivity.mosquittoBrokerAWS;
+            events = MainActivity.events;
+            SharedPreferences prefs = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+            if(serverIP == null){
+                serverIP = prefs.getString("serverIP","-");
+            }
+            if(events == null){
+                events = prefs.getStringSet("events",new HashSet<String>());
+            }
             mosquittoBrokerAWS = "tcp://"+serverIP+":1883";
             Log.w(TAG,"Subscribing...");
 
@@ -86,6 +137,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             MqttConnectOptions options = new MqttConnectOptions();
             options.setCleanSession(false);
             options.setAutomaticReconnect(true);
+
             //preparo il buffer
             DisconnectedBufferOptions dbo = new DisconnectedBufferOptions();
             dbo.setPersistBuffer(true);
@@ -97,12 +149,15 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
             try {
                 IMqttToken token = client.connect(options);
                 token.waitForCompletion();
+                isConnected = true;
                 //Log.w(TAG, token.toString());
                 Log.w(TAG, token.getException());
                 Log.w(TAG,"Connected!");
             }catch(Exception e){
-                Log.w(TAG,e.getMessage());
-                client.reconnect();
+                while(!isConnected) {
+                    client.disconnectForcibly();
+                    client.connect();
+                }
             }
             //options.setUserName("sgmzzqjb");
             //options.setPassword("1xCzGYi15ogy".toCharArray());
@@ -124,11 +179,14 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     @Override
     public void connectionLost(Throwable cause) { // viene chiamato quando MQTT lancia un eccezione e viene interrotta la connessione
         Log.w(TAG,"Connection lost...." + cause.toString());
-        try {
-            client.reconnect();
-        } catch (MqttException e) {
+        //try {
             Log.w(TAG,"Reconnecting...");
-        }
+            //client.disconnectForcibly();
+            subscribe();
+
+        //} catch (MqttException e) {
+
+        //}
         //subscribe();
     }
 
@@ -136,33 +194,40 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
     public void messageArrived(String topic, MqttMessage message) // viene chiamato quando arriva un messaggio
             throws Exception {
         Log.w(TAG,"Message arrived from topic :"+ topic);
-                Toast.makeText(this, "Message arrived from topic :"+ topic, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Message arrived from topic :"+ topic, Toast.LENGTH_SHORT).show();
 
         if(topic.equals("server/advice")){
             adviceNotification(message.toString());
-            Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, message.toString(), Toast.LENGTH_SHORT).show();
 
         }
 
         else{
+
             Event event = parseMqttMessage(message);
+            events.add(event.toString());
             //Log.w(TAG,event.toString());
             if(event.getEvent().equals("DEPARTED")) {
 
-
-                final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
+                if (!checkEventDate(event)) { // se l'evento è di 1 ora fa non lo disegno
+                    return;
+                }
+                ;
+                if (MainActivity.getmMap() != null){
+                    final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
                             .position(new LatLng(event.getLatitude(), event.getLongitude()))
                             .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
+                }
 
-                LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
+                /*LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
                 float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
                 //Log.w(TAG," " + distanza + " - " + MainActivity.sharedPreferences.getInt("progressKm",50)*1000);
                 if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
                     notification(event.getLatitude(),event.getLongitude());
 
-                long ID = Long.valueOf(event.getID()).longValue();
+                long ID = Long.valueOf(event.getID()).longValue();*/
                 //m.setId(ID);
-
+                notification(event.getLatitude(),event.getLongitude());
             }
             else if(event.getEvent().equals("ARRIVAL")){
                 // TODO:
@@ -196,8 +261,6 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         return event;
     }
 
-
-
     private void notification(Double lat, Double lng){
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(getApplicationContext(), MainActivity.NOTIFICATION_CHANNEL_ID);
         int requestID = (int) System.currentTimeMillis();
@@ -208,6 +271,7 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         notificationIntent.putExtra("action","toNotifiedParkingSpot");
         notificationIntent.putExtra("lat",lat);
         notificationIntent.putExtra("lng",lng);
+        sendBroadcast(notificationIntent);
         //**edit this line to put requestID as requestCode**
         PendingIntent contentIntent = PendingIntent.getActivity(getApplicationContext(), requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -273,15 +337,43 @@ public class MQTTSubscribe extends IntentService implements MqttCallback{
         notificationManager.notify(1, notificationBuilder.build());
     }
 
-    @Override
+    /*@Override
     protected void onHandleIntent(@Nullable Intent intent) {
         deviceIdentifier = intent.getStringExtra("deviceIdentifier");
         Log.w(TAG,"Starting service with ID = " + deviceIdentifier + ".");
         subscribe();
-    }
+    }*/
 
     /*@Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         return Service.START_STICKY;
     }*/
+
+    private boolean checkEventDate(Event ev){
+        String now = new Date().toString();
+
+        String time1 = now.split(" ")[3]; // current time
+        String hour1 = time1.split(":")[0];
+        String minutes1 = time1.split(":")[1];
+        String seconds1 = time1.split(":")[2];
+
+        String e = ev.toString();
+        String[] event = e.split("-");
+        String date = event[2];
+
+        String time2 = date.split(" ")[3]; // event time
+        String hour2 = time2.split(":")[0];
+        String minutes2 = time2.split(":")[1];
+        String seconds2 = time2.split(":")[2];
+        if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
+            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0) {
+                MainActivity.events.remove(e);
+                return false;
+            }
+        }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
+            MainActivity.events.remove(e);
+            return false;
+        }
+        return true;
+    }
 }

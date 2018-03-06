@@ -238,6 +238,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     public Date getLastSignal(){
         return this.lastSignal;
     }
+
     public void setLastSignal(Date d){
         this.lastSignal = d;
         return;
@@ -263,22 +264,18 @@ public class DetectedActivitiesIntentService extends IntentService {
         String minutes2 = time2.split(":")[1];
         String seconds2 = time2.split(":")[2];
 
-        if((Integer.parseInt(hour1)==Integer.parseInt(hour2) && Integer.parseInt(minutes1)-Integer.parseInt(minutes2) > 20) ||
-                (Integer.parseInt(hour1) > Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 20 ) ||
-                (Integer.parseInt(hour1) < Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 20 )
-                ){                                                                                                                   //controllo che tra il LastSignal e la data attuale siano passati almeno 20 minuti
-
+        //controllo che tra il LastSignal e la data attuale siano passati almeno 7 minuti
+        if((Integer.parseInt(hour1)==Integer.parseInt(hour2) && Integer.parseInt(minutes1)-Integer.parseInt(minutes2) > 7) ||
+                (Integer.parseInt(hour1) > Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 ) ||
+                (Integer.parseInt(hour1) < Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 )
+                ){
             setLastSignal(now);
             return true;
         }
-
         else{
             setLastSignal(now);
             return false;
         }
-
-
-
     }
 
     public void saveParking() {
