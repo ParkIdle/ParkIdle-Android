@@ -8,16 +8,20 @@
     <string name="drawer_close">Close</string>
     <string name="facebook_button_text">Continue with Facebook</string>
     <string name="google_button_text">Continue with Google</string>
-    <string name="you_en">You</string>
-    <string name="you_it">Sei qui</string>
-    <string name="loading1">Signin in..</string>
-    <string name="loading">Stiamo caricando le informazioni del tuo profilo...</string>
+    <string name="you">You</string>
+    <string name="loading">Signin in..</string>
     <string-array name="spinner_options">
-        <item name="kilometri">Kilometri</item>
-        <item name="miglia">Miglia </item>
+        <item name="kilometri">Kilometers</item>
+        <item name="miglia">Miles </item>
     </string-array>
     <string-array name="language_options">
         <item name="italian">Italian</item>
         <item name="english">English </item>
     </string-array>
+    <string name="titolo_parcheggio"> Free Parking Spot </string>
+    <string name="lingua"> Language </string>
+    <string name="lavoro_non_inserito"> Workplace not added, click to add</string>
+    <string name="lavoro_inserito">Workplace already added, click to change</string>
+    <string name="casa_inserita"> Home address already added, click to change</string>
+    <string name="casa_non_inserita">Home not added, click to add </string>
 </resources>

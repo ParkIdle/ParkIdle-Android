@@ -3,6 +3,7 @@ package app.parkidle;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
@@ -29,6 +30,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static app.parkidle.MainActivity.editor;
 import static app.parkidle.MainActivity.metric;
@@ -181,8 +183,8 @@ public class SettingsActivity extends AppCompatActivity {
         casa=(TextView) findViewById(R.id.text_view_casa);
         if (MainActivity.sharedPreferences.getString("lathouse","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longhouse","0").equals("0"))
-            casa.setText("Casa non inserita, clicca per inserirla");
-        else casa.setText("Indirizzo di casa già inserito,clicca qui per cambiarlo");
+            casa.setText(getResources().getString(R.string.casa_non_inserita));
+        else casa.setText(getResources().getString(R.string.casa_inserita));
 
     }
 
@@ -216,8 +218,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (MainActivity.sharedPreferences.getString("latwork","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longwork","0").equals("0"))
-            lavoro.setText("Posto di lavoro  non inserito, clicca per inserirlo");
-        else lavoro.setText("Indirizzo del posto di lavoro già inserito, clicca qui per cambiarlo");
+            lavoro.setText(getResources().getString(R.string.lavoro_non_inserito));
+        else lavoro.setText(getResources().getString(R.string.lavoro_inserito));
 
     }
 
@@ -250,6 +252,16 @@ public class SettingsActivity extends AppCompatActivity {
 
    }
 
+    public void sceglilingua(){
+        Configuration conf = getResources().getConfiguration();
+
+        if (sharedPreferences.getInt("lingua",0)==0)
+            conf.locale = new Locale("it"); //ita language locale
+        else{
+            conf.locale=new Locale("en");
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -262,8 +274,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
                 TextView languageLabel = (TextView)findViewById(R.id.language_label);
-                if(MainActivity.language == 0) languageLabel.setText("Lingua");
-                else languageLabel.setText("Language");
+                languageLabel.setText(getResources().getString(R.string.lingua));
                 final Spinner spinner = (Spinner) findViewById(R.id.language_spinner);
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(SettingsActivity.this,
@@ -278,10 +289,9 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
-                        MainActivity.editor.putInt("language",position);
+                        MainActivity.editor.putInt("lingua",position);
                         MainActivity.editor.commit();
-                        MainActivity.editor.apply();
-                        MainActivity.cambialingua();
+                        sceglilingua();
                         Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
 
