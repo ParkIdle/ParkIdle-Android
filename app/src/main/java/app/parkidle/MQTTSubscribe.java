@@ -219,13 +219,21 @@ public class MQTTSubscribe extends Service implements MqttCallback{
                             .title("Parcheggio Libero").setIcon(parkingIconEvaluator(event.toString())));
                 }
 
-                /*LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
+                LatLng me = new LatLng(MainActivity.getMyLocation().getLatitude(),MainActivity.getMyLocation().getLongitude());
                 float distanza = MainActivity.calculateDistanceInMeters(me,new LatLng(event.getLatitude(), event.getLongitude()));
                 //Log.w(TAG," " + distanza + " - " + MainActivity.sharedPreferences.getInt("progressKm",50)*1000);
-                if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) //aggiunto controllo distanza notifiche
-                    notification(event.getLatitude(),event.getLongitude());
+                //aggiunto controllo distanza notifiche
+                if ( distanza < MainActivity.sharedPreferences.getInt("progressKm",50)*1000) {
+                    if(sharedPreferences.getBoolean("isAppForeground",true) == true)
+                        notification(event.getLatitude(), event.getLongitude());
+                    else{
+                        if(sharedPreferences.getBoolean("backgroundNotify",false) == true){
+                            notification(event.getLatitude(), event.getLongitude());
+                        }
+                    }
+                }
 
-                long ID = Long.valueOf(event.getID()).longValue();*/
+                long ID = Long.valueOf(event.getID()).longValue();
                 //m.setId(ID);
                 notification(event.getLatitude(),event.getLongitude());
             }

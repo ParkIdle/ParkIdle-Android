@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -31,6 +32,7 @@ import static app.parkidle.MainActivity.getmMap;
 import static app.parkidle.MainActivity.language;
 import static app.parkidle.MainActivity.mIcon;
 import static app.parkidle.MainActivity.me;
+import static app.parkidle.MainActivity.sharedPreferences;
 import static com.amazonaws.AmazonServiceException.ErrorType.Service;
 
 /**
@@ -40,7 +42,8 @@ import static com.amazonaws.AmazonServiceException.ErrorType.Service;
 public class MyLocationService extends android.app.Service {
     private static final String TAG = "MyLocationService";
     private LocationManager mLocationManager = null;
-    private static final int LOCATION_INTERVAL = 1000;
+    private static final int LOCATION_INTERVAL_FOREGROUND = 1000;
+    private static final int LOCATION_INTERVAL_BACKGROUND = 10000;
     private static final float LOCATION_DISTANCE = 10f;
 
     private class LocationListener implements android.location.LocationListener {
@@ -125,19 +128,31 @@ public class MyLocationService extends android.app.Service {
     {
         Log.w(TAG, "onCreate");
         initializeLocationManager();
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
-                    mLocationListeners[1]);
+            Log.w(TAG,"isAppForeground = " + sharedPreferences.getBoolean("isAppForeground",true));
+            if(sharedPreferences.getBoolean("isAppForeground",true) == true)
+                mLocationManager.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL_FOREGROUND, LOCATION_DISTANCE,
+                        mLocationListeners[1]);
+            else
+                mLocationManager.requestLocationUpdates(
+                        LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL_BACKGROUND, LOCATION_DISTANCE,
+                        mLocationListeners[1]);
         } catch (java.lang.SecurityException ex) {
             Log.w(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {
             Log.w(TAG, "network provider does not exist, " + ex.getMessage());
         }
         try {
-            mLocationManager.requestLocationUpdates(
-                    LocationManager.GPS_PROVIDER, LOCATION_INTERVAL, LOCATION_DISTANCE,
-                    mLocationListeners[0]);
+            if(sharedPreferences.getBoolean("isAppForeground",true) == true)
+                mLocationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER, LOCATION_INTERVAL_FOREGROUND, LOCATION_DISTANCE,
+                        mLocationListeners[0]);
+            else
+                mLocationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER, LOCATION_INTERVAL_BACKGROUND, LOCATION_DISTANCE,
+                        mLocationListeners[0]);
         } catch (java.lang.SecurityException ex) {
             Log.w(TAG, "fail to request location update, ignore", ex);
         } catch (IllegalArgumentException ex) {

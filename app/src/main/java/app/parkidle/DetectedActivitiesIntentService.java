@@ -190,7 +190,16 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Double latitude = l.getLatitude();
             Double longitude = l.getLongitude();
-            if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
+            Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+            MainActivity.parcheggisegnalati+=1;
+            MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+            MainActivity.editor.commit();
+
+            EventHandler eh = new EventHandler(event);
+            Thread handler = new Thread(eh);
+            handler.setName("EventHandler");
+            handler.start();
+            /*if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
                 parkedOnce=false;
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
                 MainActivity.parcheggisegnalati+=1;
@@ -201,7 +210,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Thread handler = new Thread(eh);
                 handler.setName("EventHandler");
                 handler.start();
-            }
+            }*/
         }
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
@@ -225,10 +234,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double longitude = l.getLongitude();
                 saveParking();
                 Date now = new Date();
-                if (!parkedOnce){
+                /*if (!parkedOnce){
                     parkedOnce = true; // non ti fà parcheggiare piu di una volta
                     setLastSignal(now);
-                }
+                }*/
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
             }
         }

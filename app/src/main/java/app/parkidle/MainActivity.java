@@ -916,7 +916,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onStart() {
         super.onStart();
-
+        editor.putBoolean("isAppForeground",true);
+        editor.commit();
         Log.w(TAG,"OnStart(): " + events);
         mapView.onStart();
 
@@ -980,8 +981,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Log.w(TAG,"OnDestroy(): " + events);
         editor.remove("events");
         editor.putStringSet("events",events);
+        editor.putBoolean("isAppForeground",false);
         editor.commit();
         Log.w(TAG,"Saving sharedPrefs: " + events);
+
 
         mapView.onDestroy();
 

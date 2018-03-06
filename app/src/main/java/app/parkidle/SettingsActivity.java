@@ -32,6 +32,7 @@ import java.util.List;
 
 import static app.parkidle.MainActivity.editor;
 import static app.parkidle.MainActivity.metric;
+import static app.parkidle.MainActivity.sharedPreferences;
 
 public class SettingsActivity extends AppCompatActivity {
     //roba per il menù
@@ -40,6 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
     private Spinner spinner_unita_misura;
     private ArrayAdapter adapter;
     private Switch switch_risparmio_batteria;
+    private Switch switchBackgroundNotification;
     private Button trovabutton;
     private EditText indirizzo;
     private TextView casa;
@@ -74,7 +76,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public void geocodinglavoro(String posizione){
+    public void geocodingLavoro(String posizione){
         Geocoder geoc= new Geocoder(this);
         try {
             List<Address> list = geoc.getFromLocationName(posizione,1);
@@ -114,6 +116,28 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 else{
                     Toast.makeText(SettingsActivity.this, "Risparmio batteria disattivato", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    public void switch_background(){
+        switchBackgroundNotification = (Switch) findViewById(R.id.switch_notification);
+        switchBackgroundNotification.setActivated(sharedPreferences.getBoolean("backgroundNotify",false));
+
+        switchBackgroundNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Toast.makeText(SettingsActivity.this, "Notifiche in background attivate", Toast.LENGTH_SHORT).show();
+                    editor.putBoolean("backgroundNotify",true);
+                    editor.commit();
+                }
+                else{
+                    Toast.makeText(SettingsActivity.this, "Notifiche in background disattivate", Toast.LENGTH_SHORT).show();
+                    editor.putBoolean("backgroundNotify",false);
+                    editor.commit();
                 }
             }
         });
@@ -212,7 +236,7 @@ public class SettingsActivity extends AppCompatActivity {
                    return;
                }
                else{
-                   geocodinglavoro(mindirizzo.getText().toString());
+                   geocodingLavoro(mindirizzo.getText().toString());
                    return;
                }
            }
@@ -268,10 +292,9 @@ public class SettingsActivity extends AppCompatActivity {
                 });
                 seekbar();
                 switch_batteria();
+                switch_background();
                 casa();
                 lavoro();
-
-
 
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
                 spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
