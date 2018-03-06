@@ -22,6 +22,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
@@ -789,6 +790,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
     }
 
+
     private void startTutorial(){
         Intent i = new Intent(this,TutorialActivity.class);
         startActivity(i);
@@ -797,6 +799,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Layer mapText = mMap.getLayer("place-city-lg-n");
         if (language==0)
             mapText.setProperties(textField("{name_it}"));
+
         else
             mapText.setProperties(textField("{name}"));
     }
@@ -1253,6 +1256,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (language==0) {
             lingua = Locale.ITALIAN;
+
         }
         else if(language==1){
             lingua= Locale.ENGLISH;
@@ -1383,22 +1387,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String[] event = e.split("-");
             LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
             long ID = Long.valueOf(event[0]).longValue();
-            if(isItalian()){
+
                 Marker m = mapboxMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title("Parcheggio libero")
+                        .title(getResources().getString(R.string.titolo_parcheggio))
                         .setIcon(parkingIconEvaluator(e)));
                 //m.setId(ID); DA PROBLEMI PER CLICCARE I MARKER
 
-            }
-            else {
-                Marker m = mapboxMap.addMarker(new MarkerOptions()
-                        .position(point)
-                        .title("Free Parking Spot")
-                        .setIcon(parkingIconEvaluator(e)));
-                //m.setId(ID); DA PROBLEMI PER CLICCARE MARKER
-
-            }
 
         }
         Log.w(TAG + "(Renderer)","Render DONE...");
