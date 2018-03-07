@@ -28,6 +28,11 @@
     <string name="macchina"> La tua macchina </string>
     <string name="impostazioni">Impostazioni</string>
     <string name="casa">Casa</string>
-    <string name="posto_di_lavoro">Posto di lavoro</string>
+    <string name="posto_di_lavoro">Lavoro</string>
+    <string name="notifica_raggio_parcheggi">Notifica parcheggi nel raggio di:</string>
+    <string name="notifiche_background">Notifiche in background:</string>
+    <string name="unita_di_misura">Unità di misura:</string>
+    <string name="indirizzo_di_casa">Indirizzo di casa:</string>
+    <string name="indirizzo_di_lavoro">Indirizzo di lavoro:</string>
 
 </resources>

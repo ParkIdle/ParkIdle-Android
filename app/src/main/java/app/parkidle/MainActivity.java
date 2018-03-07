@@ -187,8 +187,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
 
-    public static Thread customizerThread;
-
     public static Bitmap profileBitmap;
     private DatabasedMarker dtb;
     private boolean boo;
@@ -595,8 +593,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onDrawerOpened(View drawerView) {
                         super.onDrawerOpened(drawerView);
                         //getActionBar().setTitle("Settings");
-                        if(sharedPreferences.getBoolean("needRefresh",false) == true)
+                        if(sharedPreferences.getBoolean("needRefresh",false) == true ){
                             recreate();
+                            editor.putBoolean("needRefresh", false);
+                            editor.commit();
+                        }
                         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                     }
                 };
@@ -892,7 +893,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if(isItalian())
                 Toast.makeText(this, "Posto di lavoro non salvato (Inseriscilo nelle impostazioni)", Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Work place not saved (Add it in the settings menù)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Work place not saved (Add it from settings)", Toast.LENGTH_SHORT).show();
         }
         else{
             LatLng lavoro =new LatLng(latwork,longwork);
@@ -912,12 +913,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mDrawerLayout.closeDrawers();
             CameraPosition position = new CameraPosition.Builder()
                     .target(lavoro) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
+                    .zoom(16) // Sets the zoom to level 10
                     .bearing(mLastLocation.getBearing()) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+                    .newCameraPosition(position), 1000);
         }
     }
 
@@ -1178,7 +1179,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .tilt(0) // Set the camera tilt to 20 degrees
                 .build(); // Builds the CameraPosition object from the builder
         mMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position), null);
+                .newCameraPosition(position), 1500);
     }
 
     /*public void checkGPSEnabled(LocationManager locationManager) {
@@ -1299,11 +1300,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
 
-
-
-        if (customizerThread != null) {
-            customizerThread.interrupt();
-        }
     }
 
     private void dashboard() {

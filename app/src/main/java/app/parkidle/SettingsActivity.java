@@ -108,7 +108,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public void switch_batteria(){
+    /*public void switch_batteria(){
         switch_risparmio_batteria=(Switch) findViewById(R.id.switch1);
         switch_risparmio_batteria.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -122,7 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    }*/
 
     public void switch_background(){
         switchBackgroundNotification = (Switch) findViewById(R.id.switch_notification);
@@ -261,12 +261,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (sharedPreferences.getInt("language",0)==0) {
             //Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
-            Log.w("LINGUA","Lingua settata su italiano");
+            Log.w("LINGUA","Lingua settata su Italiano");
             conf.locale = new Locale("it"); //ita language locale
         }
         else {
             //Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
-            Log.w("LINGUA","Lingua settata su inglese");
+            Log.w("LINGUA","Language now is English");
             conf.locale=new Locale("en");
 
         }
@@ -302,11 +302,14 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
+                        if(position != MainActivity.sharedPreferences.getInt("language",0)){
+                            editor.putBoolean("needRefresh", true);
+                            editor.commit();
+                        }
+
                         MainActivity.editor.putInt("language",position);
                         MainActivity.editor.commit();
                         sceglilingua();
-
-
                         //Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
 
@@ -315,15 +318,8 @@ public class SettingsActivity extends AppCompatActivity {
 
                     }
                 });
-                spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        editor.putBoolean("needRefresh",true);
-                        editor.commit();
-                    }
-                });
                 seekbar();
-                switch_batteria();
+                //switch_batteria();
                 switch_background();
                 casa();
                 lavoro();
