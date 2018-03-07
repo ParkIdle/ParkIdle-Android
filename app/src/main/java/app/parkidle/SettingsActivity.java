@@ -60,10 +60,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "La tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita,la tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Home is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, Home is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -89,10 +89,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "Il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita, il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Workplace is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, workplace is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -194,6 +194,9 @@ public class SettingsActivity extends AppCompatActivity {
         View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
         final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
         Button trova= (Button) view.findViewById((R.id.trova_button_1));
+        mBuilder.setView(view);
+        final AlertDialog dialog =mBuilder.create();
+        dialog.show();
 
         trova.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,13 +207,12 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 else{
                     geocoding(mindirizzo.getText().toString());
+                    dialog.cancel();
                     return;
                 }
             }
         });
-        mBuilder.setView(view);
-        AlertDialog dialog =mBuilder.create();
-        dialog.show();
+
         return;
     }
 
@@ -230,7 +232,9 @@ public class SettingsActivity extends AppCompatActivity {
        View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
        final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
        Button trova= (Button) view.findViewById((R.id.trova_button_1));
-
+       mBuilder.setView(view);
+       final AlertDialog dialog =mBuilder.create();
+       dialog.show();
        trova.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
@@ -240,13 +244,12 @@ public class SettingsActivity extends AppCompatActivity {
                }
                else{
                    geocodingLavoro(mindirizzo.getText().toString());
+                   dialog.cancel();
                    return;
                }
            }
        });
-       mBuilder.setView(view);
-       AlertDialog dialog =mBuilder.create();
-       dialog.show();
+
        return;
 
 
