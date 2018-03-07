@@ -3,7 +3,7 @@
     <item android:id="@+id/db" android:title="Dashboard" android:icon="@drawable/ic_dashboard_black_24dp" />
     <item android:id="@+id/mycar" android:title="My Car" android:icon="@drawable/ic_search_black_24dp"/>
     <item android:id="@+id/myhouse" android:title="Home" android:icon="@drawable/ic_menu_home"/>
-    <item android:id="@+id/myjob" android:title="Work Place" android:icon="@drawable/job"/>
+    <item android:id="@+id/myjob" android:title="Work" android:icon="@drawable/job"/>
     <item android:id="@+id/settings" android:title="Settings" android:icon="@drawable/ic_settings_black_24dp"/>
     <item android:id="@+id/feedback" android:title="FeedBack" android:icon="@drawable/ic_event_black_24dp"/>
     <item android:id="@+id/tutorial" android:title="Tutorial" android:icon="@drawable/help_tutorial_menu" ></item>

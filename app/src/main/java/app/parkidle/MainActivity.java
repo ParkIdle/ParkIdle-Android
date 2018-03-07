@@ -1,22 +1,11 @@
 package app.parkidle;
 
 import android.Manifest;
-import android.animation.ObjectAnimator;
-import android.animation.TypeEvaluator;
-import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import com.google.android.gms.actions.SearchIntents;
-import android.app.IntentService;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -24,31 +13,15 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
-import android.net.wifi.WifiInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.Parcel;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -62,19 +35,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bugfender.sdk.Bugfender;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.login.LoginManager;
-import com.google.android.gms.ads.identifier.AdvertisingIdClient;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.ActivityRecognitionClient;
@@ -83,12 +51,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
-import com.mapbox.api.directions.v5.DirectionsCriteria;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
-import com.mapbox.geojson.BoundingBox;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.annotations.BaseMarkerOptions;
 import com.mapbox.mapboxsdk.annotations.Icon;
 import com.mapbox.mapboxsdk.annotations.IconFactory;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -101,29 +66,19 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.style.layers.Layer;
-import com.mapbox.services.android.navigation.ui.v5.NavigationActivity;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationViewOptions;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationConstants;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
-import com.mapbox.services.android.navigation.v5.navigation.NavigationUnitType;
-
-import junit.framework.TestResult;
 
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ConcurrentModificationException;
@@ -141,10 +96,6 @@ import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 import io.fabric.sdk.android.Fabric;
-import io.fabric.sdk.android.services.common.Crash;
-import io.predict.PIOTripSegment;
-import io.predict.PredictIO;
-import io.predict.PredictIOStatus;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -155,7 +106,6 @@ import static app.parkidle.LoginActivity.mAuth;
 import static app.parkidle.LoginActivity.mGoogleApiClient;
 import static app.parkidle.MainActivity.parkingIconEvaluator;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static io.predict.sdk.detection.services.PIOLocationService.getLastLocation;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener, Callback<DirectionsResponse> {
 
@@ -183,8 +133,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
     private static final String TAG = "Main";
-
-    public static Thread customizerThread;
 
     public static Bitmap profileBitmap;
     private DatabasedMarker dtb;
@@ -245,19 +193,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static int parcheggisegnalati=0;
 
 
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
 
-        if(!isNetworkAvailable()){
-            Intent noConn = new Intent(this, NoConnectionActivity.class);
-            noConn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(noConn);
-            finish();
-        }
+
+
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -288,11 +231,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //checkGPSEnabled(locationManager); // controllo lo stato del GPS
         //mLastLocation = getLastLocation(); // localizzo
 
-        NotificationReceiver notificationReceiver = new NotificationReceiver();
+        OnBootReceiver onBootReceiver = new OnBootReceiver();
         IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
-        registerReceiver(notificationReceiver,filter);
+        registerReceiver(onBootReceiver,filter);
 
-        startService(new Intent(this, MyLocationService.class));
+        //if(MyLocationService.isLocationRunning == false)
+            //startService(new Intent(this, MyLocationService.class));
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -338,6 +282,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         editor.commit();
 
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
+
+        /*sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                recreate();
+            }
+        });
+*/
 
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
@@ -536,6 +488,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         });
 
+
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
         runOnUiThread(new Runnable() {
             @Override
@@ -562,14 +515,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
 
-                if (isItalian()) {
-                    Menu m = mDrawerNav.getMenu();
-                    m.findItem(R.id.db).setTitle("Profilo");
-                    m.findItem(R.id.mycar).setTitle("La tua macchina");
-                    m.findItem(R.id.settings).setTitle("Impostazioni");
-                    m.findItem(R.id.myhouse).setTitle("Casa");
-                    m.findItem(R.id.myjob).setTitle("Posto di lavoro");
-                }
+                Menu m = mDrawerNav.getMenu();
+                m.findItem(R.id.db).setTitle(getResources().getString(R.string.profilo));
+                m.findItem(R.id.mycar).setTitle(getResources().getString(R.string.macchina));
+                m.findItem(R.id.settings).setTitle(getResources().getString(R.string.impostazioni));
+                m.findItem(R.id.myhouse).setTitle(getResources().getString(R.string.casa));
+                m.findItem(R.id.myjob).setTitle(getResources().getString(R.string.posto_di_lavoro));
+
 
                 mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, mDrawerLayout,
                         R.string.drawer_open, R.string.drawer_close) {
@@ -588,6 +540,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onDrawerOpened(View drawerView) {
                         super.onDrawerOpened(drawerView);
                         //getActionBar().setTitle("Settings");
+                        if(sharedPreferences.getBoolean("needRefresh",false) == true ){
+                            recreate();
+                            editor.putBoolean("needRefresh", false);
+                            editor.commit();
+                        }
                         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                     }
                 };
@@ -677,6 +634,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
 
+
         // MqttSubscribe dopo che la mappa viene assegnata in modo
         // da evitare NullPointerException quando inserisco un marker
         // di un parcheggio rilevato
@@ -735,12 +693,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
     }//qua finisce oncreate
 
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -789,6 +742,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
     }
 
+
     private void startTutorial(){
         Intent i = new Intent(this,TutorialActivity.class);
         startActivity(i);
@@ -797,6 +751,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Layer mapText = mMap.getLayer("place-city-lg-n");
         if (language==0)
             mapText.setProperties(textField("{name_it}"));
+
         else
             mapText.setProperties(textField("{name}"));
     }
@@ -885,7 +840,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if(isItalian())
                 Toast.makeText(this, "Posto di lavoro non salvato (Inseriscilo nelle impostazioni)", Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Work place not saved (Add it in the settings menù)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Work place not saved (Add it from settings)", Toast.LENGTH_SHORT).show();
         }
         else{
             LatLng lavoro =new LatLng(latwork,longwork);
@@ -905,12 +860,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mDrawerLayout.closeDrawers();
             CameraPosition position = new CameraPosition.Builder()
                     .target(lavoro) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
+                    .zoom(16) // Sets the zoom to level 10
                     .bearing(mLastLocation.getBearing()) // degree - azimut
                     .tilt(0) // Set the camera tilt to 20 degrees
                     .build(); // Builds the CameraPosition object from the builder
             mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+                    .newCameraPosition(position), 1000);
         }
     }
 
@@ -921,6 +876,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerNav);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -966,6 +922,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         Log.w(TAG,"OnResume(): " + events);
         mapView.onResume();
+
         //checkEvents(events);
         //activatePredictIOTracker();
         /*if(!fromNewIntent) {
@@ -974,7 +931,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }*/
         //checkGPSEnabled(locationManager);
         startService(new Intent(this, MQTTSubscribe.class));
-        startService(new Intent(this, MyLocationService.class));
+        if(MyLocationService.isLocationRunning == false)
+            startService(new Intent(this, MyLocationService.class));
     }
 
     @Override
@@ -1016,8 +974,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         editor.putBoolean("isAppForeground",false);
         editor.commit();
         Log.w(TAG,"Saving sharedPrefs: " + events);
-
-
         mapView.onDestroy();
 
     }
@@ -1034,6 +990,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         finishAffinity();
         //Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
     }
+
 
     /*@SuppressLint("MissingPermission")
     public Location getLastLocation() {
@@ -1169,7 +1126,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .tilt(0) // Set the camera tilt to 20 degrees
                 .build(); // Builds the CameraPosition object from the builder
         mMap.animateCamera(CameraUpdateFactory
-                .newCameraPosition(position), null);
+                .newCameraPosition(position), 1500);
     }
 
     /*public void checkGPSEnabled(LocationManager locationManager) {
@@ -1253,6 +1210,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (language==0) {
             lingua = Locale.ITALIAN;
+
         }
         else if(language==1){
             lingua= Locale.ENGLISH;
@@ -1289,11 +1247,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
 
-
-
-        if (customizerThread != null) {
-            customizerThread.interrupt();
-        }
     }
 
     private void dashboard() {
@@ -1383,22 +1336,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String[] event = e.split("-");
             LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
             long ID = Long.valueOf(event[0]).longValue();
-            if(isItalian()){
+
                 Marker m = mapboxMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title("Parcheggio libero")
+                        .title(getResources().getString(R.string.titolo_parcheggio))
                         .setIcon(parkingIconEvaluator(e)));
                 //m.setId(ID); DA PROBLEMI PER CLICCARE I MARKER
 
-            }
-            else {
-                Marker m = mapboxMap.addMarker(new MarkerOptions()
-                        .position(point)
-                        .title("Free Parking Spot")
-                        .setIcon(parkingIconEvaluator(e)));
-                //m.setId(ID); DA PROBLEMI PER CLICCARE MARKER
-
-            }
 
         }
         Log.w(TAG + "(Renderer)","Render DONE...");
@@ -1530,6 +1474,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return distance;
     }
 
+
     public static float calculateDistanceInMeters(LatLng p1, LatLng p2) {
         Double markerlat = p1.getLatitude();
         Double mylat = p2.getLatitude();
@@ -1569,12 +1514,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if(action.equals("toNotifiedParkingSpot")){
                 CameraPosition position = new CameraPosition.Builder()
                         .target(new LatLng(lat,lng)) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
+                        .zoom(16) // Sets the zoom to level 10
                         .bearing(0) // degree - azimut
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 mMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), null);
+                        .newCameraPosition(position), 1000);
             }
         }
     }
@@ -1777,11 +1722,13 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                             }
                         }
                     }
-                    if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
-                        if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                    else{
+                        if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
+                            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                                events[i].remove(e);
+                        }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
                             events[i].remove(e);
-                    }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
-                        events[i].remove(e);
+                        }
                     }
                 } catch (ConcurrentModificationException e) {
                     Log.e(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());

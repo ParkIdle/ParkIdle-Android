@@ -31,6 +31,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng;
 import static app.parkidle.MainActivity.getmMap;
 import static app.parkidle.MainActivity.language;
 import static app.parkidle.MainActivity.mIcon;
+import static app.parkidle.MainActivity.mLastLocation;
 import static app.parkidle.MainActivity.me;
 import static app.parkidle.MainActivity.sharedPreferences;
 import static com.amazonaws.AmazonServiceException.ErrorType.Service;
@@ -45,6 +46,8 @@ public class MyLocationService extends android.app.Service {
     private static final int LOCATION_INTERVAL_FOREGROUND = 1000;
     private static final int LOCATION_INTERVAL_BACKGROUND = 10000;
     private static final float LOCATION_DISTANCE = 10f;
+    private boolean isAppForeground;
+    public static boolean isLocationRunning;
 
     private class LocationListener implements android.location.LocationListener {
         Location mLastLocation;
@@ -69,7 +72,7 @@ public class MyLocationService extends android.app.Service {
                     //Camera Position definisce la posizione della telecamera
                     MainActivity.position = new CameraPosition.Builder()
                             .target(new LatLng(location.getLatitude(), location.getLongitude())) // Sets the new camera position
-                            .zoom(17) // Sets the zoom to level 10
+                            .zoom(16) // Sets the zoom to level 10
                             .bearing(location.getBearing()) // degree - azimut
                             .tilt(0) // Set the camera tilt to 20 degrees
                             .build(); // Builds the CameraPosition object from the builder
@@ -88,7 +91,9 @@ public class MyLocationService extends android.app.Service {
         @Override
         public void onProviderDisabled(String provider) {
             Log.w(TAG, "onProviderDisabled: " + provider);
-
+            if(provider.equals("gps")){
+                Log.w(TAG,"Checking gps..");
+            }
         }
 
         @Override
@@ -118,8 +123,16 @@ public class MyLocationService extends android.app.Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.w(TAG, "onStartCommand");
-        super.onStartCommand(intent, flags, startId);
+        Log.w(TAG, "onStartCommand id " + startId + " - flags " + flags + " - " + intent);
+        if(!isLocationRunning) isLocationRunning = true;
+        //super.onStartCommand(intent, flags, startId);
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        isAppForeground = sharedPreferences.getBoolean("isAppForeground",true);
+        if(isAppForeground)
+            if (mLocationManager == null) {
+                mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            }
+            checkGPSEnabled(mLocationManager);
         return START_STICKY;
     }
 
@@ -127,11 +140,13 @@ public class MyLocationService extends android.app.Service {
     public void onCreate()
     {
         Log.w(TAG, "onCreate");
-        initializeLocationManager();
+        isLocationRunning = true;
         SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        isAppForeground = sharedPreferences.getBoolean("isAppForeground",true);
+        initializeLocationManager();
         try {
             Log.w(TAG,"isAppForeground = " + sharedPreferences.getBoolean("isAppForeground",true));
-            if(sharedPreferences.getBoolean("isAppForeground",true) == true)
+            if(isAppForeground == true)
                 mLocationManager.requestLocationUpdates(
                         LocationManager.NETWORK_PROVIDER, LOCATION_INTERVAL_FOREGROUND, LOCATION_DISTANCE,
                         mLocationListeners[1]);
@@ -145,7 +160,7 @@ public class MyLocationService extends android.app.Service {
             Log.w(TAG, "network provider does not exist, " + ex.getMessage());
         }
         try {
-            if(sharedPreferences.getBoolean("isAppForeground",true) == true)
+            if(isAppForeground == true)
                 mLocationManager.requestLocationUpdates(
                         LocationManager.GPS_PROVIDER, LOCATION_INTERVAL_FOREGROUND, LOCATION_DISTANCE,
                         mLocationListeners[0]);
@@ -158,7 +173,7 @@ public class MyLocationService extends android.app.Service {
         } catch (IllegalArgumentException ex) {
             Log.w(TAG, "gps provider does not exist " + ex.getMessage());
         }
-        //checkGPSEnabled(mLocationManager);
+
 
     }
 
@@ -176,6 +191,7 @@ public class MyLocationService extends android.app.Service {
                 }
             }
         }
+        isLocationRunning = false;
     }
 
     private void initializeLocationManager() {
@@ -183,19 +199,22 @@ public class MyLocationService extends android.app.Service {
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
-
+        if(isAppForeground)
+            Log.w(TAG,"Checking gps at initialize...");
+            //checkGPSEnabled(mLocationManager);
     }
 
     public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Log.w(TAG,"Building alert...");
+            Log.w(TAG, "Building alert...");
             //buildAlertMessage(this); // costruisce un alert che propone di attivare il GPS
-            Intent i = new Intent(this,GpsDialogActivity.class);
+            Intent i = new Intent(this, GpsDialogActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+            stopSelf();
         }
-        if(!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            if(language == 0)
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            if (language == 0)
                 Toast.makeText(this, "Per una localizzazione più precisa attiva il WiFi", Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();

@@ -45,7 +45,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:ellipsize="end"
-            android:text="Notifica parcheggi nel raggio di:"
+            android:text="@string/notifica_raggio_parcheggi"
             android:textSize="18sp" />
 
         <SeekBar
@@ -73,22 +73,7 @@
             android:id="@+id/switch_notification"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="Notifiche in background"
-            android:textSize="18sp" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Switch
-            android:id="@+id/switch1"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:text="Risparmio energia con batteria scarica"
+            android:text="@string/notifiche_background"
             android:textSize="18sp" />
 
         <Space
@@ -105,7 +90,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:ellipsize="end"
-            android:text="Unità di misura"
+            android:text="@string/unita_di_misura"
             android:textSize="18sp" />
 
         <android.support.v7.widget.AppCompatSpinner
@@ -125,7 +110,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:text="Indirizzo di casa"
+            android:text="@string/indirizzo_di_casa"
             android:textSize="18sp" />
 
         <TextView
@@ -144,7 +129,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:text="Indirizzo del posto di lavoro"
+            android:text="@string/indirizzo_di_lavoro"
             android:textSize="18sp" />
 
         <TextView

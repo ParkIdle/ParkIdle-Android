@@ -3,11 +3,13 @@ package app.parkidle;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -29,6 +31,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static app.parkidle.MainActivity.editor;
 import static app.parkidle.MainActivity.metric;
@@ -57,10 +60,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "La tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita,la tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Home is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, Home is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -86,10 +89,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "Il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita, il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Workplace is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, workplace is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -105,7 +108,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    public void switch_batteria(){
+    /*public void switch_batteria(){
         switch_risparmio_batteria=(Switch) findViewById(R.id.switch1);
         switch_risparmio_batteria.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -119,7 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
-    }
+    }*/
 
     public void switch_background(){
         switchBackgroundNotification = (Switch) findViewById(R.id.switch_notification);
@@ -181,8 +184,8 @@ public class SettingsActivity extends AppCompatActivity {
         casa=(TextView) findViewById(R.id.text_view_casa);
         if (MainActivity.sharedPreferences.getString("lathouse","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longhouse","0").equals("0"))
-            casa.setText("Casa non inserita, clicca per inserirla");
-        else casa.setText("Indirizzo di casa già inserito,clicca qui per cambiarlo");
+            casa.setText(getResources().getString(R.string.casa_non_inserita));
+        else casa.setText(getResources().getString(R.string.casa_inserita));
 
     }
 
@@ -191,6 +194,9 @@ public class SettingsActivity extends AppCompatActivity {
         View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
         final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
         Button trova= (Button) view.findViewById((R.id.trova_button_1));
+        mBuilder.setView(view);
+        final AlertDialog dialog =mBuilder.create();
+        dialog.show();
 
         trova.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,13 +207,12 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 else{
                     geocoding(mindirizzo.getText().toString());
+                    dialog.cancel();
                     return;
                 }
             }
         });
-        mBuilder.setView(view);
-        AlertDialog dialog =mBuilder.create();
-        dialog.show();
+
         return;
     }
 
@@ -216,8 +221,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         if (MainActivity.sharedPreferences.getString("latwork","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longwork","0").equals("0"))
-            lavoro.setText("Posto di lavoro  non inserito, clicca per inserirlo");
-        else lavoro.setText("Indirizzo del posto di lavoro già inserito, clicca qui per cambiarlo");
+            lavoro.setText(getResources().getString(R.string.lavoro_non_inserito));
+        else lavoro.setText(getResources().getString(R.string.lavoro_inserito));
 
     }
 
@@ -227,7 +232,9 @@ public class SettingsActivity extends AppCompatActivity {
        View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
        final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
        Button trova= (Button) view.findViewById((R.id.trova_button_1));
-
+       mBuilder.setView(view);
+       final AlertDialog dialog =mBuilder.create();
+       dialog.show();
        trova.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
@@ -237,18 +244,36 @@ public class SettingsActivity extends AppCompatActivity {
                }
                else{
                    geocodingLavoro(mindirizzo.getText().toString());
+                   dialog.cancel();
                    return;
                }
            }
        });
-       mBuilder.setView(view);
-       AlertDialog dialog =mBuilder.create();
-       dialog.show();
+
        return;
 
 
 
    }
+
+    public void sceglilingua(){
+        Configuration conf = getResources().getConfiguration();
+
+        if (sharedPreferences.getInt("language",0)==0) {
+            //Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
+            Log.w("LINGUA","Lingua settata su Italiano");
+            conf.locale = new Locale("it"); //ita language locale
+        }
+        else {
+            //Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
+            Log.w("LINGUA","Language now is English");
+            conf.locale=new Locale("en");
+
+        }
+        getResources().updateConfiguration(conf,getResources().getDisplayMetrics());
+
+
+    }
 
 
     @Override
@@ -262,8 +287,7 @@ public class SettingsActivity extends AppCompatActivity {
 
 
                 TextView languageLabel = (TextView)findViewById(R.id.language_label);
-                if(MainActivity.language == 0) languageLabel.setText("Lingua");
-                else languageLabel.setText("Language");
+                languageLabel.setText(getResources().getString(R.string.lingua));
                 final Spinner spinner = (Spinner) findViewById(R.id.language_spinner);
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(SettingsActivity.this,
@@ -278,11 +302,15 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
+                        if(position != MainActivity.sharedPreferences.getInt("language",0)){
+                            editor.putBoolean("needRefresh", true);
+                            editor.commit();
+                        }
+
                         MainActivity.editor.putInt("language",position);
                         MainActivity.editor.commit();
-                        MainActivity.editor.apply();
-                        MainActivity.cambialingua();
-                        Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
+                        sceglilingua();
+                        //Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -291,14 +319,14 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
                 seekbar();
-                switch_batteria();
+                //switch_batteria();
                 switch_background();
                 casa();
                 lavoro();
 
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
                 spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
-                if ( MainActivity.sharedPreferences.getInt("metric",0)==0) {
+                if( MainActivity.sharedPreferences.getInt("metric",0)==0) {
                     spinner_unita_misura.setSelection(0);
                 }
                 else {
@@ -311,7 +339,7 @@ public class SettingsActivity extends AppCompatActivity {
                         String text1 = spinner_unita_misura.getItemAtPosition(position).toString();
 
                         TextView spinner_dialog_text=(TextView) view;
-                        Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
                         if(text1.equals("Kilometri")){
                             MainActivity.editor.putInt("metric",0);
                             MainActivity.editor.commit();}
@@ -328,5 +356,14 @@ public class SettingsActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    protected void onStop() {
+        recreate();
+
+        super.onStop();
+        //Toast.makeText(this, "Recreate", Toast.LENGTH_SHORT).show();
+
     }
 }

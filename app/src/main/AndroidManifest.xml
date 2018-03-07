@@ -40,9 +40,15 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
         <!-- BroadcastReceiver that starts MqttService on device boot -->
-        <receiver android:name=".NotificationReceiver">
+        <receiver android:name=".OnBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".OnConnectivityChangeReceiver">
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
@@ -107,6 +113,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".NoConnectionActivity">
+        </activity>
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
@@ -123,7 +131,9 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
         <activity android:name=".FullScreenImage" />
-        <activity android:name=".GpsDialogActivity" android:theme="@android:style/Theme.Dialog"></activity>
+        <activity android:name=".GpsDialogActivity" android:configChanges="orientation"
+            android:screenOrientation="sensor"
+            android:theme="@style/Theme.MyDialogTheme"></activity>
     </application>
 
 </manifest>
