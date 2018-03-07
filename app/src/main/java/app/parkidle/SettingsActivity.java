@@ -9,6 +9,7 @@ import android.location.Geocoder;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -59,10 +60,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "La tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita,la tua casa si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Home is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, Home is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -88,10 +89,10 @@ public class SettingsActivity extends AppCompatActivity {
             }
             Address add= list.get(0);
             String locality = add.getLocality();
-            if(MainActivity.language==0)
-                Toast.makeText(this, "Il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
+            if(MainActivity.sharedPreferences.getInt("language",0)==0)
+                Toast.makeText(this, "Posizione inserita, il tuo posto di lavoro si trova a " + locality, Toast.LENGTH_SHORT).show();
             else
-                Toast.makeText(this, "Workplace is in " + locality, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Address added, workplace is in " + locality, Toast.LENGTH_SHORT).show();
             double lat=add.getLatitude();
             double longi=add.getLongitude();
             //Toast.makeText(this, (float)lat +" " + (float)longi, Toast.LENGTH_SHORT).show();
@@ -193,6 +194,9 @@ public class SettingsActivity extends AppCompatActivity {
         View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
         final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
         Button trova= (Button) view.findViewById((R.id.trova_button_1));
+        mBuilder.setView(view);
+        final AlertDialog dialog =mBuilder.create();
+        dialog.show();
 
         trova.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -203,13 +207,12 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 else{
                     geocoding(mindirizzo.getText().toString());
+                    dialog.cancel();
                     return;
                 }
             }
         });
-        mBuilder.setView(view);
-        AlertDialog dialog =mBuilder.create();
-        dialog.show();
+
         return;
     }
 
@@ -229,7 +232,9 @@ public class SettingsActivity extends AppCompatActivity {
        View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
        final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
        Button trova= (Button) view.findViewById((R.id.trova_button_1));
-
+       mBuilder.setView(view);
+       final AlertDialog dialog =mBuilder.create();
+       dialog.show();
        trova.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View v) {
@@ -239,13 +244,12 @@ public class SettingsActivity extends AppCompatActivity {
                }
                else{
                    geocodingLavoro(mindirizzo.getText().toString());
+                   dialog.cancel();
                    return;
                }
            }
        });
-       mBuilder.setView(view);
-       AlertDialog dialog =mBuilder.create();
-       dialog.show();
+
        return;
 
 
@@ -255,14 +259,23 @@ public class SettingsActivity extends AppCompatActivity {
     public void sceglilingua(){
         Configuration conf = getResources().getConfiguration();
 
-        if (sharedPreferences.getInt("lingua",0)==0) {
-            Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
+        if (sharedPreferences.getInt("language",0)==0) {
+            //Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
+            Log.w("LINGUA","Lingua settata su italiano");
             conf.locale = new Locale("it"); //ita language locale
+
+
         }
         else {
-            Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
+            Log.w("LINGUA","Lingua settata su inglese");
+
             conf.locale=new Locale("en");
+
         }
+        getResources().updateConfiguration(conf,getResources().getDisplayMetrics());
+
+
     }
 
 
@@ -292,10 +305,12 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
-                        MainActivity.editor.putInt("lingua",position);
+                        MainActivity.editor.putInt("language",position);
                         MainActivity.editor.commit();
                         sceglilingua();
-                        Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
+
+
+                        //Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
 
                     @Override
@@ -311,7 +326,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
                 spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
-                if ( MainActivity.sharedPreferences.getInt("metric",0)==0) {
+                if( MainActivity.sharedPreferences.getInt("metric",0)==0) {
                     spinner_unita_misura.setSelection(0);
                 }
                 else {
@@ -324,7 +339,7 @@ public class SettingsActivity extends AppCompatActivity {
                         String text1 = spinner_unita_misura.getItemAtPosition(position).toString();
 
                         TextView spinner_dialog_text=(TextView) view;
-                        Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(SettingsActivity.this, "Hai selezionato: "+ spinner_dialog_text.getText(), Toast.LENGTH_SHORT).show();
                         if(text1.equals("Kilometri")){
                             MainActivity.editor.putInt("metric",0);
                             MainActivity.editor.commit();}
@@ -341,5 +356,14 @@ public class SettingsActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    @Override
+    protected void onStop() {
+        recreate();
+
+        super.onStop();
+        //Toast.makeText(this, "Recreate", Toast.LENGTH_SHORT).show();
+
     }
 }
