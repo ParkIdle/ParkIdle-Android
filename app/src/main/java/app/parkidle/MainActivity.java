@@ -1563,12 +1563,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if(action.equals("toNotifiedParkingSpot")){
                 CameraPosition position = new CameraPosition.Builder()
                         .target(new LatLng(lat,lng)) // Sets the new camera position
-                        .zoom(17) // Sets the zoom to level 10
+                        .zoom(16) // Sets the zoom to level 10
                         .bearing(0) // degree - azimut
                         .tilt(0) // Set the camera tilt to 20 degrees
                         .build(); // Builds the CameraPosition object from the builder
                 mMap.animateCamera(CameraUpdateFactory
-                        .newCameraPosition(position), null);
+                        .newCameraPosition(position), 1000);
             }
         }
     }
@@ -1771,11 +1771,13 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
                             }
                         }
                     }
-                    if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
-                        if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                    else{
+                        if (Integer.parseInt(hour1) - Integer.parseInt(hour2) == 1) {
+                            if (Integer.parseInt(minutes1) - Integer.parseInt(minutes2) >= 0)
+                                events[i].remove(e);
+                        }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
                             events[i].remove(e);
-                    }else if (Integer.parseInt(hour1) - Integer.parseInt(hour2) > 1){
-                        events[i].remove(e);
+                        }
                     }
                 } catch (ConcurrentModificationException e) {
                     Log.e(TAG + "(CheckTask)","WARNING! -> Exception: " + e.getMessage());
