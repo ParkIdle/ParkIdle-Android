@@ -293,7 +293,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
         registerReceiver(notificationReceiver,filter);
 
-        startService(new Intent(this, MyLocationService.class));
+        //if(MyLocationService.isLocationRunning == false)
+            //startService(new Intent(this, MyLocationService.class));
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
