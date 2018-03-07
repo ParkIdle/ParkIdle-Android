@@ -125,7 +125,9 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
         <activity android:name=".FullScreenImage" />
-        <activity android:name=".GpsDialogActivity" android:theme="@android:style/Theme.Dialog"></activity>
+        <activity android:name=".GpsDialogActivity" android:configChanges="orientation"
+            android:screenOrientation="sensor"
+            android:theme="@style/Theme.MyDialogTheme"></activity>
     </application>
 
 </manifest>

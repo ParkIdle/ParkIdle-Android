@@ -10,6 +10,15 @@
 
     </style>
 
+    <style name="Theme.MyDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <!--buttons color-->
+        <item name="colorAccent">@color/green</item>
+        <!--title and message color-->
+        <item name="android:textColorPrimary">@android:color/primary_text_light</item>
+        <!--dialog background-->
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
 
     <style name="NoActionBar" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="android:windowActionBar">false</item>
@@ -17,7 +26,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-
     </style>
 
     <style name="PrimaryFlatButton" parent="Theme.AppCompat.Light.DarkActionBar">

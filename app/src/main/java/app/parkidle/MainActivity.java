@@ -22,6 +22,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
@@ -287,7 +288,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
         registerReceiver(notificationReceiver,filter);
 
-        startService(new Intent(this, MyLocationService.class));
+        //if(MyLocationService.isLocationRunning == false)
+            //startService(new Intent(this, MyLocationService.class));
 
         isCameraFollowing = true; // imposto di default la camera che mi segue
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
@@ -557,14 +559,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
 
-                if (isItalian()) {
-                    Menu m = mDrawerNav.getMenu();
-                    m.findItem(R.id.db).setTitle("Profilo");
-                    m.findItem(R.id.mycar).setTitle("La tua macchina");
-                    m.findItem(R.id.settings).setTitle("Impostazioni");
-                    m.findItem(R.id.myhouse).setTitle("Casa");
-                    m.findItem(R.id.myjob).setTitle("Posto di lavoro");
-                }
+                Menu m = mDrawerNav.getMenu();
+                m.findItem(R.id.db).setTitle(getResources().getString(R.string.profilo));
+                m.findItem(R.id.mycar).setTitle(getResources().getString(R.string.macchina));
+                m.findItem(R.id.settings).setTitle(getResources().getString(R.string.impostazioni));
+                m.findItem(R.id.myhouse).setTitle(getResources().getString(R.string.casa));
+                m.findItem(R.id.myjob).setTitle(getResources().getString(R.string.posto_di_lavoro));
+
 
                 mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, mDrawerLayout,
                         R.string.drawer_open, R.string.drawer_close) {
@@ -779,6 +780,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         return true;
     }
 
+
     private void startTutorial(){
         Intent i = new Intent(this,TutorialActivity.class);
         startActivity(i);
@@ -787,6 +789,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Layer mapText = mMap.getLayer("place-city-lg-n");
         if (language==0)
             mapText.setProperties(textField("{name_it}"));
+
         else
             mapText.setProperties(textField("{name}"));
     }
@@ -964,7 +967,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }*/
         //checkGPSEnabled(locationManager);
         startService(new Intent(this, MQTTSubscribe.class));
-        startService(new Intent(this, MyLocationService.class));
+        if(MyLocationService.isLocationRunning == false)
+            startService(new Intent(this, MyLocationService.class));
     }
 
     @Override
@@ -1006,8 +1010,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         editor.putBoolean("isAppForeground",false);
         editor.commit();
         Log.w(TAG,"Saving sharedPrefs: " + events);
-
-
         mapView.onDestroy();
 
     }
@@ -1243,6 +1245,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         if (language==0) {
             lingua = Locale.ITALIAN;
+
         }
         else if(language==1){
             lingua= Locale.ENGLISH;
@@ -1373,22 +1376,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             String[] event = e.split("-");
             LatLng point = new LatLng(Double.parseDouble(event[3]),Double.parseDouble(event[4]));
             long ID = Long.valueOf(event[0]).longValue();
-            if(isItalian()){
+
                 Marker m = mapboxMap.addMarker(new MarkerOptions()
                         .position(point)
-                        .title("Parcheggio libero")
+                        .title(getResources().getString(R.string.titolo_parcheggio))
                         .setIcon(parkingIconEvaluator(e)));
                 //m.setId(ID); DA PROBLEMI PER CLICCARE I MARKER
 
-            }
-            else {
-                Marker m = mapboxMap.addMarker(new MarkerOptions()
-                        .position(point)
-                        .title("Free Parking Spot")
-                        .setIcon(parkingIconEvaluator(e)));
-                //m.setId(ID); DA PROBLEMI PER CLICCARE MARKER
-
-            }
 
         }
         Log.w(TAG + "(Renderer)","Render DONE...");
