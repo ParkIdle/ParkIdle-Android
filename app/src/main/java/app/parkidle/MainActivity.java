@@ -245,19 +245,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static int parcheggisegnalati=0;
 
 
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
 
-        if(!isNetworkAvailable()){
-            Intent noConn = new Intent(this, NoConnectionActivity.class);
-            noConn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(noConn);
-            finish();
-        }
+
+
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -735,12 +730,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
     }//qua finisce oncreate
 
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

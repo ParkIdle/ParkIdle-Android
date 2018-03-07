@@ -107,6 +107,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".NoConnectionActivity">
+        </activity>
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
