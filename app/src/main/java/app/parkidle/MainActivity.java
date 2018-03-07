@@ -595,7 +595,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onDrawerOpened(View drawerView) {
                         super.onDrawerOpened(drawerView);
                         //getActionBar().setTitle("Settings");
-                        recreate();
+                        if(sharedPreferences.getBoolean("needRefresh",false) == true)
+                            recreate();
                         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                     }
                 };

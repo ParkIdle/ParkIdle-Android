@@ -263,13 +263,10 @@ public class SettingsActivity extends AppCompatActivity {
             //Toast.makeText(this, "Lingua settata su italiano", Toast.LENGTH_SHORT).show();
             Log.w("LINGUA","Lingua settata su italiano");
             conf.locale = new Locale("it"); //ita language locale
-
-
         }
         else {
             //Toast.makeText(this, "Lingua settata su inglese", Toast.LENGTH_SHORT).show();
             Log.w("LINGUA","Lingua settata su inglese");
-
             conf.locale=new Locale("en");
 
         }
@@ -316,6 +313,13 @@ public class SettingsActivity extends AppCompatActivity {
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
 
+                    }
+                });
+                spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        editor.putBoolean("needRefresh",true);
+                        editor.commit();
                     }
                 });
                 seekbar();
