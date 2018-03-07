@@ -91,7 +91,9 @@ public class MyLocationService extends android.app.Service {
         @Override
         public void onProviderDisabled(String provider) {
             Log.w(TAG, "onProviderDisabled: " + provider);
-
+            if(provider.equals("gps")){
+                Log.w(TAG,"Checking gps..");
+            }
         }
 
         @Override
@@ -121,8 +123,16 @@ public class MyLocationService extends android.app.Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.w(TAG, "onStartCommand");
-        super.onStartCommand(intent, flags, startId);
+        Log.w(TAG, "onStartCommand id " + startId + " - flags " + flags + " - " + intent);
+        if(!isLocationRunning) isLocationRunning = true;
+        //super.onStartCommand(intent, flags, startId);
+        SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+        isAppForeground = sharedPreferences.getBoolean("isAppForeground",true);
+        if(isAppForeground)
+            if (mLocationManager == null) {
+                mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+            }
+            checkGPSEnabled(mLocationManager);
         return START_STICKY;
     }
 
@@ -189,26 +199,28 @@ public class MyLocationService extends android.app.Service {
         if (mLocationManager == null) {
             mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         }
-        if(isAppForeground == true)
-            checkGPSEnabled(mLocationManager);
+        if(isAppForeground)
+            Log.w(TAG,"Checking gps at initialize...");
+            //checkGPSEnabled(mLocationManager);
     }
 
     public void checkGPSEnabled(LocationManager locationManager) {
         if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            Log.w(TAG,"Building alert...");
+            Log.w(TAG, "Building alert...");
             //buildAlertMessage(this); // costruisce un alert che propone di attivare il GPS
-            Intent i = new Intent(this,GpsDialogActivity.class);
+            Intent i = new Intent(this, GpsDialogActivity.class);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             stopSelf();
         }
-        if(!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
-            if(language == 0)
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            if (language == 0)
                 Toast.makeText(this, "Per una localizzazione più precisa attiva il WiFi", Toast.LENGTH_LONG).show();
             else
                 Toast.makeText(this, "For a more accurate localization turn ON the WiFi service", Toast.LENGTH_LONG).show();
         }
     }
+
 }
 
 class LatLngEvaluator implements TypeEvaluator<LatLng> {

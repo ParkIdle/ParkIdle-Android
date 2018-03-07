@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.util.Log;
 public class GpsDialogActivity extends Activity {
 
     private boolean isGpsEnabled;
+    public static boolean isDialogActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,10 @@ public class GpsDialogActivity extends Activity {
             Log.w("GpsDialog","GPS IS ENABLED NOW");
             Intent i = new Intent(this,MyLocationService.class);
             startService(i);
+            SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("isDialogActive",false);
+            editor.commit();
             finish();
         }
     }

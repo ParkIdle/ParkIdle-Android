@@ -2,8 +2,12 @@ package app.parkidle;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -83,6 +87,13 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_login);
+
+        if(!isNetworkAvailable() || isAirplaneModeOn(this)){
+            Intent noConn = new Intent(this, NoConnectionActivity.class);
+            noConn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(noConn);
+            finish();
+        }
 
 
         Log.w(TAG,"Inizio procedura login");
@@ -299,6 +310,20 @@ public class LoginActivity extends AppCompatActivity {
                         // ...
                     }
                 });
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    private static boolean isAirplaneModeOn(Context context) {
+
+        return Settings.System.getInt(context.getContentResolver(),
+                Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+
     }
 
 

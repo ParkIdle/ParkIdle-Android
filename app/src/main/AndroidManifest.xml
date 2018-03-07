@@ -107,6 +107,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name=".NoConnectionActivity">
+        </activity>
         <activity
             android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
@@ -123,7 +125,9 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FeedBackActivity" />
         <activity android:name=".FullScreenImage" />
-        <activity android:name=".GpsDialogActivity" android:theme="@android:style/Theme.Dialog"></activity>
+        <activity android:name=".GpsDialogActivity" android:configChanges="orientation"
+            android:screenOrientation="sensor"
+            android:theme="@style/Theme.MyDialogTheme"></activity>
     </application>
 
 </manifest>
