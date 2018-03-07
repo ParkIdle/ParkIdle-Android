@@ -36,6 +36,7 @@ import org.eclipse.paho.client.mqttv3.internal.DisconnectedMessageBuffer;
 import org.eclipse.paho.client.mqttv3.internal.MqttPersistentData;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -182,7 +183,11 @@ public class MQTTSubscribe extends Service implements MqttCallback{
         //try {
             Log.w(TAG,"Reconnecting...");
             //client.disconnectForcibly();
-            subscribe();
+        try {
+            client.connect();
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
 
         //} catch (MqttException e) {
 
