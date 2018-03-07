@@ -7,6 +7,8 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import com.google.android.gms.actions.SearchIntents;
+
+import android.app.Application;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -340,6 +342,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
 
+        /*sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                recreate();
+            }
+        });
+*/
+
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
@@ -537,6 +547,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         });
 
+
         //Log.w(TAG,"[EVENTS] -> " + events.toString());
         runOnUiThread(new Runnable() {
             @Override
@@ -588,6 +599,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onDrawerOpened(View drawerView) {
                         super.onDrawerOpened(drawerView);
                         //getActionBar().setTitle("Settings");
+                        recreate();
                         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                     }
                 };
@@ -674,6 +686,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 email.setText(LoginActivity.getUser().getEmail());
             }
         });
+
 
 
 
@@ -923,6 +936,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // If the nav drawer is open, hide action items related to the content view
         boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerNav);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
+
         return super.onPrepareOptionsMenu(menu);
     }
 
@@ -968,6 +982,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         Log.w(TAG,"OnResume(): " + events);
         mapView.onResume();
+
         //checkEvents(events);
         //activatePredictIOTracker();
         /*if(!fromNewIntent) {
@@ -1035,6 +1050,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         finishAffinity();
         //Toast.makeText(this, "Tasto disattivato", Toast.LENGTH_SHORT).show();
     }
+
 
     /*@SuppressLint("MissingPermission")
     public Location getLastLocation() {
@@ -1522,6 +1538,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         return distance;
     }
+
 
     public static float calculateDistanceInMeters(LatLng p1, LatLng p2) {
         Double markerlat = p1.getLatitude();
