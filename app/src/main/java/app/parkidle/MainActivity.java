@@ -564,14 +564,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
                 mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
 
-                if (isItalian()) {
-                    Menu m = mDrawerNav.getMenu();
-                    m.findItem(R.id.db).setTitle("Profilo");
-                    m.findItem(R.id.mycar).setTitle("La tua macchina");
-                    m.findItem(R.id.settings).setTitle("Impostazioni");
-                    m.findItem(R.id.myhouse).setTitle("Casa");
-                    m.findItem(R.id.myjob).setTitle("Posto di lavoro");
-                }
+                Menu m = mDrawerNav.getMenu();
+                m.findItem(R.id.db).setTitle(getResources().getString(R.string.profilo));
+                m.findItem(R.id.mycar).setTitle(getResources().getString(R.string.macchina));
+                m.findItem(R.id.settings).setTitle(getResources().getString(R.string.impostazioni));
+                m.findItem(R.id.myhouse).setTitle(getResources().getString(R.string.casa));
+                m.findItem(R.id.myjob).setTitle(getResources().getString(R.string.posto_di_lavoro));
+
 
                 mActionBarDrawerToggle = new ActionBarDrawerToggle(MainActivity.this, mDrawerLayout,
                         R.string.drawer_open, R.string.drawer_close) {
