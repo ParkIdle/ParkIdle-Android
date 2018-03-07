@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -95,10 +96,8 @@ public class LoginActivity extends AppCompatActivity {
             finish();
         }
 
-
         Log.w(TAG,"Inizio procedura login");
         FirebaseApp.initializeApp(this);
-
 
         // inizialiting the Facebook options by the ID provided from Firebase
         mCallbackManager = CallbackManager.Factory.create();
@@ -179,10 +178,6 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-
-
-
-
     }//qua finisce on create
 
     @Override
@@ -194,6 +189,17 @@ public class LoginActivity extends AppCompatActivity {
         //currentAccount = GoogleSignIn.getLastSignedInAccount(this);
         if(currentUser != null)
             updateUI(currentUser);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if(!isNetworkAvailable() || isAirplaneModeOn(this)){
+            Intent noConn = new Intent(this, NoConnectionActivity.class);
+            noConn.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(noConn);
+            finish();
+        }
     }
 
     private void signIn_google() {
@@ -312,6 +318,8 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+
+
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -325,12 +333,6 @@ public class LoginActivity extends AppCompatActivity {
                 Settings.System.AIRPLANE_MODE_ON, 0) != 0;
 
     }
-
-
-
-
-
-
 
     public static boolean isWithGoogle() {
         return withGoogle;
