@@ -12,26 +12,29 @@
         android:id="@+id/imageView10"
         android:layout_width="262dp"
         android:layout_height="341dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/timing_parcheggi" />
 
     <ImageView
         android:id="@+id/imageView12"
         android:layout_width="352dp"
-        android:layout_height="152dp"
+        android:layout_height="148dp"
         android:layout_marginBottom="8dp"
-        android:layout_marginTop="308dp"
-        app:layout_constraintBottom_toBottomOf="@+id/imageView17"
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tasto_avanti_2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.903"
+        app:layout_constraintVertical_bias="0.84000003"
         app:srcCompat="@drawable/box_testo_timer" />
 
     <ImageView
@@ -44,9 +47,9 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView12"
+        app:layout_constraintTop_toTopOf="@+id/imageView10"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/tasto_avanti" />
 
 </android.support.constraint.ConstraintLayout>
