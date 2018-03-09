@@ -44,7 +44,7 @@ public class MyLocationService extends android.app.Service {
     private static final String TAG = "MyLocationService";
     private LocationManager mLocationManager = null;
     private static final int LOCATION_INTERVAL_FOREGROUND = 1000;
-    private static final int LOCATION_INTERVAL_BACKGROUND = 10000;
+    private static final int LOCATION_INTERVAL_BACKGROUND = 3000;
     private static final float LOCATION_DISTANCE = 10f;
     private boolean isAppForeground;
     public static boolean isLocationRunning;

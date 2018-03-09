@@ -34,4 +34,7 @@
     <string name="unita_di_misura">Metrics:</string>
     <string name="indirizzo_di_casa">Home address:</string>
     <string name="indirizzo_di_lavoro">Work address:</string>
+    <string name="cambio_preferenze">Changes were made, if you want to apply them, restart the app. Do you want to restart it now?</string>
+    <string name="conferma">Yes</string>
+    <string name="nega">No</string>
 </resources>

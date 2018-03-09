@@ -32,7 +32,6 @@ public class GpsDialogActivity extends Activity {
                     public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id) {
                         isGpsEnabled = true;
                         startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {

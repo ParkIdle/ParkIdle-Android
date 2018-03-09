@@ -283,21 +283,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         events = sharedPreferences.getStringSet("events", new HashSet<String>());
 
-        /*sharedPreferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                recreate();
-            }
-        });
-*/
-
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
         mapView = (MapView) findViewById(R.id.mapView);
         // creo la mappa
         mapView.onCreate(savedInstanceState);
-
         // preparo la mappa
         //prepareMap(mapView);
         mapView.getMapAsync(new OnMapReadyCallback() {
@@ -540,11 +531,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onDrawerOpened(View drawerView) {
                         super.onDrawerOpened(drawerView);
                         //getActionBar().setTitle("Settings");
-                        if(sharedPreferences.getBoolean("needRefresh",false) == true ){
-                            recreate();
-                            editor.putBoolean("needRefresh", false);
-                            editor.commit();
-                        }
                         invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
                     }
                 };
@@ -691,6 +677,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             nearestParkingSpot();
         }
     }
+
     }//qua finisce oncreate
 
 
@@ -713,7 +700,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 break;
             case R.id.refresh:
                 //Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show();
-                List<Marker> mList = getmMap().getMarkers();
+                /*List<Marker> mList = getmMap().getMarkers();
                 Iterator<Marker> it = mList.listIterator();
                 while (it.hasNext()){
                     Marker m = it.next();
@@ -736,7 +723,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 dialog.setMessage("Refreshing..");
                 dialog.show();
                 renderEvents(events,getmMap());
-                dialog.dismiss();
+                dialog.dismiss();*/
+                refreshMarkers();
                 break;
         }
         return true;
@@ -757,7 +745,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void myCar(){
-
         latpark = sharedPreferences.getFloat("latpark",0);
         longpark = sharedPreferences.getFloat("longpark",0);
         if(latpark==0 && longpark==0){
@@ -922,7 +909,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onResume();
         Log.w(TAG,"OnResume(): " + events);
         mapView.onResume();
-
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(MapboxMap mapboxMap) {
+                Log.w(TAG,"Map is ready");
+                refreshMarkers();
+            }
+        });
         //checkEvents(events);
         //activatePredictIOTracker();
         /*if(!fromNewIntent) {
@@ -1121,7 +1114,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
         CameraPosition position = new CameraPosition.Builder()
                 .target(nearest.getPosition()) // Sets the new camera position
-                .zoom(17) // Sets the zoom to level 10
+                .zoom(16) // Sets the zoom to level 10
                 .bearing(mLastLocation.getBearing()) // degree - azimut
                 .tilt(0) // Set the camera tilt to 20 degrees
                 .build(); // Builds the CameraPosition object from the builder
@@ -1532,6 +1525,33 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private void feedback_activity(){
         Intent i = new Intent(this,FeedBackActivity.class);
         startActivity(i);
+    }
+
+    private void refreshMarkers(){
+        List<Marker> mList = getmMap().getMarkers();
+        Iterator<Marker> it = mList.listIterator();
+        while (it.hasNext()){
+            Marker m = it.next();
+            if(!m.getIcon().equals(mIcon)) {
+                getmMap().removeMarker(m);
+            }
+        }
+        CheckEventsTask cet = new CheckEventsTask();
+        cet.execute(events);
+        try {
+            events = cet.get();
+        } catch (InterruptedException e) {
+            Log.w(TAG,e.getMessage());
+            Crashlytics.logException(e);
+        } catch (ExecutionException e) {
+            Log.w(TAG,e.getMessage());
+            Crashlytics.logException(e);
+        }
+        ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setMessage("Refreshing..");
+        dialog.show();
+        renderEvents(events,getmMap());
+        dialog.dismiss();
     }
 
     private String getDateFromMarkerID(long id){

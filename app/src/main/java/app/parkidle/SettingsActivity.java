@@ -2,10 +2,13 @@ package app.parkidle;
 
 import android.content.ClipData;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Address;
 import android.location.Geocoder;
+import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -49,6 +52,8 @@ public class SettingsActivity extends AppCompatActivity {
     private EditText indirizzo;
     private TextView casa;
     private TextView lavoro;
+    private boolean needRefresh;
+    private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     public void geocoding(String posizione){
         Geocoder geoc= new Geocoder(this);
@@ -126,7 +131,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     public void switch_background(){
         switchBackgroundNotification = (Switch) findViewById(R.id.switch_notification);
-        switchBackgroundNotification.setActivated(sharedPreferences.getBoolean("backgroundNotify",false));
+        switchBackgroundNotification.setChecked(sharedPreferences.getBoolean("backgroundNotify",false));
 
         switchBackgroundNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
@@ -280,6 +285,19 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        needRefresh = false;
+        listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(key.equals("language") || key.equals("metric") || key.equals("latwork") || key.equals("longwork")
+                        || key.equals("lathouse") || key.equals("longhouse") || key.equals("progressKm") || key.equals("backgroundNotify")
+                        || key.equals("longwork")){
+                    Log.w("Settings","Shared Preferences changed!");
+                    needRefresh = true;
+                }
+            }
+        };
+        sharedPreferences.registerOnSharedPreferenceChangeListener(listener);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -302,13 +320,11 @@ public class SettingsActivity extends AppCompatActivity {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         String text = spinner.getItemAtPosition(position).toString();
                         spinner.setSelection(position);
-                        if(position != MainActivity.sharedPreferences.getInt("language",0)){
-                            editor.putBoolean("needRefresh", true);
-                            editor.commit();
-                        }
 
-                        MainActivity.editor.putInt("language",position);
-                        MainActivity.editor.commit();
+                        if(position != MainActivity.sharedPreferences.getInt("language",0)) {
+                            MainActivity.editor.putInt("language", position);
+                            MainActivity.editor.commit();
+                        }
                         sceglilingua();
                         //Toast.makeText(SettingsActivity.this, "Riavvia l'app per i cambiamenti \nRestart the app to apply changes", Toast.LENGTH_LONG).show();
                     }
@@ -354,16 +370,25 @@ public class SettingsActivity extends AppCompatActivity {
 
                     }
                 });
+
+
             }
         });
     }
 
     @Override
     protected void onStop() {
-        recreate();
-
         super.onStop();
         //Toast.makeText(this, "Recreate", Toast.LENGTH_SHORT).show();
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        if(needRefresh){
+            startActivity(new Intent(this,ChangedSettingsDialogActivity.class));
+        }
+        needRefresh = false;
     }
 }

@@ -34,5 +34,8 @@
     <string name="unita_di_misura">Unità di misura:</string>
     <string name="indirizzo_di_casa">Indirizzo di casa:</string>
     <string name="indirizzo_di_lavoro">Indirizzo di lavoro:</string>
+    <string name="cambio_preferenze">Sono stati rilevati dei cambiamenti, per renderli effettivi devi riavviare l'app. Vuoi farlo ora?</string>
+    <string name="conferma">Si</string>
+    <string name="nega">No</string>
 
 </resources>
