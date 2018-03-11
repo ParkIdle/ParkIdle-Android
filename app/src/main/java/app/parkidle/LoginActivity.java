@@ -49,6 +49,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 
+import java.util.Date;
 import java.util.function.ToDoubleBiFunction;
 
 import io.predict.sdk.detection.services.testapp.SensorLoggerService;

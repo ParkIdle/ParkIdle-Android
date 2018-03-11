@@ -34,6 +34,9 @@ import java.util.concurrent.ExecutionException;
 public class DetectedActivitiesIntentService extends IntentService {
 
     private Location l;
+    private Location eventLocation;
+    private Date eventDate;
+    private boolean wasInVehicle;
     private String activitiesJson;
     private SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
     private SharedPreferences.Editor editor = MainActivity.editor;
@@ -120,6 +123,35 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,maxActivity + " non tenuta in considerazione.");
             return;
         }
+        if(maxActivity.equals("IN VEHICLE") || maxActivity.equals("ON BICYCLE")){
+            if(wasInVehicle == false) {
+                wasInVehicle = true;
+                eventLocation = MainActivity.getMyLocation(); // when i first started
+                //eventDate = new Date(); // now
+            }
+            /*if(eventDate != null){
+                Date now = new Date();
+                String time1 = eventDate.toString().split(" ")[3];
+                String hour1 = time1.split(":")[0];
+                String minutes1 = time1.split(":")[1];
+                String seconds1 = time1.split(":")[2];
+
+                String time2 = now.toString().split(" ")[3];
+                String hour2 = time2.split(":")[0];
+                String minutes2 = time2.split(":")[1];
+                String seconds2 = time2.split(":")[2];
+
+                if(Integer.parseInt(hour2) > Integer.parseInt(hour1)){
+                    if(60 - Integer.parseInt(minutes2) - Integer.parseInt(minutes1) >= 20){
+                        wasInVehicle = false;
+                    }
+                }else if(Integer.parseInt(hour2) == Integer.parseInt(hour1)){
+                    if(Integer.parseInt(minutes2) - Integer.parseInt(minutes1) >= 20){
+                        wasInVehicle = false;
+                    }
+                }
+            }   */
+        }
         addDetectedActivity(maxActivity);
         createEvent(maxActivity);
     }
@@ -188,8 +220,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Log.w(TAG,"La location è null non posso mandare l'evento(partenza)");
                 return;
             }
-            Double latitude = l.getLatitude();
-            Double longitude = l.getLongitude();
+            //Double latitude = l.getLatitude();
+            //Double longitude = l.getLongitude();
+            Double latitude = eventLocation.getLatitude(); //location di quando sei partito
+            Double longitude = eventLocation.getLongitude();
             Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
             MainActivity.parcheggisegnalati+=1;
             MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
@@ -239,6 +273,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                     setLastSignal(now);
                 }*/
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
+                wasInVehicle = false;
             }
         }
 
@@ -298,7 +333,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             editor.apply();
             Log.w(TAG,"Parcheggio salvato!");
         }
-        Log.w(TAG,"Parcheggio non salvato...");
+        else Log.w(TAG,"Parcheggio non salvato...");
     }
 
     private synchronized void addDetectedActivity(String activity){
