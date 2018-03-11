@@ -341,6 +341,10 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
     private synchronized void addDetectedActivity(String activity, Location activityLocation){
+        if(activityLocation == null) {
+            Log.w(TAG,"Location is null for this activity");
+            return;
+        }
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
