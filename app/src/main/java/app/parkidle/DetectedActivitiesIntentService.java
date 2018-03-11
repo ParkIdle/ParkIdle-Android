@@ -38,6 +38,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private Date eventDate;
     private boolean wasInVehicle;
     private String activitiesJson;
+    private String activitiesLocations;
     private SharedPreferences sharedPreferences = MainActivity.sharedPreferences;
     private SharedPreferences.Editor editor = MainActivity.editor;
     private Date lastSignal;
@@ -79,6 +80,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         if(sharedPreferences == null)
             sharedPreferences = getSharedPreferences("PARKIDLE_PREFENCES",MODE_PRIVATE);
         activitiesJson = sharedPreferences.getString("detectedActivities","");
+        activitiesLocations = sharedPreferences.getString("activitiesLocations","");
         String maxActivity = null;
         String activity = null;
         int maxConfidence = 0;
@@ -123,7 +125,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,maxActivity + " non tenuta in considerazione.");
             return;
         }
-        if(maxActivity.equals("IN VEHICLE") || maxActivity.equals("ON BICYCLE")){
+        /*if(maxActivity.equals("IN VEHICLE") || maxActivity.equals("ON BICYCLE")){
             if(wasInVehicle == false) {
                 wasInVehicle = true;
                 eventLocation = MainActivity.getMyLocation(); // when i first started
@@ -151,8 +153,8 @@ public class DetectedActivitiesIntentService extends IntentService {
                     }
                 }
             }   */
-        }
-        addDetectedActivity(maxActivity);
+        //}
+        addDetectedActivity(maxActivity,MainActivity.getMyLocation());
         createEvent(maxActivity);
     }
 
@@ -222,8 +224,10 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             //Double latitude = l.getLatitude();
             //Double longitude = l.getLongitude();
-            Double latitude = eventLocation.getLatitude(); //location di quando sei partito
-            Double longitude = eventLocation.getLongitude();
+            //Double latitude = eventLocation.getLatitude(); //location di quando sei partito
+            //Double longitude = eventLocation.getLongitude();
+            Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
+            Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
             Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
             MainActivity.parcheggisegnalati+=1;
             MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
@@ -336,20 +340,28 @@ public class DetectedActivitiesIntentService extends IntentService {
         else Log.w(TAG,"Parcheggio non salvato...");
     }
 
-    private synchronized void addDetectedActivity(String activity){
+    private synchronized void addDetectedActivity(String activity, Location activityLocation){
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
-
         String[] jsonSplit = activitiesJson.split(",");
         if(jsonSplit.length > 5){
             activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
         }
+
+        if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
+        else activitiesLocations = activitiesLocations + "," + activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
+        String[] locationsSplit = activitiesLocations.split(",");
+        if(locationsSplit.length > 5){
+            activitiesLocations = locationsSplit[1] + "," + locationsSplit[2] + "," + locationsSplit[3] + "," + locationsSplit[4] + "," + locationsSplit[5];
+        }
+
         if(editor == null)
             editor = sharedPreferences.edit();
         editor.putString("detectedActivities", activitiesJson);
+        editor.putString("activitiesLocations",activitiesLocations);
         editor.apply();
 
-        Log.w(TAG,"@@@ACTIVITY LIST@@@ : " + activitiesJson);
+        Log.w(TAG,"@@@ACTIVITY LIST@@@ : " + activitiesJson + "\n@@@ACTIVITY LOCATIONS@@@ : " + activitiesLocations);
     }
 
     private String markerIdHashcode(Double lat, Double lon){
