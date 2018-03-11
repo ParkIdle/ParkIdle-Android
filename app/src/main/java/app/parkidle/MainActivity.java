@@ -377,7 +377,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //TEST STUFF
                         Date d = new Date();
                         Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                        parcheggisegnalati++;
+                        events.add(p.toString());
+                        parcheggisegnalati++; //TODO: perchè aumenta le segnalazioni?
                         editor.putInt("parcheggiorank",parcheggisegnalati);
                         editor.commit();
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
