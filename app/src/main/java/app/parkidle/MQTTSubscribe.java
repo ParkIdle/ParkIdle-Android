@@ -2,6 +2,7 @@ package app.parkidle;
 
 import android.app.IntentService;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -317,6 +318,11 @@ public class MQTTSubscribe extends Service implements MqttCallback{
                 .setContentIntent(contentIntent);
 
         NotificationManager notificationManager = (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(
+                    MainActivity.NOTIFICATION_CHANNEL_ID, "NewParkingSpot", NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(mChannel);
+        }
         notificationManager.notify(1, notificationBuilder.build());
     }
 
