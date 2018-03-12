@@ -362,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
 
+                /*
                 mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
@@ -388,7 +389,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                     }
                 });
-
+                */
                 mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                     @Nullable
                     @Override
