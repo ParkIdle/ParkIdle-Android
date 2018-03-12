@@ -362,8 +362,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
 
-                /*
-                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+
+                /*mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
@@ -385,11 +385,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start(); é*/
+                        t5.start(); é
 
                     }
-                });
-                */
+                });*/
+
                 mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                     @Nullable
                     @Override
