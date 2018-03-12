@@ -368,7 +368,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
 
-                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                        /*Marker m = mapboxMap.addMarker(new MarkerOptions()
                                 .setIcon(icona_parcheggio_libero)
                                 .position(point)
                                 .setTitle("Parcheggio libero"));
@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start();
+                        t5.start(); é*/
 
                     }
                 });
