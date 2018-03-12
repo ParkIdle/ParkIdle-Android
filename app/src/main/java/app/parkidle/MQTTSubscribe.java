@@ -184,21 +184,9 @@ public class MQTTSubscribe extends Service implements MqttCallback{
         try {
             Log.w(TAG,"Reconnecting...");
             //client.disconnectForcibly();
-
-        try {
             client.connect();
         } catch (MqttException e) {
             e.printStackTrace();
-        }
-
-        //} catch (MqttException e) {
-
-            //subscribe();
-            client.connect();
-
-
-        } catch (MqttException e) {
-            Log.w(TAG,e.getMessage());
         }
         //subscribe();
     }
