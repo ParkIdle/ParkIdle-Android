@@ -159,7 +159,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
     private void createEvent(String activity) {
-        Log.w(TAG,"Vediamo se è un evento valido...");;
+        Log.w(TAG,"Vediamo se è un evento valido...");
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");

@@ -27,7 +27,7 @@ public class FragmentFive extends Fragment {
         super.onViewCreated(v5, savedInstanceState);
 
 
-        ImageView tasto5 = (ImageView)v5.findViewById(R.id.tasto_mappa);
+        ImageView tasto5 = v5.findViewById(R.id.tasto_mappa);
         tasto5.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
