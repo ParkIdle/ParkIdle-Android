@@ -28,7 +28,7 @@ import android.widget.ImageView;
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_fullscreenimg);
 
-            ImageView fullScreenImageView = (ImageView) findViewById(R.id.imageView2);
+            ImageView fullScreenImageView = findViewById(R.id.imageView2);
             if(MainActivity.getImageBitmap(LoginActivity.getUser().getPhotoUrl().toString())!= null)
                 fullScreenImageView.setImageBitmap(MainActivity.getImageBitmap(LoginActivity.getUser().getPhotoUrl().toString()));
         }

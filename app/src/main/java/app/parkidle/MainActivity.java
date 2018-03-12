@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         //Prendo l'istanza di MapBox(API Maps) e inserisco la key
         Mapbox.getInstance(MainActivity.this, "pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA");
         // mapView sarebbe la vista della mappa e l'associo ad un container in XML
-        mapView = (MapView) findViewById(R.id.mapView);
+        mapView = findViewById(R.id.mapView);
         // creo la mappa
         mapView.onCreate(savedInstanceState);
         // preparo la mappa
@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                         window = inflater.inflate(R.layout.parkidle_info_window, null);
 
-                        Button nav = (Button) window.findViewById(R.id.info_navigation);
+                        Button nav = window.findViewById(R.id.info_navigation);
                         nav.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -413,11 +413,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         Icon icon = marker.getIcon();
                         if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
 
-                            TextView title = (TextView) window.findViewById(R.id.info_title);
+                            TextView title = window.findViewById(R.id.info_title);
                             title.setText(marker.getTitle());
 
-                            TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
-                            TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                            TextView minutes = window.findViewById(R.id.info_minutes);
+                            TextView distance = window.findViewById(R.id.info_distance);
                             String date = "";
                             //long markerID = marker.getId();
                             //String date = getDateFromMarkerID(markerID);
@@ -451,11 +451,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         else if (icon.equals(house_icon) || icon.equals(work_icon) ||icon.equals(icona_whereiparked)){
 
 
-                            TextView title = (TextView) window.findViewById(R.id.info_title);
+                            TextView title = window.findViewById(R.id.info_title);
                             title.setText(marker.getTitle());
 
-                            TextView minutes = (TextView) window.findViewById(R.id.info_minutes);
-                            TextView distance = (TextView) window.findViewById(R.id.info_distance);
+                            TextView minutes = window.findViewById(R.id.info_minutes);
+                            TextView distance = window.findViewById(R.id.info_distance);
 
                             if (isItalian()) {
                                 minutes.setText("");
@@ -504,8 +504,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 });
 
                 // Swipe-left Menu
-                mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-                mDrawerNav = (NavigationView) findViewById(R.id.drawer_navigation);
+                mDrawerLayout = findViewById(R.id.drawer_layout);
+                mDrawerNav = findViewById(R.id.drawer_navigation);
 
                 Menu m = mDrawerNav.getMenu();
                 m.findItem(R.id.db).setTitle(getResources().getString(R.string.profilo));

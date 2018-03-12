@@ -224,7 +224,6 @@ public class MQTTSubscribe extends Service implements MqttCallback{
                 if (!checkEventDate(event)) { // se l'evento è di 1 ora fa non lo disegno
                     return;
                 }
-                ;
                 if (MainActivity.getmMap() != null){
                     final Marker m = MainActivity.getmMap().addMarker(new MarkerOptions()
                             .position(new LatLng(event.getLatitude(), event.getLongitude()))

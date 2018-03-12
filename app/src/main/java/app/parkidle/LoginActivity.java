@@ -154,7 +154,7 @@ public class LoginActivity extends AppCompatActivity {
                 });*/
 
                 // Animazione logo ParkIdle
-                ImageView myImageView= (ImageView)findViewById(R.id.splashscreen);
+                ImageView myImageView= findViewById(R.id.splashscreen);
                 Animation myFadeInAnimation = AnimationUtils.loadAnimation(LoginActivity.this, R.anim.fadein);
                 myImageView.startAnimation(myFadeInAnimation); //Set animation to your ImageView
             }

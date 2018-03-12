@@ -26,7 +26,7 @@ public class FragmentTwo extends android.support.v4.app.Fragment {
         super.onViewCreated(v2, savedInstanceState);
 
 
-        ImageView tasto2 = (ImageView)v2.findViewById(R.id.tasto_avanti_2);
+        ImageView tasto2 = v2.findViewById(R.id.tasto_avanti_2);
         tasto2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
