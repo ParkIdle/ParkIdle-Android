@@ -130,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity {
     }*/
 
     public void switch_background(){
-        switchBackgroundNotification = (Switch) findViewById(R.id.switch_notification);
+        switchBackgroundNotification = findViewById(R.id.switch_notification);
         switchBackgroundNotification.setChecked(sharedPreferences.getBoolean("backgroundNotify",false));
 
         switchBackgroundNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -153,8 +153,8 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     public void seekbar(){
-        seek_bar=(SeekBar)findViewById(R.id.seek_Bar);
-        text_view=(TextView)findViewById(R.id.text_view);
+        seek_bar= findViewById(R.id.seek_Bar);
+        text_view= findViewById(R.id.text_view);
         seek_bar.setProgress(MainActivity.sharedPreferences.getInt("progressKm",2));
         text_view.setText(seek_bar.getProgress()+"km");
 
@@ -186,7 +186,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     }
     public void casa(){
-        casa=(TextView) findViewById(R.id.text_view_casa);
+        casa= findViewById(R.id.text_view_casa);
         if (MainActivity.sharedPreferences.getString("lathouse","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longhouse","0").equals("0"))
             casa.setText(getResources().getString(R.string.casa_non_inserita));
@@ -197,8 +197,8 @@ public class SettingsActivity extends AppCompatActivity {
     public void cas(View view1){
         AlertDialog.Builder mBuilder=new AlertDialog.Builder(SettingsActivity.this);
         View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
-        final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
-        Button trova= (Button) view.findViewById((R.id.trova_button_1));
+        final EditText mindirizzo= view.findViewById((R.id.indirizzo_txt));
+        Button trova= view.findViewById((R.id.trova_button_1));
         mBuilder.setView(view);
         final AlertDialog dialog =mBuilder.create();
         dialog.show();
@@ -222,7 +222,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public void lavoro(){
-        lavoro=(TextView) findViewById(R.id.text_view_lavoro);
+        lavoro= findViewById(R.id.text_view_lavoro);
 
         if (MainActivity.sharedPreferences.getString("latwork","0").equals("0")
                 && MainActivity.sharedPreferences.getString("longwork","0").equals("0"))
@@ -235,8 +235,8 @@ public class SettingsActivity extends AppCompatActivity {
 
        AlertDialog.Builder mBuilder=new AlertDialog.Builder(SettingsActivity.this);
        View view =getLayoutInflater().inflate(R.layout.geocoding_layout,null);
-       final EditText mindirizzo= (EditText) view.findViewById((R.id.indirizzo_txt));
-       Button trova= (Button) view.findViewById((R.id.trova_button_1));
+       final EditText mindirizzo= view.findViewById((R.id.indirizzo_txt));
+       Button trova= view.findViewById((R.id.trova_button_1));
        mBuilder.setView(view);
        final AlertDialog dialog =mBuilder.create();
        dialog.show();
@@ -304,9 +304,9 @@ public class SettingsActivity extends AppCompatActivity {
             public void run() {
 
 
-                TextView languageLabel = (TextView)findViewById(R.id.language_label);
+                TextView languageLabel = findViewById(R.id.language_label);
                 languageLabel.setText(getResources().getString(R.string.lingua));
-                final Spinner spinner = (Spinner) findViewById(R.id.language_spinner);
+                final Spinner spinner = findViewById(R.id.language_spinner);
                 // Create an ArrayAdapter using the string array and a default spinner layout
                 ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(SettingsActivity.this,
                         R.array.language_options, android.R.layout.simple_spinner_item);
@@ -341,7 +341,7 @@ public class SettingsActivity extends AppCompatActivity {
                 lavoro();
 
                 adapter=ArrayAdapter.createFromResource(SettingsActivity.this, R.array.spinner_options,android.R.layout.simple_spinner_item);
-                spinner_unita_misura=(Spinner) findViewById(R.id.unita_misura_spinner);
+                spinner_unita_misura= findViewById(R.id.unita_misura_spinner);
                 if( MainActivity.sharedPreferences.getInt("metric",0)==0) {
                     spinner_unita_misura.setSelection(0);
                 }

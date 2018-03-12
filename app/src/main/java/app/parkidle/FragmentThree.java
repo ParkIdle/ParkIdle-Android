@@ -27,7 +27,7 @@ public class FragmentThree extends Fragment {
         super.onViewCreated(v3, savedInstanceState);
 
 
-        ImageView tasto3 = (ImageView)v3.findViewById(R.id.tasto_avanti_3);
+        ImageView tasto3 = v3.findViewById(R.id.tasto_avanti_3);
         tasto3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
