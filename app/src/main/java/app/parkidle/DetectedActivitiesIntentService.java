@@ -242,7 +242,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 editor = sharedPreferences.edit();
             editor.putFloat("latpark", 0);
             editor.putFloat("longpark", 0);
-            editor.apply();
+            editor.commit();
             Log.w(TAG,"Sei partito. Parcheggio cancellato!");
             /*if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
                 parkedOnce=false;

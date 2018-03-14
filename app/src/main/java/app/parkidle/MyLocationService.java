@@ -128,11 +128,12 @@ public class MyLocationService extends android.app.Service {
         //super.onStartCommand(intent, flags, startId);
         SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         isAppForeground = sharedPreferences.getBoolean("isAppForeground",true);
-        if(isAppForeground)
+        if(isAppForeground) {
             if (mLocationManager == null) {
                 mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
             }
             checkGPSEnabled(mLocationManager);
+        }
         return START_STICKY;
     }
 
