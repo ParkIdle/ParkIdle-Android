@@ -1708,6 +1708,7 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
         Log.w(TAG + "(CheckTask)","Checking events..");
         int count = events.length;
         for (int i = 0; i < count; i++) {
+            if(events[i] == null) return new HashSet<String>();
             Iterator<String> it = events[i].iterator();
             String now = new Date().toString();
 
