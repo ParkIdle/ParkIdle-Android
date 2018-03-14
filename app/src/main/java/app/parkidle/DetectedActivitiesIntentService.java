@@ -163,7 +163,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");
-        if (split.length != 5) {
+        String[] split2 = activitiesLocations.split(",");
+        if (split.length != 5 || split2.length != 5) {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
