@@ -362,12 +362,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     }
                 });
 
-                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+
+                /*mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
 
-                        Marker m = mapboxMap.addMarker(new MarkerOptions()
+                        /*Marker m = mapboxMap.addMarker(new MarkerOptions()
                                 .setIcon(icona_parcheggio_libero)
                                 .position(point)
                                 .setTitle("Parcheggio libero"));
@@ -384,10 +385,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start();
+                        t5.start(); é
 
                     }
-                });
+                });*/
 
                 mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                     @Nullable
@@ -411,7 +412,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         LatLng myLatLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
                         String distanza = calculateDistance(marker.getPosition(), myLatLng);
                         Icon icon = marker.getIcon();
-                        if (icon.equals(icona_parcheggio_libero) ||icon.equals(icona_parcheggio_libero_5mins) ||icon.equals(icona_parcheggio_libero_10mins) ||icon.equals(icona_parcheggio_libero_20mins)) {
+                        if (icon.equals(icona_parcheggio_libero) || icon.equals(icona_parcheggio_libero_5mins) || icon.equals(icona_parcheggio_libero_10mins) || icon.equals(icona_parcheggio_libero_20mins)) {
 
                             TextView title = window.findViewById(R.id.info_title);
                             title.setText(marker.getTitle());
@@ -1063,6 +1064,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
     private void recenterCamera() {
+        if(mLastLocation == null) {
+            Toast.makeText(this, "Non sei localizzato.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         if (!isCameraFollowing) {
             CameraPosition position = new CameraPosition.Builder()
                     .target(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude())) // Sets the new camera position
@@ -1319,6 +1324,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private void renderEvents(Set<String> events,MapboxMap mapboxMap){
         //Log.w(TAG,"Rendering events...: " + events);
+        if(events == null) return;
         Iterator<String> it = events.iterator();
         if(mapboxMap == null){
             Log.w(TAG + "(Renderer)","Cannot RENDER, Map is null");
@@ -1698,9 +1704,11 @@ class CheckEventsTask extends AsyncTask<Set<String>, Void, Set<String>> {
 
     protected Set<String> doInBackground(Set<String>... events) {
 
+        if(events == null) return new HashSet<String>();
         Log.w(TAG + "(CheckTask)","Checking events..");
         int count = events.length;
         for (int i = 0; i < count; i++) {
+            if(events[i] == null) return new HashSet<String>();
             Iterator<String> it = events[i].iterator();
             String now = new Date().toString();
 

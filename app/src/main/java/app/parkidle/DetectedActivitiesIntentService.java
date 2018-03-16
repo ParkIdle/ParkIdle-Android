@@ -163,7 +163,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");
-        if (split.length != 5) {
+        String[] split2 = activitiesLocations.split(",");
+        if (split.length != 5 || split2.length != 5) {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
@@ -237,6 +238,13 @@ public class DetectedActivitiesIntentService extends IntentService {
             Thread handler = new Thread(eh);
             handler.setName("EventHandler");
             handler.start();
+
+            if(editor == null)
+                editor = sharedPreferences.edit();
+            editor.putFloat("latpark", 0);
+            editor.putFloat("longpark", 0);
+            editor.commit();
+            Log.w(TAG,"Sei partito. Parcheggio cancellato!");
             /*if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
                 parkedOnce=false;
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
@@ -268,8 +276,10 @@ public class DetectedActivitiesIntentService extends IntentService {
                     Log.w(TAG,"[!] La location è null non posso inviare l'evento (arrivo)");
                     return;
                 }
-                Double latitude = l.getLatitude();
-                Double longitude = l.getLongitude();
+                //Double latitude = l.getLatitude();
+                //Double longitude = l.getLongitude();
+                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[0]);
+                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[1]);
                 saveParking();
                 Date now = new Date();
                 /*if (!parkedOnce){
@@ -277,7 +287,8 @@ public class DetectedActivitiesIntentService extends IntentService {
                     setLastSignal(now);
                 }*/
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
-                wasInVehicle = false;
+
+                //wasInVehicle = false;
             }
         }
 
