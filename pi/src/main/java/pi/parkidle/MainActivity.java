@@ -770,14 +770,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .setIcon(icona_whereiparked));
             }
             mDrawerLayout.closeDrawers();
-            CameraPosition position = new CameraPosition.Builder()
-                    .target(parcheggio) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
-                    .bearing(mLastLocation.getBearing()) // degree - azimut
-                    .tilt(0) // Set the camera tilt to 20 degrees
-                    .build(); // Builds the CameraPosition object from the builder
-            getmMap().animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+            if(mLastLocation == null) {
+                String avviso  ="Posizione nulla, impossibile localizzarsi.";
+                Toast.makeText(this, avviso, Toast.LENGTH_SHORT).show();
+            }else{
+                CameraPosition position = new CameraPosition.Builder()
+                        .target(parcheggio) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 10
+                        .bearing(mLastLocation.getBearing()) // degree - azimut
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                getmMap().animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), null);
+            }
         }
     }
 
@@ -809,14 +814,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .setIcon(house_icon));
             }
             mDrawerLayout.closeDrawers();
-            CameraPosition position = new CameraPosition.Builder()
-                    .target(casa) // Sets the new camera position
-                    .zoom(17) // Sets the zoom to level 10
-                    .bearing(mLastLocation.getBearing()) // degree - azimut
-                    .tilt(0) // Set the camera tilt to 20 degrees
-                    .build(); // Builds the CameraPosition object from the builder
-            mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), null);
+            if(mLastLocation == null){
+                String avviso  ="Posizione nulla, impossibile localizzarsi.";
+                Toast.makeText(this, avviso, Toast.LENGTH_SHORT).show();
+            }else {
+                CameraPosition position = new CameraPosition.Builder()
+                        .target(casa) // Sets the new camera position
+                        .zoom(17) // Sets the zoom to level 10
+                        .bearing(mLastLocation.getBearing()) // degree - azimut
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                mMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), null);
+            }
         }
     }
 
@@ -847,14 +857,19 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         .setIcon(work_icon));
             }
             mDrawerLayout.closeDrawers();
-            CameraPosition position = new CameraPosition.Builder()
-                    .target(lavoro) // Sets the new camera position
-                    .zoom(16) // Sets the zoom to level 10
-                    .bearing(mLastLocation.getBearing()) // degree - azimut
-                    .tilt(0) // Set the camera tilt to 20 degrees
-                    .build(); // Builds the CameraPosition object from the builder
-            mMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(position), 1000);
+            if(mLastLocation == null){
+                String avviso  ="Posizione nulla, impossibile localizzarsi.";
+                Toast.makeText(this, avviso, Toast.LENGTH_SHORT).show();
+            }else {
+                CameraPosition position = new CameraPosition.Builder()
+                        .target(lavoro) // Sets the new camera position
+                        .zoom(16) // Sets the zoom to level 10
+                        .bearing(mLastLocation.getBearing()) // degree - azimut
+                        .tilt(0) // Set the camera tilt to 20 degrees
+                        .build(); // Builds the CameraPosition object from the builder
+                mMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(position), 1000);
+            }
         }
     }
 
@@ -1636,32 +1651,39 @@ class ColorManagerTask extends AsyncTask<Set<String>, Void, Void> {
             //MainActivity.editor.putBoolean("colorThreadIsRunning", true);
             List<Marker> listMarker = map.getMarkers();
             Log.w(TAG + "(ColorManager)", "STARTED");
-            Iterator<Marker> it = listMarker.iterator();
-            while (it.hasNext()) {
-                Marker MMM = it.next();
-                String markerID = String.valueOf(MMM.getId());
-                Log.w(TAG + "(ColorManager)", markerID+" is going to be colorEvaluated");
+            if (listMarker == null){
+                Log.w("COLOR THREAD","LISTA DI MARKER NULLA!");
+                Log.w("COLOR THREAD","LISTA DI MARKER NULLA!");
+                Log.w("COLOR THREAD","LISTA DI MARKER NULLA!");
+                return null;
+            }else {
+                Iterator<Marker> it = listMarker.iterator();
+                while (it.hasNext()) {
+                    Marker MMM = it.next();
+                    String markerID = String.valueOf(MMM.getId());
+                    Log.w(TAG + "(ColorManager)", markerID + " is going to be colorEvaluated");
 
-                Iterator<String> checkIterator = events[0].iterator();
-                while (checkIterator.hasNext()) {
-                    String markerSearcher = checkIterator.next();
-                    String[] event = markerSearcher.split("-");
-                    //Log.d("MarkerFound: ", "Evaluating Marker color");
+                    Iterator<String> checkIterator = events[0].iterator();
+                    while (checkIterator.hasNext()) {
+                        String markerSearcher = checkIterator.next();
+                        String[] event = markerSearcher.split("-");
+                        //Log.d("MarkerFound: ", "Evaluating Marker color");
                     /*MMM.setIcon(parkingIconEvaluator(markerSearcher));
                     map.removeMarker(MMM);
                     Marker j = map.addMarker(new MarkerOptions().position(MMM.getPosition())
                             .title("Parcheggio libero")
                             .setIcon(parkingIconEvaluator(markerSearcher)));
                     j.setId(MMM.getId());*/
-                    if (event[0].equals(markerID)) {
-                        Log.w(TAG + "(ColorManager)", "Marker found -> Evaluating Marker color");
-                        MMM.setIcon(parkingIconEvaluator(markerSearcher));
-                        map.updateMarker(MMM);
+                        if (event[0].equals(markerID)) {
+                            Log.w(TAG + "(ColorManager)", "Marker found -> Evaluating Marker color");
+                            MMM.setIcon(parkingIconEvaluator(markerSearcher));
+                            map.updateMarker(MMM);
+                        }
                     }
                 }
+                Log.w(TAG + "(ColorManager)", "DONE");
+                return null;
             }
-            Log.w(TAG + "(ColorManager)", "DONE");
-            return null;
         }
         Log.w(TAG + "(ColorManager)", "Map is null");
         return null;

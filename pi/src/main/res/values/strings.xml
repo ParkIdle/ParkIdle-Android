@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ParkIdle</string>
+    <string name="app_name">Parkidle</string>
     <string name="title_activity_maps">Map</string>
     <string name="mapbox_token">pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA</string>
     <string name="facebook_app_id">156734918407060</string>
