@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context="pi.parkidle.SettingsActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="510dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="1dp">
+
+        <TextView
+            android:id="@+id/language_label"
+            android:layout_width="match_parent"
+            android:layout_height="33dp"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:text="Language"
+            android:textSize="18sp" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/language_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_gravity="center_horizontal">
+
+        </android.support.v7.widget.AppCompatSpinner>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="visible" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/Raggiolabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:text="@string/notifica_raggio_parcheggi"
+            android:textSize="18sp" />
+
+        <SeekBar
+            android:id="@+id/seek_Bar"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:max="10"
+            android:progress="2" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Switch
+            android:id="@+id/switch_notification"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/notifiche_background"
+            android:textSize="18sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/unita_misura_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:ellipsize="end"
+            android:text="@string/unita_di_misura"
+            android:textSize="18sp" />
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:id="@+id/unita_misura_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="51dp"
+            android:layout_gravity="center_horizontal">
+
+        </android.support.v7.widget.AppCompatSpinner>
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/editText2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:text="@string/indirizzo_di_casa"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/text-view-casa"
+            android:layout_width="match_parent"
+            android:layout_height="53dp"
+            android:onClick="cas"
+            android:textSize="15sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/editText3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:text="@string/indirizzo_di_lavoro"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/text-view-lavoro"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:onClick="lav"
+            android:textSize="15sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
