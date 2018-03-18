@@ -154,8 +154,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");
-        String[] split2 = activitiesLocations.split(",");
-        if (split.length != 5 || split2.length != 5) {
+        //String[] split2 = activitiesLocations.split(",");
+        if (split.length < 5) {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
@@ -216,10 +216,10 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             //Double latitude = l.getLatitude();
             //Double longitude = l.getLongitude();
-            //Double latitude = eventLocation.getLatitude(); //location di quando sei partito
-            //Double longitude = eventLocation.getLongitude();
-            Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
-            Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
+            //Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
+            //Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
+            Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
+            Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
             Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
 
             MQTTSubscribe.sendMessage("client/departed",event.toString());
@@ -350,19 +350,21 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,"Location is null for this activity");
             return;
         }
+        activity = activity + "_" + activityLocation.getLatitude() + "_" + activityLocation.getLongitude();
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
-        if(jsonSplit.length > 5){
+        if(jsonSplit.length > 10){
+            //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
             activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
         }
 
-        if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
+        /*if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
         else activitiesLocations = activitiesLocations + "," + activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
         String[] locationsSplit = activitiesLocations.split(",");
         if(locationsSplit.length > 5){
             activitiesLocations = locationsSplit[1] + "," + locationsSplit[2] + "," + locationsSplit[3] + "," + locationsSplit[4] + "," + locationsSplit[5];
-        }
+        }*/
 
         if(editor == null)
             editor = sharedPreferences.edit();
@@ -377,6 +379,22 @@ public class DetectedActivitiesIntentService extends IntentService {
         long hasho = (long)((lat*15661+lon*27773)/33911);
         return ""+hasho;
     }
+
+    private void sendEvent(Event event) {
+        // aggiungi parcheggio tra i segnalati nel profilo
+        MQTTSubscribe.sendMessage("client/departed",event.toString());
+        MainActivity.parcheggisegnalati += 1;
+        MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+        MainActivity.editor.commit();
+
+        if (editor == null)
+            editor = sharedPreferences.edit();
+        editor.putFloat("latpark", 0);
+        editor.putFloat("longpark", 0);
+        editor.commit();
+        Log.w(TAG, "Sei partito. Parcheggio cancellato!");
+    }
+
 
     /*@Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {

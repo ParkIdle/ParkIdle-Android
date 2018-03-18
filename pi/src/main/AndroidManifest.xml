@@ -61,31 +61,12 @@
         <service android:name="org.eclipse.paho.android.service.MqttService" />
         <service android:name="pi.parkidle.MyLocationService" />
 
-<<<<<<< HEAD
-        <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.AIRPLANE_MODE" />
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                <action android:name="com.sonymobile.SUPER_STAMINA_SETTING_CHANGED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".BatteryLowReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
             </intent-filter>
         </receiver>
-=======
->>>>>>> 9cfb3068740a7e414e56685a4c21d2020aff4b78
         <!--
         Set custom default icon. This is used when no icon is set for incoming notification messages.
         See README(https://goo.gl/l4GJaQ) for more.
