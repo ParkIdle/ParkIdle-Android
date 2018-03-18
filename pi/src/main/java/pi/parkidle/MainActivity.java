@@ -238,13 +238,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         registerReceiver(onBootReceiver,filter);
 
 
-        //controllo lo switch nel menu delle impostazioni, poi se trovo true comincio a checkare la percentuale della batteria
-        bool_turnoffbackground = sharedPreferences.getBoolean("turnOffBackground",false);
-        if (bool_turnoffbackground) {
-            BatteryLowReceiver batteryLowReceiver = new BatteryLowReceiver();
-            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            registerReceiver(batteryLowReceiver, ifilter);
-        }
+
 
 
 
@@ -255,6 +249,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         editor = sharedPreferences.edit();
         language = sharedPreferences.getInt("language",0);
+
+        //controllo lo switch nel menu delle impostazioni, poi se trovo true comincio a checkare la percentuale della batteria
+        bool_turnoffbackground = sharedPreferences.getBoolean("turnOffBackground",false);
+        if (bool_turnoffbackground) {
+            BatteryLowReceiver batteryLowReceiver = new BatteryLowReceiver();
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            registerReceiver(batteryLowReceiver, ifilter);
+        }
 
         deviceIdentifier = sharedPreferences.getString("deviceIdentifier","0");
         if(deviceIdentifier.contains("-"))

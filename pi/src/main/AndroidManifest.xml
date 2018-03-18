@@ -62,22 +62,7 @@
         <service android:name="pi.parkidle.MyLocationService" />
 
 
-        <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.AIRPLANE_MODE" />
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
-                <action android:name="com.sonymobile.SUPER_STAMINA_SETTING_CHANGED" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
 
-                <data android:scheme="package" />
-            </intent-filter>
-        </receiver>
         <receiver android:name=".BatteryLowReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
