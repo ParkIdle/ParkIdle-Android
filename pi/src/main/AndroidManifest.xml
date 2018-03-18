@@ -54,24 +54,14 @@
         <service
             android:name="pi.parkidle.DetectedActivitiesIntentService"
             android:exported="false" />
-        <service
-            android:name="io.predict.sdk.detection.services.PIOMainService"
-            android:exported="false" />
-        <service
-            android:name="io.predict.sdk.detection.services.PIOUtilService"
-            android:exported="false" />
-        <service
-            android:name="io.predict.sdk.detection.services.PIOLocationService"
-            android:exported="false" />
-        <service
-            android:name="io.predict.sdk.detection.services.PIOComService"
-            android:exported="false" />
+
         <service
             android:name="pi.parkidle.MQTTSubscribe"
             android:exported="false" />
         <service android:name="org.eclipse.paho.android.service.MqttService" />
         <service android:name="pi.parkidle.MyLocationService" />
 
+<<<<<<< HEAD
         <receiver android:name="io.predict.sdk.detection.receivers.PIOReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -94,6 +84,8 @@
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
             </intent-filter>
         </receiver>
+=======
+>>>>>>> 9cfb3068740a7e414e56685a4c21d2020aff4b78
         <!--
         Set custom default icon. This is used when no icon is set for incoming notification messages.
         See README(https://goo.gl/l4GJaQ) for more.
