@@ -32,6 +32,7 @@ public class BatteryLowReceiver extends BroadcastReceiver {
         float batteryPct = level / (float)scale;
         Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
         if(batteryPct <= 0.2){
+            Log.w("BATTERY RECEIVER","Disattivo DetectedActivitiesIntentService => Batteria < 20%");
             context.stopService(new Intent(context,DetectedActivitiesIntentService.class));
         }
         /*Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
