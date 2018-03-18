@@ -31,6 +31,7 @@
     <string name="posto_di_lavoro">Lavoro</string>
     <string name="notifica_raggio_parcheggi">Notifica parcheggi nel raggio di:</string>
     <string name="notifiche_background">Notifiche in background:</string>
+    <string name="switch_disattiva_background">Disattiva servizi in background sotto il 20%:</string>
     <string name="unita_di_misura">Unità di misura:</string>
     <string name="indirizzo_di_casa">Indirizzo di casa:</string>
     <string name="indirizzo_di_lavoro">Indirizzo di lavoro:</string>

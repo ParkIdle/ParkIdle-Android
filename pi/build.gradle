@@ -21,7 +21,7 @@ android {
         versionName '1.3.2'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
-        versionCode 11
+        versionCode 12
     }
     buildTypes {
         release {

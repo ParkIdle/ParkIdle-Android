@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -179,6 +180,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     //private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
     //private String deviceIdentifier;
 
+
+    //shared prefs per il turn off notifiche background
+    private boolean bool_turnoffbackground;
     //shared prefs per salvare il parcheggio
     private double latpark;
     private double longpark;
@@ -234,6 +238,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         OnBootReceiver onBootReceiver = new OnBootReceiver();
         IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
         registerReceiver(onBootReceiver,filter);
+
+
+        //controllo lo switch nel menu delle impostazioni, poi se trovo true comincio a checkare la percentuale della batteria
+        bool_turnoffbackground = sharedPreferences.getBoolean("turnOffBackground",false);
+        if (bool_turnoffbackground) {
+            BatteryLowReceiver batteryLowReceiver = new BatteryLowReceiver();
+            IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            registerReceiver(batteryLowReceiver, ifilter);
+        }
+
+
 
         //if(MyLocationService.isLocationRunning == false)
             //startService(new Intent(this, MyLocationService.class));

@@ -41,6 +41,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView casa;
     private TextView lavoro;
     private boolean needRefresh;
+    private Switch switch_disattiva_background;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
 
     public void geocoding(String posizione){
@@ -138,7 +139,26 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
+    public void switch_disattiva_background(){
+        switch_disattiva_background = findViewById(R.id.switch_disattiva_background);
+        switch_disattiva_background.setChecked(sharedPreferences.getBoolean("turnOffBackground",false));
 
+        switch_disattiva_background.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    Toast.makeText(SettingsActivity.this,"Disattivazione servizi in background..",Toast.LENGTH_SHORT).show();
+                    editor.putBoolean("turnOffBackground",true);
+                    editor.commit();
+                }
+                else {
+                    Toast.makeText(SettingsActivity.this, "Servizi in background attivi sotto al 20%", Toast.LENGTH_SHORT).show();
+                    editor.putBoolean("turnOffBackground",false);
+                    editor.commit();
+                }
+            }
+        });
+    }
 
     public void seekbar(){
         seek_bar= findViewById(R.id.seek_Bar);

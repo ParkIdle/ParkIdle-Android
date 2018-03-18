@@ -76,6 +76,13 @@
             android:text="@string/notifiche_background"
             android:textSize="18sp" />
 
+        <Switch
+            android:id="@+id/switch_disattiva_background"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="@string/switch_disattiva_background"
+            android:textSize="18sp" />
+
         <Space
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
