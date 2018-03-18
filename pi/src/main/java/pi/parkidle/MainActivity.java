@@ -237,11 +237,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         IntentFilter filter = new IntentFilter("android.intent.action.BOOT_COMPLETED");
         registerReceiver(onBootReceiver,filter);
 
-
-
-
-
-
         //if(MyLocationService.isLocationRunning == false)
             //startService(new Intent(this, MyLocationService.class));
 
