@@ -221,14 +221,17 @@ public class DetectedActivitiesIntentService extends IntentService {
             Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
             Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
             Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+
+            MQTTSubscribe.sendMessage("client/departed",event.toString());
+
+            /*EventHandler eh = new EventHandler(event);
+            Thread handler = new Thread(eh);
+            handler.setName("EventHandler");
+            handler.start();*/
+            // aggiungi parcheggio tra i segnalati nel profilo
             MainActivity.parcheggisegnalati+=1;
             MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
             MainActivity.editor.commit();
-
-            EventHandler eh = new EventHandler(event);
-            Thread handler = new Thread(eh);
-            handler.setName("EventHandler");
-            handler.start();
 
             if(editor == null)
                 editor = sharedPreferences.edit();

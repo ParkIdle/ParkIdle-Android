@@ -55,8 +55,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-maps:11.8.0'
     compile 'com.google.gms:google-services:3.1.2'
     compile 'com.facebook.android:facebook-login:4.29.0'
-    compile 'com.android.support:multidex:1.0.1'
-    compile 'com.bugfender.sdk:android:1.+'
+    compile 'com.android.support:multidex:1.0.3'
+    compile 'com.bugfender.sdk:android:1.0.3'
     compile 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     // Mapbox SDK dependency
@@ -67,7 +67,7 @@ dependencies {
     compile('com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.7.2-SNAPSHOT') {
         transitive = true
     }
-    compile 'com.mapzen.android:lost:3.0.2'
+    compile 'com.mapzen.android:lost:3.0.4'
     compile 'org.apache.httpcomponents:httpclient-android:4.3.5'
     // MQTT Dependencies
     compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.1.0'

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ParkIdle-Android.iml" filepath="$PROJECT_DIR$/ParkIdle-Android.iml" />
-      <module fileurl="file://$PROJECT_DIR$/pi/app.iml" filepath="$PROJECT_DIR$/pi/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/pi/pi.iml" filepath="$PROJECT_DIR$/pi/pi.iml" />
     </modules>
   </component>

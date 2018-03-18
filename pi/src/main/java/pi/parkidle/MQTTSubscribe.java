@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import static pi.parkidle.MainActivity.MQTTClient;
 import static pi.parkidle.MainActivity.parkingIconEvaluator;
 import static pi.parkidle.MainActivity.sharedPreferences;
 
@@ -43,7 +44,7 @@ public class MQTTSubscribe extends Service implements MqttCallback{
 
 
     //private MqttClient client;
-    private MqttAsyncClient client;
+    public static MqttAsyncClient client;
     private final String TAG = "MQTTSubscribe";
     private String serverIP;
     private String mosquittoBrokerAWS;
@@ -51,6 +52,8 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     private String deviceIdentifier;
     private boolean isConnected = false;
     private Set<String> events;
+    private MqttConnectOptions options;
+    private DisconnectedBufferOptions dbo;
 
     @Override
     public void onCreate() {
@@ -120,13 +123,14 @@ public class MQTTSubscribe extends Service implements MqttCallback{
             Log.w(TAG,"Subscribing...");
 
             //client = new MqttClient(mosquittoBrokerAWS, deviceIdentifier,new MemoryPersistence()); // imposto il client MQTT (in questo caso sono un subscriber
-            client = new MqttAsyncClient(mosquittoBrokerAWS, deviceIdentifier, new MemoryPersistence()); //client con buffer
-            MqttConnectOptions options = new MqttConnectOptions();
+            client = new MqttAsyncClient(mosquittoBrokerAWS, deviceIdentifier, new MemoryPersistence());//client con buffer
+            MainActivity.AsyncMQTTClient = client;
+            options = new MqttConnectOptions();
             options.setCleanSession(false);
             options.setAutomaticReconnect(true);
 
             //preparo il buffer
-            DisconnectedBufferOptions dbo = new DisconnectedBufferOptions();
+            dbo = new DisconnectedBufferOptions();
             dbo.setPersistBuffer(true);
             dbo.setBufferEnabled(true);
             dbo.setBufferSize(50);
@@ -168,10 +172,12 @@ public class MQTTSubscribe extends Service implements MqttCallback{
         Log.w(TAG,"Connection lost...." + cause.toString());
         try {
             Log.w(TAG,"Reconnecting...");
-            //client.disconnectForcibly();
-            client.connect();
+            client.disconnectForcibly();
+            client.connect(options);
+
+            Log.w(TAG,"Reconnected!");
         } catch (MqttException e) {
-            e.printStackTrace();
+            Log.w(TAG,"UNSUCCESSFULL RECONNECTION: " + e.toString());
         }
         //subscribe();
     }
@@ -179,7 +185,7 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     @Override
     public void messageArrived(String topic, MqttMessage message) // viene chiamato quando arriva un messaggio
             throws Exception {
-        Log.w(TAG,"Message arrived from topic :"+ topic);
+        Log.w(TAG,"Message arrived from topic :"+ topic + " = " + message.toString());
                 //Toast.makeText(this, "Message arrived from topic :"+ topic, Toast.LENGTH_SHORT).show();
 
         if(topic.equals("server/advice")){
@@ -249,7 +255,7 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     // parsing del messaggio ricevuto
     private Event parseMqttMessage(MqttMessage message){
         String m = message.toString();
-        String[] splitted = m.split(",");
+        String[] splitted = m.split("-");
         Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
         return event;
     }
@@ -373,5 +379,15 @@ public class MQTTSubscribe extends Service implements MqttCallback{
             return false;
         }
         return true;
+    }
+
+    public static void sendMessage(String topic, String message){
+        try {
+            Log.w("MQTTClient","Sending message: " + message);
+            client.publish(topic,new MqttMessage(message.toString().getBytes()));
+            Log.w("MQTTClient","Message sent!");
+        } catch (MqttException e) {
+            Log.w("MQTTClient","Message not sent: " + e.toString());
+        }
     }
 }

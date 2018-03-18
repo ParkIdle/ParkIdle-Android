@@ -72,6 +72,8 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOpti
 
 import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -198,10 +200,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         super.onCreate(savedInstanceState);
         Log.w(TAG,"OnCreate()");
-
-
-
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT); // la mappa non ruota
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -244,8 +242,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         language = sharedPreferences.getInt("language",0);
 
         deviceIdentifier = sharedPreferences.getString("deviceIdentifier","0");
+        if(deviceIdentifier.contains("-"))
+            deviceIdentifier.replace("-","");
         if(deviceIdentifier.equals("0")){
-            deviceIdentifier = UUID.randomUUID().toString();
+            deviceIdentifier = UUID.randomUUID().toString().replace("-","");
             editor.putString("deviceIdentifier",deviceIdentifier);
             editor.commit();
         }
@@ -363,10 +363,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 });
 
 
-                /*mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
+                mapboxMap.addOnMapLongClickListener(new MapboxMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(@NonNull LatLng point) {
                         Log.w("LONG CLICK LISTENER","long clicking...");
+
+                        Date d = new Date();
+                        Event p = new Event(markerIdHashcode(point.getLatitude(),point.getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
+                        try {
+
+                            AsyncMQTTClient.publish("client/departed",new MqttMessage(p.toString().getBytes()));
+                        } catch (MqttException e) {
+                            Log.w(TAG,e);
+                        }
+                        Log.w(TAG,"Event Sent");
 
                         /*Marker m = mapboxMap.addMarker(new MarkerOptions()
                                 .setIcon(icona_parcheggio_libero)
@@ -379,16 +389,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         Date d = new Date();
                         Event p = new Event(markerIdHashcode(m.getPosition().getLatitude(),m.getPosition().getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
                         events.add(p.toString());
-                        parcheggisegnalati++; //TODO: perchè aumenta le segnalazioni?
+                        parcheggisegnalati++;
                         editor.putInt("parcheggiorank",parcheggisegnalati);
                         editor.commit();
                         //PIOTripSegment pts = new PIOTripSegment("TEST","PROVA",d,mLastLocation,d,null,null,null,null,false);
                         EventHandler peh = new EventHandler(p);
                         Thread t5 = new Thread(peh);
-                        t5.start(); é
+                        t5.start(); é*/
 
                     }
-                });*/
+                });
 
                 mapboxMap.setInfoWindowAdapter(new MapboxMap.InfoWindowAdapter() {
                     @Nullable
