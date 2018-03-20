@@ -62,14 +62,13 @@
         <service android:name="pi.parkidle.MyLocationService" />
 
 
-
         <receiver android:name=".BatteryLowReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
             </intent-filter>
         </receiver>
-
+        <!--
         Set custom default icon. This is used when no icon is set for incoming notification messages.
         See README(https://goo.gl/l4GJaQ) for more.
         -->

@@ -13,6 +13,7 @@ import android.util.Log;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -34,6 +35,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private SharedPreferences.Editor editor = MainActivity.editor;
     private Date lastSignal;
     private Boolean parkedOnce=false;
+    private Date trafficThreshold;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -116,35 +118,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,maxActivity + " non tenuta in considerazione.");
             return;
         }
-        /*if(maxActivity.equals("IN VEHICLE") || maxActivity.equals("ON BICYCLE")){
-            if(wasInVehicle == false) {
-                wasInVehicle = true;
-                eventLocation = MainActivity.getMyLocation(); // when i first started
-                //eventDate = new Date(); // now
-            }
-            /*if(eventDate != null){
-                Date now = new Date();
-                String time1 = eventDate.toString().split(" ")[3];
-                String hour1 = time1.split(":")[0];
-                String minutes1 = time1.split(":")[1];
-                String seconds1 = time1.split(":")[2];
 
-                String time2 = now.toString().split(" ")[3];
-                String hour2 = time2.split(":")[0];
-                String minutes2 = time2.split(":")[1];
-                String seconds2 = time2.split(":")[2];
-
-                if(Integer.parseInt(hour2) > Integer.parseInt(hour1)){
-                    if(60 - Integer.parseInt(minutes2) - Integer.parseInt(minutes1) >= 20){
-                        wasInVehicle = false;
-                    }
-                }else if(Integer.parseInt(hour2) == Integer.parseInt(hour1)){
-                    if(Integer.parseInt(minutes2) - Integer.parseInt(minutes1) >= 20){
-                        wasInVehicle = false;
-                    }
-                }
-            }   */
-        //}
         addDetectedActivity(maxActivity,MainActivity.getMyLocation());
         createEvent(maxActivity);
     }
@@ -154,8 +128,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
         //activitiesJson = sharedPreferences.getString("detectedActivities","");
         String[] split = activitiesJson.split(",");
-        String[] split2 = activitiesLocations.split(",");
-        if (split.length != 5 || split2.length != 5) {
+        //String[] split2 = activitiesLocations.split(",");
+        if (split.length < 5) {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
@@ -192,6 +166,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             handler.start();
         }*/
         // vecchio check
+
+
         if (!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")){
             for(int i = 1; i < split.length; i++){
                 if(i < 3){
@@ -209,48 +185,31 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Log.w(TAG,"[SI] Sei partito!");
             Date now = new Date();
-            l = MainActivity.getMyLocation();
+            /*4l = MainActivity.getMyLocation();
             if(l==null){
                 Log.w(TAG,"La location è null non posso mandare l'evento(partenza)");
                 return;
-            }
+            }*/
             //Double latitude = l.getLatitude();
             //Double longitude = l.getLongitude();
-            //Double latitude = eventLocation.getLatitude(); //location di quando sei partito
-            //Double longitude = eventLocation.getLongitude();
-            Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
-            Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
-            Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-
-            MQTTSubscribe.sendMessage("client/departed",event.toString());
-
-            /*EventHandler eh = new EventHandler(event);
-            Thread handler = new Thread(eh);
-            handler.setName("EventHandler");
-            handler.start();*/
-            // aggiungi parcheggio tra i segnalati nel profilo
-            MainActivity.parcheggisegnalati+=1;
-            MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
-            MainActivity.editor.commit();
-
-            if(editor == null)
-                editor = sharedPreferences.edit();
-            editor.putFloat("latpark", 0);
-            editor.putFloat("longpark", 0);
-            editor.commit();
-            Log.w(TAG,"Sei partito. Parcheggio cancellato!");
-            /*if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
-                parkedOnce=false;
+            //Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
+            //Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
+            if(trafficCheck(now)) {
+                Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
+                Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-                MainActivity.parcheggisegnalati+=1;
-                MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
-                MainActivity.editor.commit();
 
-                EventHandler eh = new EventHandler(event);
+                MQTTSubscribe.sendMessage("client/departed", event.toString());
+
+                /*EventHandler eh = new EventHandler(event);
                 Thread handler = new Thread(eh);
                 handler.setName("EventHandler");
-                handler.start();
-            }*/
+                handler.start();*/
+                // aggiungi parcheggio tra i segnalati nel profilo
+                MainActivity.parcheggisegnalati += 1;
+                MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+                MainActivity.editor.commit();
+            }
         }
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
@@ -276,33 +235,17 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[1]);
                 saveParking();
                 Date now = new Date();
-                /*if (!parkedOnce){
-                    parkedOnce = true; // non ti fà parcheggiare piu di una volta
-                    setLastSignal(now);
-                }*/
+                trafficThreshold = now;
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
-                //wasInVehicle = false;
+
             }
         }
 
     }
 
-    public Date getLastSignal(){
-        return this.lastSignal;
-    }
-
-    public void setLastSignal(Date d){
-        this.lastSignal = d;
-        return;
-    }
-
     public boolean trafficCheck(Date now){
-
-        if (getLastSignal()==null){
-            setLastSignal(now);
-            return true;
-        }
+        if (trafficThreshold==null) return true;
 
         Log.w("trafficCHECK"," checking if we're in a traffic queue");
         String now1 = now.toString();
@@ -311,22 +254,20 @@ public class DetectedActivitiesIntentService extends IntentService {
         String minutes1 = time1.split(":")[1];
         String seconds1 = time1.split(":")[2];
 
-        String lastChecked = getLastSignal().toString();
+        String lastChecked = trafficThreshold.toString();
         String time2 = lastChecked.split(" ")[3]; // event time
         String hour2 = time2.split(":")[0];
         String minutes2 = time2.split(":")[1];
         String seconds2 = time2.split(":")[2];
 
-        //controllo che tra il LastSignal e la data attuale siano passati almeno 7 minuti
+        //controllo che tra il TrafficThreshold e now siano passati almeno 7 minuti
         if((Integer.parseInt(hour1)==Integer.parseInt(hour2) && Integer.parseInt(minutes1)-Integer.parseInt(minutes2) > 7) ||
                 (Integer.parseInt(hour1) > Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 ) ||
                 (Integer.parseInt(hour1) < Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 )
                 ){
-            setLastSignal(now);
             return true;
         }
         else{
-            setLastSignal(now);
             return false;
         }
     }
@@ -350,19 +291,21 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,"Location is null for this activity");
             return;
         }
+        activity = activity + "_" + activityLocation.getLatitude() + "_" + activityLocation.getLongitude();
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
-        if(jsonSplit.length > 5){
+        if(jsonSplit.length > 10){
+            //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
             activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
         }
 
-        if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
+        /*if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
         else activitiesLocations = activitiesLocations + "," + activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
         String[] locationsSplit = activitiesLocations.split(",");
         if(locationsSplit.length > 5){
             activitiesLocations = locationsSplit[1] + "," + locationsSplit[2] + "," + locationsSplit[3] + "," + locationsSplit[4] + "," + locationsSplit[5];
-        }
+        }*/
 
         if(editor == null)
             editor = sharedPreferences.edit();
@@ -377,6 +320,22 @@ public class DetectedActivitiesIntentService extends IntentService {
         long hasho = (long)((lat*15661+lon*27773)/33911);
         return ""+hasho;
     }
+
+    private void sendEvent(Event event) {
+        // aggiungi parcheggio tra i segnalati nel profilo
+        MQTTSubscribe.sendMessage("client/departed",event.toString());
+        MainActivity.parcheggisegnalati += 1;
+        MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+        MainActivity.editor.commit();
+
+        if (editor == null)
+            editor = sharedPreferences.edit();
+        editor.putFloat("latpark", 0);
+        editor.putFloat("longpark", 0);
+        editor.commit();
+        Log.w(TAG, "Sei partito. Parcheggio cancellato!");
+    }
+
 
     /*@Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {

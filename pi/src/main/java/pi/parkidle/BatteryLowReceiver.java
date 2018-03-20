@@ -16,7 +16,6 @@ import static pi.parkidle.MainActivity.sharedPreferences;
  */
 
 public class BatteryLowReceiver extends BroadcastReceiver {
-    private SharedPreferences.OnSharedPreferenceChangeListener listener;
     @Override
     public void onReceive(Context context, Intent intent) {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
@@ -32,10 +31,14 @@ public class BatteryLowReceiver extends BroadcastReceiver {
 
         float batteryPct = level / (float)scale;
         Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
+        if(batteryPct <= 0.2){
+            Log.w("BATTERY RECEIVER","Disattivo DetectedActivitiesIntentService => Batteria < 20%");
+            context.stopService(new Intent(context,DetectedActivitiesIntentService.class));
+        }
+        /*Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
         Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
         Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
-        Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
-        Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");
+        Log.w("BATTERY RECEIVER","La mia percentuale di batteria è: "+batteryPct+" GRAZIE!");*/
 
 
     }

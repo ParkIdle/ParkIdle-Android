@@ -255,7 +255,7 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     // parsing del messaggio ricevuto
     private Event parseMqttMessage(MqttMessage message){
         String m = message.toString();
-        String[] splitted = m.split("-");
+        String[] splitted = m.split(",");
         Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
         return event;
     }
