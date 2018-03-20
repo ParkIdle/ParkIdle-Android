@@ -175,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
     public static Icon house_icon;
     public static Icon work_icon;
+    private static Marker parkmarker;
 
     //private PIOManager pioManager; //gestisce l'ascolto degli eventi PredictIO
     //private String deviceIdentifier;
@@ -373,6 +374,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                 .position(point)
                                 .setTitle("Parcheggio libero"));
 
+                        //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
                         //notification(point.getLatitude(),point.getLongitude()); // per testare le notifiche
 
                         //TEST STUFF
@@ -759,12 +761,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             LatLng parcheggio = new LatLng(latpark,longpark);
             isCameraFollowing=false;
             if(isItalian()) {
-                Marker parkmarker = getmMap().addMarker(new MarkerOptions()
+                parkmarker = getmMap().addMarker(new MarkerOptions()
                         .position(new LatLng(latpark, longpark))
                         .title("La tua macchina")
                         .setIcon(icona_whereiparked));
             }else{
-                Marker parkmarker = getmMap().addMarker(new MarkerOptions()
+                parkmarker = getmMap().addMarker(new MarkerOptions()
                         .position(new LatLng(new LatLng(latpark, longpark)))
                         .title("Your Car")
                         .setIcon(icona_whereiparked));
@@ -781,6 +783,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
+    public static void deleteParkingStat(){
+        getmMap().removeMarker(parkmarker);
+    }
 
     public void myhouse(){
 

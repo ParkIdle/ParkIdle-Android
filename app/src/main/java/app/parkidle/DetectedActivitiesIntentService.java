@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     private SharedPreferences.Editor editor = MainActivity.editor;
     private Date lastSignal;
     private Boolean parkedOnce=false;
+    private Date TrafficThreshold;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -201,6 +203,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             handler.start();
         }*/
         // vecchio check
+
+
         if (!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")){
             for(int i = 1; i < split.length; i++){
                 if(i < 3){
@@ -218,33 +222,35 @@ public class DetectedActivitiesIntentService extends IntentService {
             }
             Log.w(TAG,"[SI] Sei partito!");
             Date now = new Date();
-            l = MainActivity.getMyLocation();
-            if(l==null){
-                Log.w(TAG,"La location è null non posso mandare l'evento(partenza)");
-                return;
+            if (trafficCheck(now)) {
+                l = MainActivity.getMyLocation();
+                if (l == null) {
+                    Log.w(TAG, "La location è null non posso mandare l'evento(partenza)");
+                    return;
+                }
+                //Double latitude = l.getLatitude();
+                //Double longitude = l.getLongitude();
+                //Double latitude = eventLocation.getLatitude(); //location di quando sei partito
+                //Double longitude = eventLocation.getLongitude();
+                Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
+                Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
+                Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+                MainActivity.parcheggisegnalati += 1;
+                MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+                MainActivity.editor.commit();
+
+                EventHandler eh = new EventHandler(event);
+                Thread handler = new Thread(eh);
+                handler.setName("EventHandler");
+                handler.start();
             }
-            //Double latitude = l.getLatitude();
-            //Double longitude = l.getLongitude();
-            //Double latitude = eventLocation.getLatitude(); //location di quando sei partito
-            //Double longitude = eventLocation.getLongitude();
-            Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
-            Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
-            Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-            MainActivity.parcheggisegnalati+=1;
-            MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
-            MainActivity.editor.commit();
-
-            EventHandler eh = new EventHandler(event);
-            Thread handler = new Thread(eh);
-            handler.setName("EventHandler");
-            handler.start();
-
             if(editor == null)
                 editor = sharedPreferences.edit();
             editor.putFloat("latpark", 0);
             editor.putFloat("longpark", 0);
             editor.commit();
-            Log.w(TAG,"Sei partito. Parcheggio cancellato!");
+            Log.w(TAG,"Parcheggio cancellato!");
+            MainActivity.deleteParkingStat();
             /*if(trafficCheck(now)) {//TRUE se non sei nel traffico, FALSE se sei nel traffico
                 parkedOnce=false;
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
@@ -282,10 +288,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[1]);
                 saveParking();
                 Date now = new Date();
-                /*if (!parkedOnce){
-                    parkedOnce = true; // non ti fà parcheggiare piu di una volta
-                    setLastSignal(now);
-                }*/
+                TrafficThreshold = now;
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
                 //wasInVehicle = false;
@@ -304,11 +307,7 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
     public boolean trafficCheck(Date now){
-
-        if (getLastSignal()==null){
-            setLastSignal(now);
-            return true;
-        }
+        if (TrafficThreshold==null) return true;
 
         Log.w("trafficCHECK"," checking if we're in a traffic queue");
         String now1 = now.toString();
@@ -317,22 +316,20 @@ public class DetectedActivitiesIntentService extends IntentService {
         String minutes1 = time1.split(":")[1];
         String seconds1 = time1.split(":")[2];
 
-        String lastChecked = getLastSignal().toString();
+        String lastChecked = TrafficThreshold.toString();
         String time2 = lastChecked.split(" ")[3]; // event time
         String hour2 = time2.split(":")[0];
         String minutes2 = time2.split(":")[1];
         String seconds2 = time2.split(":")[2];
 
-        //controllo che tra il LastSignal e la data attuale siano passati almeno 7 minuti
+        //controllo che tra il TrafficThreshold e now siano passati almeno 7 minuti
         if((Integer.parseInt(hour1)==Integer.parseInt(hour2) && Integer.parseInt(minutes1)-Integer.parseInt(minutes2) > 7) ||
                 (Integer.parseInt(hour1) > Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 ) ||
                 (Integer.parseInt(hour1) < Integer.parseInt(hour2) && Integer.parseInt(minutes1)+60-Integer.parseInt(minutes2) > 7 )
                 ){
-            setLastSignal(now);
             return true;
         }
         else{
-            setLastSignal(now);
             return false;
         }
     }
