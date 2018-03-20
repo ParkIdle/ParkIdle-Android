@@ -1,0 +1,41 @@
+<resources tools:ignore="ExtraTranslation" xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Parkidle</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="mapbox_token">pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA</string>
+    <string name="facebook_app_id">156734918407060</string>
+    <string name="fb_login_protocol_scheme">fb156734918407060</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
+    <string name="facebook_button_text">Continue with Facebook</string>
+    <string name="google_button_text">Continue with Google</string>
+    <string name="you">You</string>
+    <string name="loading">Signin in..</string>
+    <string-array name="spinner_options">
+        <item name="kilometri">Kilometers</item>
+        <item name="miglia">Miles </item>
+    </string-array>
+    <string-array name="language_options">
+        <item name="italian">Italian</item>
+        <item name="english">English </item>
+    </string-array>
+    <string name="titolo_parcheggio"> Free Parking Spot </string>
+    <string name="lingua"> Language </string>
+    <string name="lavoro_non_inserito"> Workplace not added, click to add</string>
+    <string name="lavoro_inserito">Workplace already added, click to change</string>
+    <string name="casa_inserita"> Home address already added, click to change</string>
+    <string name="casa_non_inserita">Home not added, click to add </string>
+    <string name="profilo">Profile</string>
+    <string name="macchina"> Your car </string>
+    <string name="impostazioni">Settings</string>
+    <string name="casa">Home</string>
+    <string name="posto_di_lavoro">Workplace</string>
+    <string name="notifica_raggio_parcheggi">Parking spot\'s notification distance:</string>
+    <string name="notifiche_background">Background notifications:</string>
+    <string name="switch_disattiva_background">Turn off background services in low battery percentage:</string>
+    <string name="unita_di_misura">Metrics:</string>
+    <string name="indirizzo_di_casa">Home address:</string>
+    <string name="indirizzo_di_lavoro">Work address:</string>
+    <string name="cambio_preferenze">Changes were made, if you want to apply them, restart the app. Do you want to restart it now?</string>
+    <string name="conferma">Yes</string>
+    <string name="nega">No</string>
+</resources>

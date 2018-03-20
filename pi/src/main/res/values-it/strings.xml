@@ -1,0 +1,42 @@
+<resources>
+    <string name="app_name">Parkidle</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="mapbox_token">pk.eyJ1Ijoic2ltb25lc3RhZmZhIiwiYSI6ImNqYTN0cGxrMjM3MDEyd25ybnhpZGNiNWEifQ._cTZOjjlwPGflJ46TpPoyA</string>
+    <string name="facebook_app_id">156734918407060</string>
+    <string name="fb_login_protocol_scheme">fb156734918407060</string>
+    <string name="drawer_open">Apri</string>
+    <string name="drawer_close">Chiudi</string>
+    <string name="facebook_button_text">Continua con Facebook</string>
+    <string name="google_button_text">Continua con Google</string>
+    <string name="you">Tu</string>
+    <string name="loading">Accedendo..</string>
+    <string-array name="spinner_options">
+        <item name="kilometers">Kilometri</item>
+        <item name="miles">Miglia </item>
+    </string-array>
+    <string-array name="language_options">
+        <item name="italian">Italiano</item>
+        <item name="english">Inglese </item>
+    </string-array>
+    <string name="titolo_parcheggio"> Parcheggio libero </string>
+    <string name="lingua"> Lingua </string>
+    <string name="lavoro_non_inserito"> Posto di lavoro  non inserito, clicca per inserirlo</string>
+    <string name="lavoro_inserito">Indirizzo del posto di lavoro già inserito, clicca qui per cambiarlo</string>
+    <string name="casa_inserita"> Indirizzo di casa già inserito, clicca qui per cambiarlo </string>
+    <string name="casa_non_inserita">Casa non inserita, clicca per inserirla </string>
+    <string name="profilo">Profilo</string>
+    <string name="macchina"> La tua macchina </string>
+    <string name="impostazioni">Impostazioni</string>
+    <string name="casa">Casa</string>
+    <string name="posto_di_lavoro">Lavoro</string>
+    <string name="notifica_raggio_parcheggi">Notifica parcheggi nel raggio di:</string>
+    <string name="notifiche_background">Notifiche in background:</string>
+    <string name="switch_disattiva_background">Disattiva servizi in background sotto il 20%:</string>
+    <string name="unita_di_misura">Unità di misura:</string>
+    <string name="indirizzo_di_casa">Indirizzo di casa:</string>
+    <string name="indirizzo_di_lavoro">Indirizzo di lavoro:</string>
+    <string name="cambio_preferenze">Sono stati rilevati dei cambiamenti, per renderli effettivi devi riavviare l\'app. Vuoi farlo ora?</string>
+    <string name="conferma">Si</string>
+    <string name="nega">No</string>
+
+</resources>
