@@ -8,6 +8,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Environment;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -52,6 +53,8 @@ public class DetectedActivitiesIntentService extends IntentService {
     private boolean testMode;
 
     public File logFile;
+
+    private String dir;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -327,9 +330,20 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     public void appendLog(String text, int mode){
 
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            Log.w("Profiling","NO SD CARD.");
+            return;
+        }
+        else {
+            dir = Environment.getExternalStorageDirectory() + File.separator + "parkidle";
+            //create folder
+            File folder = new File(dir); //folder name
+            if (!folder.exists()) folder.mkdirs();
+        }
+
         if (mode == 0) {
             text = "test.add("+text+");\\r\\n";
-            logFile = new File("sdcard/events.file");
+            logFile = new File(dir,"events.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -342,7 +356,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         else if (mode == 1) {
             text = "accuracy.add("+text+");\\r\\n";
-            logFile = new File("sdcard/accuracy.file");
+            logFile = new File(dir,"accuracy.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -359,7 +373,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             location += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
             location += "locations.add(loc);\\r\\n";
             text = location;
-            logFile = new File("sdcard/locations.file");
+            logFile = new File(dir,"locations.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -372,9 +386,9 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         try
         {
+
             //BufferedWriter for performance, true to set append to file flag
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-
             buf.append(text);
             Log.w("FILE WRITTEN",text);
             buf.newLine();
