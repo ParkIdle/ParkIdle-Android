@@ -392,18 +392,22 @@ public class DetectedActivitiesIntentService extends IntentService {
         try
         {
             if (mode==2){
+
+                StringBuffer sb = new StringBuffer();
+                sb.append((char)13);
+                sb.append((char)10);
+                String crlfTerminator = sb.toString();
+
                 //BufferedWriter for performance, true to set append to file flag
                 BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
                 buf.append(location);
-                buf.newLine();
+                buf.append(crlfTerminator);
                 buf.append(location2);
-                buf.newLine();
+                buf.append(crlfTerminator);
                 buf.append(location3);
-                buf.newLine();
+                buf.append(crlfTerminator);
                 buf.append(location4);
-                buf.newLine();
-                buf.newLine();
-                buf.newLine();
+                buf.append(crlfTerminator);
                 Log.w("FILE WRITTEN",text);
                 buf.newLine();
                 buf.flush();
