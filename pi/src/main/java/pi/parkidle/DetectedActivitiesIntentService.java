@@ -421,7 +421,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         String[] jsonSplit = activitiesJson.split(",");
         if(jsonSplit.length > 5){
             //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
-            activitiesJson = jsonSplit[6] + "," + jsonSplit[7] + "," + jsonSplit[8] + "," + jsonSplit[9] + "," + jsonSplit[10];
+            activitiesJson = jsonSplit[0] + "," + jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4];
         }
 
         /*if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
