@@ -49,6 +49,11 @@ public class DetectedActivitiesIntentService extends IntentService {
     private Boolean parkedOnce=false;
     private Date trafficThreshold;
 
+    private String location;
+    private String location2;
+    private String location3;
+    private String location4;
+
     private boolean profilingMode;
     private boolean testMode;
 
@@ -368,11 +373,11 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
 
         else {
-            String location = "loc = new Location('Fake Location'); \\r\\n";
-            location += "loc.setLatitude("+text.split("@")[0]+");\\r\\n";
-            location += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
-            location += "locations.add(loc);\\r\\n";
-            text = location;
+            location = "loc = new Location('Fake Location'); \\r\\n";
+            location2 = "loc.setLatitude("+text.split("@")[0]+");\\r\\n";
+            location3 += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
+            location4 += "locations.add(loc);\\r\\n";
+            text = location + location2 + location3 + location4;
             logFile = new File(dir,"locations.txt");
             if (!logFile.exists()) {
                 try {
@@ -386,14 +391,34 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         try
         {
+            if (mode==2){
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(location);
+                buf.newLine();
+                buf.append(location2);
+                buf.newLine();
+                buf.append(location3);
+                buf.newLine();
+                buf.append(location4);
+                buf.newLine();
+                buf.newLine();
+                buf.newLine();
+                Log.w("FILE WRITTEN",text);
+                buf.newLine();
+                buf.flush();
+                buf.close();
 
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(text);
-            Log.w("FILE WRITTEN",text);
-            buf.newLine();
-            buf.flush();
-            buf.close();
+            }
+            else {
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(text);
+                Log.w("FILE WRITTEN", text);
+                buf.newLine();
+                buf.flush();
+                buf.close();
+            }
         }
         catch (IOException e)
         {
