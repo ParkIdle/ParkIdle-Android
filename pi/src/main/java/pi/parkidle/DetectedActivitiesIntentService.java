@@ -241,7 +241,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             //Double longitude = l.getLongitude();
             //Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
             //Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
-            if(trafficCheck(now)) {
+            //if(trafficCheck(now)) {
                 Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
                 Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
@@ -262,15 +262,15 @@ public class DetectedActivitiesIntentService extends IntentService {
                 MainActivity.parcheggisegnalati += 1;
                 MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
                 MainActivity.editor.commit();
-            }
+            //}
         }
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
         else{
             Log.w(TAG,"[?] Vediamo se sei arrivato...");
-            if(split[0].equals("IN VEHICLE") || split[0].equals("ON BICYCLE")) {
+            if(split[0].split("_")[0].equals("IN VEHICLE") || split[0].split("_")[0].equals("ON BICYCLE")) {
                 for (int i = 1; i < split.length; i++) {
-                    if (split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
+                    if (split[i].split("_")[0].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
                         Log.w(TAG, "[" + i + "] No non sei arrivato...");
                         return;
                     }
@@ -284,11 +284,11 @@ public class DetectedActivitiesIntentService extends IntentService {
                 }
                 //Double latitude = l.getLatitude();
                 //Double longitude = l.getLongitude();
-                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[0]);
-                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[1]);
+                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[1]);
+                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[2]);
                 saveParking();
                 Date now = new Date();
-                trafficThreshold = now;
+                //trafficThreshold = now;
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
 
@@ -419,7 +419,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
-        if(jsonSplit.length > 10){
+        if(jsonSplit.length > 5){
             //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
             activitiesJson = jsonSplit[6] + "," + jsonSplit[7] + "," + jsonSplit[8] + "," + jsonSplit[9] + "," + jsonSplit[10];
         }

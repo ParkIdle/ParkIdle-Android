@@ -391,12 +391,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
                         Date d = new Date();
                         Event p = new Event(markerIdHashcode(point.getLatitude(),point.getLongitude()),"DEPARTED",d.toString(),Double.toString(point.getLatitude()),Double.toString(point.getLongitude()));
-                        try {
 
-                            AsyncMQTTClient.publish("client/departed",new MqttMessage(p.toString().getBytes()));
-                        } catch (MqttException e) {
-                            Log.w(TAG,e);
-                        }
+                            MQTTSubscribe.sendMessage("client/departed",p.toString());
+                            //AsyncMQTTClient.publish("client/departed",new MqttMessage(p.toString().getBytes()));
+
                         Log.w(TAG,"Event Sent");
 
                         /*Marker m = mapboxMap.addMarker(new MarkerOptions()
