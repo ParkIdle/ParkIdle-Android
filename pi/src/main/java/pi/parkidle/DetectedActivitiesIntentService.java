@@ -8,6 +8,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Environment;
 import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
@@ -48,10 +49,17 @@ public class DetectedActivitiesIntentService extends IntentService {
     private Boolean parkedOnce=false;
     private Date trafficThreshold;
 
+    private String location;
+    private String location2;
+    private String location3;
+    private String location4;
+
     private boolean profilingMode;
     private boolean testMode;
 
     public File logFile;
+
+    private String dir;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -327,9 +335,20 @@ public class DetectedActivitiesIntentService extends IntentService {
 
     public void appendLog(String text, int mode){
 
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            Log.w("Profiling","NO SD CARD.");
+            return;
+        }
+        else {
+            dir = Environment.getExternalStorageDirectory() + File.separator + "parkidle";
+            //create folder
+            File folder = new File(dir); //folder name
+            if (!folder.exists()) folder.mkdirs();
+        }
+
         if (mode == 0) {
             text = "test.add("+text+");\\r\\n";
-            logFile = new File("sdcard/events.file");
+            logFile = new File(dir,"events.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -342,7 +361,7 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         else if (mode == 1) {
             text = "accuracy.add("+text+");\\r\\n";
-            logFile = new File("sdcard/accuracy.file");
+            logFile = new File(dir,"accuracy.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -354,12 +373,12 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
 
         else {
-            String location = "loc = new Location('Fake Location'); \\r\\n";
-            location += "loc.setLatitude("+text.split("@")[0]+");\\r\\n";
-            location += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
-            location += "locations.add(loc);\\r\\n";
-            text = location;
-            logFile = new File("sdcard/locations.file");
+            location = "loc = new Location('Fake Location'); \\r\\n";
+            location2 = "loc.setLatitude("+text.split("@")[0]+");\\r\\n";
+            location3 += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
+            location4 += "locations.add(loc);\\r\\n";
+            text = location + location2 + location3 + location4;
+            logFile = new File(dir,"locations.txt");
             if (!logFile.exists()) {
                 try {
                     logFile.createNewFile();
@@ -372,14 +391,35 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         try
         {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            if (mode==2){
+                
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(location);
+                buf.newLine();
+                buf.append(location2);
+                buf.newLine();
+                buf.append(location3);
+                buf.newLine();
+                buf.append(location4);
+                buf.newLine();
+                buf.newLine();
+                buf.newLine();
+                Log.w("FILE WRITTEN",text);
+                buf.newLine();
+                buf.flush();
+                buf.close();
 
-            buf.append(text);
-            Log.w("FILE WRITTEN",text);
-            buf.newLine();
-            buf.flush();
-            buf.close();
+            }
+            else {
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(text);
+                Log.w("FILE WRITTEN", text);
+                buf.newLine();
+                buf.flush();
+                buf.close();
+            }
         }
         catch (IOException e)
         {
