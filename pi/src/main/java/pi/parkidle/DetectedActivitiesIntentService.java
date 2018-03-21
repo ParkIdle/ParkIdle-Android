@@ -168,16 +168,16 @@ public class DetectedActivitiesIntentService extends IntentService {
         // vecchio check
 
 
-        if (!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")){
+        if (!split[0].split("_")[0].equals("IN VEHICLE") && !split[0].split("_")[0].equals("ON BICYCLE")){
             for(int i = 1; i < split.length; i++){
                 if(i < 3){
-                    if(split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")){
+                    if(split[i].split("_")[0].equals("IN VEHICLE") || split[i].split("_")[0].equals("ON BICYCLE")){
                         Log.w(TAG,"[NO] Le activity 2-3 sono inVehicle o onBicycle: CHIUDO");
                         return;
                     }
                 }
                 else {
-                    if(!split[i].equals("IN VEHICLE") && !split[i].equals("ON BICYCLE")) {
+                    if(!split[i].split("_")[0].equals("IN VEHICLE") && !split[i].split("_")[0].equals("ON BICYCLE")) {
                         Log.w(TAG, "[NO] La " + (i+1) + " non è 'IN VEHICLE o BICYCLE'");
                         return;
                     }
@@ -194,7 +194,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             //Double longitude = l.getLongitude();
             //Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
             //Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
-            if(trafficCheck(now)) {
+            //if(trafficCheck(now)) {
                 Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
                 Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
@@ -209,15 +209,15 @@ public class DetectedActivitiesIntentService extends IntentService {
                 MainActivity.parcheggisegnalati += 1;
                 MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
                 MainActivity.editor.commit();
-            }
+            //}
         }
 
         // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
         else{
             Log.w(TAG,"[?] Vediamo se sei arrivato...");
-            if(split[0].equals("IN VEHICLE") || split[0].equals("ON BICYCLE")) {
+            if(split[0].split("_")[0].equals("IN VEHICLE") || split[0].split("_")[0].equals("ON BICYCLE")) {
                 for (int i = 1; i < split.length; i++) {
-                    if (split[i].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
+                    if (split[i].split("_")[0].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
                         Log.w(TAG, "[" + i + "] No non sei arrivato...");
                         return;
                     }
@@ -231,11 +231,11 @@ public class DetectedActivitiesIntentService extends IntentService {
                 }
                 //Double latitude = l.getLatitude();
                 //Double longitude = l.getLongitude();
-                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[0]);
-                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("-")[1]);
+                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[1]);
+                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[2]);
                 saveParking();
                 Date now = new Date();
-                trafficThreshold = now;
+                //trafficThreshold = now;
                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
 
 
@@ -295,7 +295,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
-        if(jsonSplit.length > 10){
+        if(jsonSplit.length > 5){
             //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
             activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
         }
