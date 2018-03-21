@@ -1,6 +1,7 @@
 package pi.parkidle;
 
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,6 +15,12 @@ import android.widget.ImageView;
  */
 
 public class FragmentThree extends Fragment {
+    private ImageView funzione_ricentro;
+    private ImageView box_testo_ricentro;
+    private ImageView tasto;
+
+
+
     public FragmentThree(){
 
     }
@@ -26,9 +33,10 @@ public class FragmentThree extends Fragment {
 
         super.onViewCreated(v3, savedInstanceState);
 
-
-        ImageView tasto3 = v3.findViewById(R.id.tasto_avanti_3);
-        tasto3.setOnClickListener(new View.OnClickListener() {
+        funzione_ricentro = v3.findViewById(R.id.imageView7);
+        box_testo_ricentro = v3.findViewById(R.id.imageView8);
+        tasto = v3.findViewById(R.id.tasto_avanti_3);
+        tasto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((TutorialActivity)getActivity()).switchToNextFragment3();
@@ -36,5 +44,12 @@ public class FragmentThree extends Fragment {
         });
 
         return v3;
+    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        funzione_ricentro.setImageDrawable(null);
+        box_testo_ricentro.setImageDrawable(null);
+        tasto.setImageDrawable(null);
     }
 }

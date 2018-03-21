@@ -27,6 +27,7 @@ public class TutorialActivity extends AppCompatActivity {
 
     public void switchToNextFragment1(){
         viewPager.setCurrentItem(1);
+
     }
     public void switchToNextFragment2(){
         viewPager.setCurrentItem(2);

@@ -19,6 +19,10 @@ import android.widget.ImageView;
 
 public class FragmentOne extends android.support.v4.app.Fragment{
     public ViewPager viewPager;
+    private ImageView funzione_parcheggio;
+    private ImageView box_testo_parcheggio;
+    private ImageView welcome_to_parkidle;
+    private ImageView tasto;
 
 
 
@@ -65,7 +69,18 @@ public class FragmentOne extends android.support.v4.app.Fragment{
     }
 
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        funzione_parcheggio.setImageDrawable(null);
+        welcome_to_parkidle.setImageDrawable(null);
+        box_testo_parcheggio.setImageDrawable(null);
+        tasto.setImageDrawable(null);
+        Log.w("FRAGMENT ONE","HO SETTATO A NULL LE IMMAGINI!");
+        Log.w("FRAGMENT ONE","HO SETTATO A NULL LE IMMAGINI!");
+        Log.w("FRAGMENT ONE","HO SETTATO A NULL LE IMMAGINI!");
 
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
@@ -108,8 +123,11 @@ public class FragmentOne extends android.support.v4.app.Fragment{
         }*/
 
 
+        funzione_parcheggio = v.findViewById(R.id.imageView4);
+        box_testo_parcheggio = v.findViewById(R.id.imageView5);
+        welcome_to_parkidle = v.findViewById(R.id.imageView3);
 
-        ImageView tasto = v.findViewById(R.id.tasto_avanti_1);
+        tasto = v.findViewById(R.id.tasto_avanti_1);
         tasto.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

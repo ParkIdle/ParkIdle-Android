@@ -16,6 +16,10 @@ import android.widget.ImageView;
  */
 
 public class FragmentTwo extends android.support.v4.app.Fragment {
+    private ImageView timing_parcheggi;
+    private ImageView box_testo_timer;
+    private ImageView tasto_avanti;
+
     public FragmentTwo(){
 
     }
@@ -61,6 +65,16 @@ public class FragmentTwo extends android.support.v4.app.Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        timing_parcheggi.setImageDrawable(null);
+        box_testo_timer.setImageDrawable(null);
+        tasto_avanti.setImageDrawable(null);
+
+
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
 
         View v2 = inflater.inflate(R.layout.fragment_two_layout,container,false);
@@ -82,9 +96,10 @@ public class FragmentTwo extends android.support.v4.app.Fragment {
             Log.w("FRAGMENT TWO","Immagine decodificata: Byte spesi: " + byte_spesi + " , Byte allocati : "+ byte_allocati);
         }*/
 
-
-        ImageView tasto2 = v2.findViewById(R.id.tasto_avanti_2);
-        tasto2.setOnClickListener(new View.OnClickListener() {
+        timing_parcheggi = v2.findViewById(R.id.imageView10);
+        box_testo_timer = v2.findViewById(R.id.imageView12);
+        tasto_avanti = v2.findViewById(R.id.tasto_avanti_2);
+        tasto_avanti.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((TutorialActivity)getActivity()).switchToNextFragment2();

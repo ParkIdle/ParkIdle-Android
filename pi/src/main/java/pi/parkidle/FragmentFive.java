@@ -14,8 +14,18 @@ import android.widget.ImageView;
  */
 
 public class FragmentFive extends Fragment {
+    private ImageView testo_finale;
+    private ImageView tasto_mappa;
+
     public FragmentFive(){
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        testo_finale.setImageDrawable(null);
+        tasto_mappa.setImageDrawable(null);
     }
 
     @Nullable
@@ -26,9 +36,10 @@ public class FragmentFive extends Fragment {
 
         super.onViewCreated(v5, savedInstanceState);
 
+        testo_finale = v5.findViewById(R.id.imageView18);
 
-        ImageView tasto5 = v5.findViewById(R.id.tasto_mappa);
-        tasto5.setOnClickListener(new View.OnClickListener() {
+        tasto_mappa = v5.findViewById(R.id.tasto_mappa);
+        tasto_mappa.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((TutorialActivity)getActivity()).switchToMap();

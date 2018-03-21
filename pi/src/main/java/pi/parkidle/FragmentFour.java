@@ -14,6 +14,19 @@ import android.widget.ImageView;
  */
 
 public class FragmentFour extends Fragment {
+    private ImageView parcheggio_piuvicino;
+    private ImageView box_testo_parcheggiovicino;
+    private ImageView tasto4;
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        parcheggio_piuvicino.setImageDrawable(null);
+        box_testo_parcheggiovicino.setImageDrawable(null);
+        tasto4.setImageDrawable(null);
+
+    }
+
     public FragmentFour(){
 
     }
@@ -27,8 +40,10 @@ public class FragmentFour extends Fragment {
         super.onViewCreated(v4, savedInstanceState);
 
 
-        ImageView tasto2 = v4.findViewById(R.id.tasto_avanti_4);
-        tasto2.setOnClickListener(new View.OnClickListener() {
+        parcheggio_piuvicino = v4.findViewById(R.id.imageView14);
+        box_testo_parcheggiovicino = v4.findViewById(R.id.imageView15);
+        tasto4 = v4.findViewById(R.id.tasto_avanti_4);
+        tasto4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 ((TutorialActivity)getActivity()).switchToNextFragment4();
