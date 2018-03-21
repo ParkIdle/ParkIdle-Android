@@ -197,6 +197,8 @@ public class MQTTSubscribe extends Service implements MqttCallback{
         else{
 
             Event event = parseMqttMessage(message);
+            if(event == null)
+                return;
             events.add(event.toString());
             //Log.w(TAG,event.toString());
             if(event.getEvent().equals("DEPARTED")) {
@@ -255,6 +257,8 @@ public class MQTTSubscribe extends Service implements MqttCallback{
     // parsing del messaggio ricevuto
     private Event parseMqttMessage(MqttMessage message){
         String m = message.toString();
+        if(m.contains(","))
+            return null;
         String[] splitted = m.split("-");
         Event event = new Event(splitted[0],splitted[1],splitted[2],splitted[3],splitted[4]);
         return event;
