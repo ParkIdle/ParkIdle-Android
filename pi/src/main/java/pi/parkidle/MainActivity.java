@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private ActionBarDrawerToggle mActionBarDrawerToggle;
 
     private static final int ACCESS_FINE_LOCATION_PERMISSION = 1;
+    private static final int ACCESS_EXTERNAL_WRITE_PERMISSION = 1;
     private static final String TAG = "Main";
 
     public static Bitmap profileBitmap;
@@ -174,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public static Icon icona_parcheggio_libero_5mins; // parcheggio libero (segna eventi departed)
     public static Icon icona_parcheggio_libero_10mins; // parcheggio libero (segna eventi departed)
     public static Icon icona_parcheggio_libero_20mins; // parcheggio libero (segna eventi departed)
+    public static Icon icona_parcheggio_libero_test; // parcheggio libero dai test
 
     public static Icon icona_whereiparked; // dove ho parcheggiato io (segna eventi arrived)
     public static Icon house_icon;
@@ -229,6 +231,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, ACCESS_FINE_LOCATION_PERMISSION);
         }
 
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            //se non li ho, li richiedo associando al permesso un int definito da me per riconoscerlo (vedi dichiarazioni iniziali)
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, ACCESS_EXTERNAL_WRITE_PERMISSION);
+        }
+
         // se ho gia i permessi posso chiedere di localizzarmi
         //locationManager = (LocationManager) getApplicationContext().getSystemService(getApplicationContext().LOCATION_SERVICE);
         //checkGPSEnabled(locationManager); // controllo lo stato del GPS
@@ -272,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         icona_parcheggio_libero_5mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_green70x70);
         icona_parcheggio_libero_10mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_yellow70x70);
         icona_parcheggio_libero_20mins = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_red70x70);
+        icona_parcheggio_libero_test = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.p_marker_test70x70);
         work_icon = IconFactory.getInstance(MainActivity.this).fromResource(R.drawable.workicon);
 
         // se ho gia i permessi posso chiedere di localizzarmi

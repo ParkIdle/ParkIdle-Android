@@ -12,10 +12,19 @@ import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
+import com.mapbox.mapboxsdk.geometry.LatLng;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -23,6 +32,8 @@ import java.util.Date;
  *  activity updates using
  *  {@link com.google.android.gms.location.ActivityRecognitionClient#requestActivityUpdates}.
  */
+
+
 public class DetectedActivitiesIntentService extends IntentService {
 
     private Location l;
@@ -36,6 +47,11 @@ public class DetectedActivitiesIntentService extends IntentService {
     private Date lastSignal;
     private Boolean parkedOnce=false;
     private Date trafficThreshold;
+
+    private boolean profilingMode;
+    private boolean testMode;
+
+    public File logFile;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -78,49 +94,78 @@ public class DetectedActivitiesIntentService extends IntentService {
         String activity = null;
         int maxConfidence = 0;
         // Log each activity.
-        for (DetectedActivity da: detectedActivities) {
 
-            switch(da.getType()){
-                case DetectedActivity.IN_VEHICLE:
-                    activity = "IN VEHICLE";
-                    break;
-                case DetectedActivity.ON_BICYCLE:
-                    activity = "ON BICYCLE";
-                    break;
-                case DetectedActivity.WALKING:
-                    activity = "WALKING";
-                    break;
-                case DetectedActivity.ON_FOOT:
-                    activity = "ON FOOT";
-                    break;
-                case DetectedActivity.RUNNING:
-                    activity = "RUNNING";
-                    break;
-                case DetectedActivity.STILL:
-                    activity = "STILL";
-                    break;
-                case DetectedActivity.TILTING:
-                    activity = "TILTING";
-                    break;
-                case DetectedActivity.UNKNOWN:
-                    activity = "UNKNOWN";
-                    break;
+        testMode = false; //TODO: change this for Test Mode!
+        profilingMode = true; // TODO: change this for Profiling Mode!
+
+        if (testMode==false) {
+            for (DetectedActivity da : detectedActivities) {
+
+                switch (da.getType()) {
+                    case DetectedActivity.IN_VEHICLE:
+                        activity = "IN VEHICLE";
+                        break;
+                    case DetectedActivity.ON_BICYCLE:
+                        activity = "ON BICYCLE";
+                        break;
+                    case DetectedActivity.WALKING:
+                        activity = "WALKING";
+                        break;
+                    case DetectedActivity.ON_FOOT:
+                        activity = "ON FOOT";
+                        break;
+                    case DetectedActivity.RUNNING:
+                        activity = "RUNNING";
+                        break;
+                    case DetectedActivity.STILL:
+                        activity = "STILL";
+                        break;
+                    case DetectedActivity.TILTING:
+                        activity = "TILTING";
+                        break;
+                    case DetectedActivity.UNKNOWN:
+                        activity = "UNKNOWN";
+                        break;
+                }
+                //Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
+                if (da.getConfidence() > maxConfidence) {
+                    maxConfidence = da.getConfidence();
+                    maxActivity = activity;
+                }
+
             }
-            //Log.w(TAG,"RECOGNIZED -> " + activity + da.getConfidence() + "%");
-            if(da.getConfidence() > maxConfidence){
-                maxConfidence = da.getConfidence();
-                maxActivity = activity;
+            if(maxActivity.equals("UNKNOWN") || maxActivity.equals("TILTING")) {
+                Log.w(TAG,maxActivity + " non tenuta in considerazione.");
+                return;
             }
 
-        }
-        //Toast.makeText(this, activity + " " + da.getConfidence() + "%", Toast.LENGTH_SHORT).show();
-        if(maxActivity.equals("UNKNOWN") || maxActivity.equals("TILTING")) {
-            Log.w(TAG,maxActivity + " non tenuta in considerazione.");
-            return;
-        }
+            if (profilingMode){ //scrivo logs su file
+                appendLog(maxConfidence+"", 1);
+            }
 
-        addDetectedActivity(maxActivity,MainActivity.getMyLocation());
-        createEvent(maxActivity);
+            addDetectedActivity(maxActivity,MainActivity.getMyLocation());
+            createEvent(maxActivity);
+
+        } else {
+            try {
+                if (testCase.getTest(0) == null){
+                    new testCase(0);
+                    }
+                }catch(NullPointerException e){
+                        new testCase(0);
+                }
+            maxActivity = testCase.getTest(testCase.getIndex());
+            Log.w(TAG, "TEST MODE IN!");
+            Log.w(TAG, maxActivity + " faked from index" + testCase.getIndex());
+
+            if(maxActivity.equals("UNKNOWN") || maxActivity.equals("TILTING")) {
+                Log.w(TAG,maxActivity + " non tenuta in considerazione.");
+                return;
+            }
+            addDetectedActivity(maxActivity,testCase.getLocation(testCase.getIndex()));
+            testCase.incrementIndex();
+            createEvent(maxActivity);
+        }
     }
 
     private void createEvent(String activity) {
@@ -133,6 +178,8 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
             return;
         }
+
+        //TODO: problems- NO Scrolling dinamico delle activity, ma vengono aggiornate solo quando arrivano a 10 + Nuovo assetto da splittare ancora nei check perchè ce sta pure la location
 
         // se ho una sequenza !VEHICLE - !VEHICLE - !VEHICLE - VEHICLE - VEHICLE
         // se ho una sequenza !BICYCLE - !BICYCLE - !BICYCLE - BICYCLE - BICYCLE
@@ -198,6 +245,12 @@ public class DetectedActivitiesIntentService extends IntentService {
                 Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
                 Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
                 Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+                if (testMode){
+                    MainActivity.getmMap().addMarker(new MarkerOptions()
+                            .position(new LatLng(latitude, longitude))
+                            .title("TEST MARKER")
+                            .setIcon(MainActivity.icona_parcheggio_libero_test));
+                }
 
                 MQTTSubscribe.sendMessage("client/departed", event.toString());
 
@@ -272,6 +325,69 @@ public class DetectedActivitiesIntentService extends IntentService {
         }
     }
 
+    public void appendLog(String text, int mode){
+
+        if (mode == 0) {
+            text = "test.add("+text+");\\r\\n";
+            logFile = new File("sdcard/events.file");
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        else if (mode == 1) {
+            text = "accuracy.add("+text+");\\r\\n";
+            logFile = new File("sdcard/accuracy.file");
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        else {
+            String location = "loc = new Location('Fake Location'); \\r\\n";
+            location += "loc.setLatitude("+text.split("@")[0]+");\\r\\n";
+            location += "loc.setLongitude("+text.split("@")[1]+");\\r\\n";
+            location += "locations.add(loc);\\r\\n";
+            text = location;
+            logFile = new File("sdcard/locations.file");
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        try
+        {
+            //BufferedWriter for performance, true to set append to file flag
+            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+
+            buf.append(text);
+            Log.w("FILE WRITTEN",text);
+            buf.newLine();
+            buf.flush();
+            buf.close();
+        }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
     public void saveParking() {
         //salvataggio parcheggio
         Log.w(TAG,"Sto salvando il parcheggio...");
@@ -291,13 +407,21 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,"Location is null for this activity");
             return;
         }
+
+        if (profilingMode && !testMode){ //scrivo logs su file
+
+            appendLog(activity, 0);
+            appendLog(activityLocation.getLatitude() + "@" + activityLocation.getLongitude(), 2);
+
+
+        }
         activity = activity + "_" + activityLocation.getLatitude() + "_" + activityLocation.getLongitude();
         if(activitiesJson.equals("")) activitiesJson += activity;
         else activitiesJson = activitiesJson + "," + activity;
         String[] jsonSplit = activitiesJson.split(",");
         if(jsonSplit.length > 5){
             //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
-            activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5];
+            activitiesJson = jsonSplit[0] + "," + jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4];
         }
 
         /*if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
