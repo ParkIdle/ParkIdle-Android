@@ -708,6 +708,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if(f=='p'){
             nearestParkingSpot();
         }
+
+
     }
 
     }//qua finisce oncreate
