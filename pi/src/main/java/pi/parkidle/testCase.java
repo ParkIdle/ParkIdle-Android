@@ -64,8 +64,7 @@ public class testCase {
                 loc.setLongitude(12.493151873051033);
                 locations.add(loc);
                 Log.w("Test0","ho finito bro");
-
-
+                break;
 
             case 1:
                 Log.w("Test1","Sono partito bro");
@@ -134,6 +133,8 @@ public class testCase {
                 loc.setLongitude(12.4555674);
                 locations.add(loc);
                 Log.w("Test1","Sono arrivato bro");
+                break;
+
             case 2:
                 Log.w("Test2","Sono partito bro");
                 //deve restituire 0 sei partito 0 sei arrivato
@@ -228,6 +229,8 @@ public class testCase {
                 loc.setLongitude(12.4555193);
                 locations.add(loc);
                 Log.w("Test2","Sono arrivato bro");
+                break;
+
             case 3:
                 Log.w("Test3","Sono partito bro");
                 //deve restituire 0 sei partito 0 sei arrivato
@@ -414,6 +417,8 @@ public class testCase {
                 loc.setLongitude(12.4554996);
                 locations.add(loc);
                 Log.w("Test3","Sono arrivato bro");
+                break;
+
             case 4:
                 Log.w("Test4","Sono partito bro");
                 //deve restituire 1 sei partito 0 sei arrivato
@@ -714,6 +719,7 @@ public class testCase {
                 loc.setLongitude(12.539051677145318);
                 locations.add(loc);
                 Log.w("Test4","Sono arrivato bro");
+                break;
 
         }
 

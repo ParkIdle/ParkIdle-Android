@@ -103,8 +103,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         int maxConfidence = 0;
         // Log each activity.
 
-        testMode = false; //TODO: change this for Test Mode!
-        profilingMode = true; // TODO: change this for Profiling Mode!
+        testMode = true; //TODO: change this for Test Mode!
+        profilingMode = false; // TODO: change this for Profiling Mode!
 
         if (testMode==false) {
             for (DetectedActivity da : detectedActivities) {
@@ -156,11 +156,11 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         } else {
             try {
-                if (testCase.getTest(1) == null){
-                    new testCase(1);
+                if (testCase.getTest(2) == null){
+                    new testCase(2);
                     }
                 }catch(NullPointerException e){
-                        new testCase(1);
+                        new testCase(2);
                 }
             maxActivity = testCase.getTest(testCase.getIndex());
             Log.w(TAG, "TEST MODE IN!");
