@@ -157,11 +157,11 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         } else {
             try {
-                if (testCase.getTest(1) == null){
-                    new testCase(1);
+                if (testCase.getTest(2) == null){
+                    new testCase(2);
                     }
                 }catch(NullPointerException e){
-                        new testCase(1);
+                        new testCase(2);
                 }
             maxActivity = testCase.getTest(testCase.getIndex());
             Log.w(TAG, "TEST MODE IN!");
