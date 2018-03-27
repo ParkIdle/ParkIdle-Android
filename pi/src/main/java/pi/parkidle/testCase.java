@@ -713,7 +713,8 @@ public class testCase {
                 loc.setLatitude(41.960250461931395);
                 loc.setLongitude(12.539051677145318);
                 locations.add(loc);
-                Log.w("Test4","Sono arrivato bro");
+                Log.w("Test4","Sono arrivato" +
+                        " bro");
 
         }
 

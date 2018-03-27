@@ -103,10 +103,11 @@ public class DetectedActivitiesIntentService extends IntentService {
         int maxConfidence = 0;
         // Log each activity.
 
-        testMode = false; //TODO: change this for Test Mode!
-        profilingMode = true; // TODO: change this for Profiling Mode!
+        testMode = true; //TODO: change this for Test Mode!
+        profilingMode = false; // TODO: change this for Profiling Mode!
 
         if (testMode==false) {
+
             for (DetectedActivity da : detectedActivities) {
 
                 switch (da.getType()) {
@@ -171,7 +172,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 return;
             }
             addDetectedActivity(maxActivity,testCase.getLocation(testCase.getIndex()));
-            testCase.incrementIndex();
+            //testCase.incrementIndex();
             createEvent(maxActivity);
         }
     }
