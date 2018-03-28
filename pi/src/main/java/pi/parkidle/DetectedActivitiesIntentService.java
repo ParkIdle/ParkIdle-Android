@@ -213,9 +213,9 @@ public class DetectedActivitiesIntentService extends IntentService {
             if(activityOnly[8].equals("IN VEHICLE") || activityOnly[8].equals("ON BICYCLE")){
                 if(activityOnly[9].equals("IN VEHICLE") || activityOnly[9].equals("ON BICYCLE")){
                     if(checkFirstFive(activityOnly,"departed")) {
-                        if(sharedPreferences == null)
-                            sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-                        if(sharedPreferences.getBoolean("wasInVehicle",false) == false) {
+                        //if(sharedPreferences == null)
+                          //  sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+                        //if(sharedPreferences.getBoolean("wasInVehicle",false) == false) {
                             Log.w(TAG, "[SI] SEI PARTITO");
                             Date now = new Date();
                             int interestedActivityIndex = getInterestedActivity(activityOnly, "departed");
@@ -233,14 +233,14 @@ public class DetectedActivitiesIntentService extends IntentService {
                             MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
                             MainActivity.editor.commit();
                             Log.w(TAG, "[X] PARTENZA SEGNALATA CON SUCCESSO!");
-                            if (editor == null)
+                            /*if (editor == null)
                                 if (sharedPreferences == null)
                                     sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE);
                             editor = sharedPreferences.edit();
                             editor.putBoolean("wasInVehicle", true);
-                            editor.commit();
+                            editor.commit();*/
                             return;
-                        }
+                       // }
                     }
                 }
             }
@@ -252,9 +252,9 @@ public class DetectedActivitiesIntentService extends IntentService {
                 if(!activityOnly[8].equals("IN VEHICLE") && !activityOnly[8].equals("ON BICYCLE")){
                     if(!activityOnly[9].equals("IN VEHICLE") && !activityOnly[9].equals("ON BICYCLE")){
                         if(checkFirstFive(activityOnly,"arrived")){
-                            if(sharedPreferences == null)
-                                sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-                            if(sharedPreferences.getBoolean("wasInVehicle",false) == true){
+                            //if(sharedPreferences == null)
+                                //sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+                            //if(sharedPreferences.getBoolean("wasInVehicle",false) == true){
                                 Log.w(TAG, "[SI] SEI ARRIVATO!");
                                 int interestedActivityIndex = getInterestedActivity(activityOnly,"arrived");
                                 Double latitude = Double.parseDouble(activityWithLocation[interestedActivityIndex].split("_")[1]);
@@ -263,15 +263,15 @@ public class DetectedActivitiesIntentService extends IntentService {
                                 Date now = new Date();
                                 Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
                                 Log.w(TAG, "[X] ARRIVO SEGNALATO CON SUCCESSO!");
-                                if(editor == null) {
+                                /*if(editor == null) {
                                     editor = sharedPreferences.edit();
                                     editor.putBoolean("wasInVehicle", false);
                                     editor.commit();
-                                }
+                                }*/
                                 return;
                             }
 
-                        }
+                       // }
                     }
                 }
             }
