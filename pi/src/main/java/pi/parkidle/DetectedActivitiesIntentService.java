@@ -239,6 +239,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                             editor = sharedPreferences.edit();
                             editor.putBoolean("wasInVehicle", true);
                             editor.commit();
+                            return;
                         }
                     }
                 }
@@ -267,6 +268,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                                     editor.putBoolean("wasInVehicle", false);
                                     editor.commit();
                                 }
+                                return;
                             }
 
                         }
@@ -276,6 +278,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG,"[NO] NON SEI ARRIVATO");
         }
         Log.w(TAG,"[!] NESSUN EVENTO SEGNALATO");
+
     }
 
     public boolean trafficCheck(Date now){
