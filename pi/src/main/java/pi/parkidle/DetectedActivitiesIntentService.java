@@ -187,7 +187,7 @@ public class DetectedActivitiesIntentService extends IntentService {
             Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 10)");
             return;
         }
-        String[] activityOnly = null;
+        String[] activityOnly = {""};
         for(int i = 0; i < 10; i++){
             activityOnly[i] = activityWithLocation[i].split("_")[0];
         }
