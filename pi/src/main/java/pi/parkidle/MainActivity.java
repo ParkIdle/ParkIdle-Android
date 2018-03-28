@@ -1413,7 +1413,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     public void onConnected(@Nullable Bundle bundle) {
         Log.w(TAG,"CONNECTED");
         activityRecognitionClient = new ActivityRecognitionClient(this);
-        Task task = activityRecognitionClient.requestActivityUpdates(20*1000, getActivityDetectionPendingIntent());
+        Task task = activityRecognitionClient.requestActivityUpdates(14*1000, getActivityDetectionPendingIntent());
         task.addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void result) {
