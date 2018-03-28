@@ -108,6 +108,7 @@ public class DetectedActivitiesIntentService extends IntentService {
         profilingMode = false; // TODO: change this for Profiling Mode!
 
         if (testMode==false) {
+
             for (DetectedActivity da : detectedActivities) {
 
                 switch (da.getType()) {
@@ -172,7 +173,7 @@ public class DetectedActivitiesIntentService extends IntentService {
                 return;
             }
             addDetectedActivity(maxActivity,testCase.getLocation(testCase.getIndex()));
-            testCase.incrementIndex();
+            //testCase.incrementIndex();
             createEvent(maxActivity);
         }
     }
