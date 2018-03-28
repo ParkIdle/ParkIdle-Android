@@ -104,8 +104,8 @@ public class DetectedActivitiesIntentService extends IntentService {
         int maxConfidence = 0;
         // Log each activity.
 
-        testMode = true; //TODO: change this for Test Mode!
-        profilingMode = false; // TODO: change this for Profiling Mode!
+        testMode = false; //TODO: change this for Test Mode!
+        profilingMode = true; // TODO: change this for Profiling Mode!
 
         if (testMode==false) {
 
