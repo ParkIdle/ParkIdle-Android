@@ -20,12 +20,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.LinkedList;
 
 
 /**
@@ -60,6 +57,10 @@ public class DetectedActivitiesIntentService extends IntentService {
     public File logFile;
 
     private String dir;
+
+    private LinkedList<String> firstFive;
+    private LinkedList<String> lastFive;
+    private LinkedList<MyDetectedActivity> activityList;
 
     protected static final String TAG = "DetectedActivitiesIS";
 
@@ -156,11 +157,11 @@ public class DetectedActivitiesIntentService extends IntentService {
 
         } else {
             try {
-                if (testCase.getTest(2) == null){
-                    new testCase(2);
+                if (testCase.getTest(4) == null){
+                    new testCase(4);
                     }
                 }catch(NullPointerException e){
-                        new testCase(2);
+                        new testCase(4);
                 }
             maxActivity = testCase.getTest(testCase.getIndex());
             Log.w(TAG, "TEST MODE IN!");
@@ -177,132 +178,103 @@ public class DetectedActivitiesIntentService extends IntentService {
     }
 
     private void createEvent(String activity) {
-        Log.w(TAG,"Vediamo se è un evento valido...");
-        //SharedPreferences sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
-        //activitiesJson = sharedPreferences.getString("detectedActivities","");
-        String[] split = activitiesJson.split(",");
-        //String[] split2 = activitiesLocations.split(",");
-        if (split.length < 5) {
-            Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 5)");
+        Log.w(TAG,"CONTROLLO VALIDITA' LISTA...");
+
+        // CHECK DIMENSIONI LISTA
+        String[] activityWithLocation = activitiesJson.split(",");
+        if (activityWithLocation.length < 10) {
+            Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 10)");
+            return;
+        }
+        String[] activityOnly = null;
+        for(int i = 0; i < 10; i++){
+            activityOnly[i] = activityWithLocation[i].split("_")[0];
+        }
+        if(activityOnly.length < 10){
+            Log.w(TAG, "[NO] Sequenza attività troppo corta per rilevare un evento ( size < 10)");
             return;
         }
 
-        //TODO: problems- NO Scrolling dinamico delle activity, ma vengono aggiornate solo quando arrivano a 10 + Nuovo assetto da splittare ancora nei check perchè ce sta pure la location
+        Log.w(TAG,"[?] CONTROLLO SE SEI PARTITO...");
 
-        // se ho una sequenza !VEHICLE - !VEHICLE - !VEHICLE - VEHICLE - VEHICLE
-        // se ho una sequenza !BICYCLE - !BICYCLE - !BICYCLE - BICYCLE - BICYCLE
-        /*if(!split[0].equals("IN VEHICLE") && !split[0].equals("ON BICYCLE")) {
-            Log.w(TAG, "[0] Vediamo se sei partito...");
-            if(split[1].equals("IN VEHICLE") || split[1].equals("ON BICYCLE")){
-                Log.w(TAG,"[1] No non sei partito...");
-                return;
-            }
-            if(split[2].equals("IN VEHICLE") || split[2].equals("ON BICYCLE")){
-                Log.w(TAG,"[2] No non sei partito...");
-                return;
-            }
-            if(!split[3].equals("IN VEHICLE") && !split[3].equals("ON BICYCLE")) {
-                Log.w(TAG, "[3] No non sei partito... (non sei in veicolo allo stato 3)");
-                return;
-            }
-            if(!split[4].equals("IN VEHICLE") && !split[4].equals("ON BICYCLE")) {
-                Log.w(TAG, "[4] No non sei partito...");
-                return;
-            }
-            Log.w(TAG,"[x] Sei partito!");
-            Date now = new Date();
-            l = MainActivity.getMyLocation();
-            Double latitude = l.getLatitude();
-            Double longitude = l.getLongitude();
-            Event event = new Event(MainActivity.deviceIdentifier, "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-            EventHandler eh = new EventHandler(event);
-            Thread handler = new Thread(eh);
-            handler.setName("EventHandler");
-            handler.start();
-        }*/
-        // vecchio check
-
-
-        if (!split[0].split("_")[0].equals("IN VEHICLE") && !split[0].split("_")[0].equals("ON BICYCLE")){
-            for(int i = 1; i < split.length; i++){
-                if(i < 3){
-                    if(split[i].split("_")[0].equals("IN VEHICLE") || split[i].split("_")[0].equals("ON BICYCLE")){
-                        Log.w(TAG,"[NO] Le activity 2-3 sono inVehicle o onBicycle: CHIUDO");
-                        return;
-                    }
-                }
-                else {
-                    if(!split[i].split("_")[0].equals("IN VEHICLE") && !split[i].split("_")[0].equals("ON BICYCLE")) {
-                        Log.w(TAG, "[NO] La " + (i+1) + " non è 'IN VEHICLE o BICYCLE'");
-                        return;
+        // CONTROLLO EVENTO
+        /** PARTENZE VALIDE (S == !VEHICLE o !BICYCLE, V == VEHICLE o BICYCLE)
+            S S S S S S V V V V
+            S S S S S S S V V V
+            S S S S S S S S V V
+         **/
+        /** ARRIVO VALIDO (S == !VEHICLE o !BICYCLE, V == VEHICLE o BICYCLE)
+         V V V V V V S S S S
+         V V V V V V V S S S
+         **/
+        if (checkLastFive(activityOnly,"departed")){
+            // POTREBBE ESSERE UNA PARTENZA
+            if(activityOnly[8].equals("IN VEHICLE") || activityOnly[8].equals("ON BICYCLE")){
+                if(activityOnly[9].equals("IN VEHICLE") || activityOnly[9].equals("ON BICYCLE")){
+                    if(checkFirstFive(activityOnly,"departed")) {
+                        if(sharedPreferences == null)
+                            sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+                        if(sharedPreferences.getBoolean("wasInVehicle",false) == false) {
+                            Log.w(TAG, "[SI] SEI PARTITO");
+                            Date now = new Date();
+                            int interestedActivityIndex = getInterestedActivity(activityOnly, "departed");
+                            Double latitude = Double.parseDouble(activityWithLocation[interestedActivityIndex].split("_")[1]);
+                            Double longitude = Double.parseDouble(activityWithLocation[interestedActivityIndex].split("_")[2]);
+                            Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
+                            if (testMode) {
+                                MainActivity.getmMap().addMarker(new MarkerOptions()
+                                        .position(new LatLng(latitude, longitude))
+                                        .title("TEST MARKER")
+                                        .setIcon(MainActivity.icona_parcheggio_libero_test));
+                            }
+                            MQTTSubscribe.sendMessage("client/departed", event.toString());
+                            MainActivity.parcheggisegnalati += 1;
+                            MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
+                            MainActivity.editor.commit();
+                            Log.w(TAG, "[X] PARTENZA SEGNALATA CON SUCCESSO!");
+                            if (editor == null)
+                                if (sharedPreferences == null)
+                                    sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES", MODE_PRIVATE);
+                            editor = sharedPreferences.edit();
+                            editor.putBoolean("wasInVehicle", true);
+                            editor.commit();
+                        }
                     }
                 }
             }
-            Log.w(TAG,"[SI] Sei partito!");
-            Date now = new Date();
-            /*4l = MainActivity.getMyLocation();
-            if(l==null){
-                Log.w(TAG,"La location è null non posso mandare l'evento(partenza)");
-                return;
-            }*/
-            //Double latitude = l.getLatitude();
-            //Double longitude = l.getLongitude();
-            //Double latitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[0]);
-            //Double longitude = Double.parseDouble(activitiesLocations.split(",")[2].split("-")[1]);
-            //if(trafficCheck(now)) {
-                Double latitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[1]);
-                Double longitude = Double.parseDouble(activitiesJson.split(",")[2].split("_")[2]);
-                Event event = new Event(markerIdHashcode(latitude, longitude), "DEPARTED", now.toString(), latitude.toString(), longitude.toString());
-                if (testMode){
-                    MainActivity.getmMap().addMarker(new MarkerOptions()
-                            .position(new LatLng(latitude, longitude))
-                            .title("TEST MARKER")
-                            .setIcon(MainActivity.icona_parcheggio_libero_test));
-                }
-
-                MQTTSubscribe.sendMessage("client/departed", event.toString());
-
-                /*EventHandler eh = new EventHandler(event);
-                Thread handler = new Thread(eh);
-                handler.setName("EventHandler");
-                handler.start();*/
-                // aggiungi parcheggio tra i segnalati nel profilo
-                MainActivity.parcheggisegnalati += 1;
-                MainActivity.editor.putInt("parcheggiorank", MainActivity.parcheggisegnalati);
-                MainActivity.editor.commit();
-            //}
+            Log.w(TAG,"[NO] NON SEI PARTITO");
         }
+        if(checkLastFive(activityOnly,"arrived")){
+            // POTREBBE ESSERE UN ARRIVO
+            if(!activityOnly[7].equals("IN VEHICLE") && !activityOnly[7].equals("ON BICYCLE")){
+                if(!activityOnly[8].equals("IN VEHICLE") && !activityOnly[8].equals("ON BICYCLE")){
+                    if(!activityOnly[9].equals("IN VEHICLE") && !activityOnly[9].equals("ON BICYCLE")){
+                        if(checkFirstFive(activityOnly,"arrived")){
+                            if(sharedPreferences == null)
+                                sharedPreferences = getSharedPreferences("PARKIDLE_PREFERENCES",MODE_PRIVATE);
+                            if(sharedPreferences.getBoolean("wasInVehicle",false) == true){
+                                Log.w(TAG, "[SI] SEI ARRIVATO!");
+                                int interestedActivityIndex = getInterestedActivity(activityOnly,"arrived");
+                                Double latitude = Double.parseDouble(activityWithLocation[interestedActivityIndex].split("_")[1]);
+                                Double longitude = Double.parseDouble(activityWithLocation[interestedActivityIndex].split("_")[2]);
+                                saveParking();
+                                Date now = new Date();
+                                Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
+                                Log.w(TAG, "[X] ARRIVO SEGNALATO CON SUCCESSO!");
+                                if(editor == null) {
+                                    editor = sharedPreferences.edit();
+                                    editor.putBoolean("wasInVehicle", false);
+                                    editor.commit();
+                                }
+                            }
 
-        // se ho una sequenza VEHICLE - !VEHICLE - !VEHICLE - !VEHICLE
-        else{
-            Log.w(TAG,"[?] Vediamo se sei arrivato...");
-            if(split[0].split("_")[0].equals("IN VEHICLE") || split[0].split("_")[0].equals("ON BICYCLE")) {
-                for (int i = 1; i < split.length; i++) {
-                    if (split[i].split("_")[0].equals("IN VEHICLE") || split[i].equals("ON BICYCLE")) {
-                        Log.w(TAG, "[" + i + "] No non sei arrivato...");
-                        return;
+                        }
                     }
                 }
-                // creo l'evento di arrivo
-                Log.w(TAG, "[SI] Sei arrivato!");
-                l = MainActivity.getMyLocation();
-                if(l==null){
-                    Log.w(TAG,"[!] La location è null non posso inviare l'evento (arrivo)");
-                    return;
-                }
-                //Double latitude = l.getLatitude();
-                //Double longitude = l.getLongitude();
-                Double latitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[1]);
-                Double longitude = Double.parseDouble(activitiesLocations.split(",")[3].split("_")[2]);
-                saveParking();
-                Date now = new Date();
-                //trafficThreshold = now;
-                Event event = new Event(markerIdHashcode(latitude,longitude), "ARRIVED", now.toString(), latitude.toString(), longitude.toString());
-
-
             }
+            Log.w(TAG,"[NO] NON SEI ARRIVATO");
         }
-
+        Log.w(TAG,"[!] NESSUN EVENTO SEGNALATO");
     }
 
     public boolean trafficCheck(Date now){
@@ -448,34 +420,25 @@ public class DetectedActivitiesIntentService extends IntentService {
             return;
         }
 
-        if (profilingMode && !testMode){ //scrivo logs su file
-
+        if (profilingMode && !testMode) { //scrivo logs su file
             appendLog(activity, 0);
             appendLog(activityLocation.getLatitude() + "@" + activityLocation.getLongitude(), 2);
-
-
         }
-        activity = activity + "_" + activityLocation.getLatitude() + "_" + activityLocation.getLongitude();
-        if(activitiesJson.equals("")) activitiesJson += activity;
-        else activitiesJson = activitiesJson + "," + activity;
+
+        MyDetectedActivity myDetectedActivity = new MyDetectedActivity(activity,activityLocation.getLatitude(),activityLocation.getLongitude());
+        if(activitiesJson.equals("")) activitiesJson += myDetectedActivity.toString();
+        else activitiesJson = activitiesJson + "," + myDetectedActivity.toString();
         String[] jsonSplit = activitiesJson.split(",");
-        if(jsonSplit.length > 5){
-            //activitiesJson = activitiesJson.substring(activitiesJson.indexOf(",")+1);
-            activitiesJson = jsonSplit[0] + "," + jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4];
+        if(jsonSplit.length > 10){
+            activitiesJson = jsonSplit[1] + "," + jsonSplit[2] + "," + jsonSplit[3] + "," + jsonSplit[4] + "," + jsonSplit[5] +
+                    jsonSplit[6] + "," + jsonSplit[7] + "," + jsonSplit[8] + "," + jsonSplit[9] + "," + jsonSplit[10] ;
         }
-
-        /*if(activitiesLocations.equals("")) activitiesLocations += activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
-        else activitiesLocations = activitiesLocations + "," + activityLocation.getLatitude() + "-" + activityLocation.getLongitude();
-        String[] locationsSplit = activitiesLocations.split(",");
-        if(locationsSplit.length > 5){
-            activitiesLocations = locationsSplit[1] + "," + locationsSplit[2] + "," + locationsSplit[3] + "," + locationsSplit[4] + "," + locationsSplit[5];
-        }*/
 
         if(editor == null)
             editor = sharedPreferences.edit();
         editor.putString("detectedActivities", activitiesJson);
-        editor.putString("activitiesLocations",activitiesLocations);
-        editor.apply();
+        //editor.putString("activitiesLocations",activitiesLocations);
+        editor.commit();
 
         Log.w(TAG,"@@@ACTIVITY LIST@@@ : " + activitiesJson + "\n@@@ACTIVITY LOCATIONS@@@ : " + activitiesLocations);
     }
@@ -500,9 +463,74 @@ public class DetectedActivitiesIntentService extends IntentService {
         Log.w(TAG, "Sei partito. Parcheggio cancellato!");
     }
 
+    // questo metodo serve a controllare le ultime 5 activity nella lista (ossia le più recenti)
+    // e verificare che vadano bene secondo l'algoritmo
+    private boolean checkLastFive(String[] activities,String event){
+        if(event.equals("departed")) {
+            if (!activities[5].equals("IN VEHICLE") && !activities[5].equals("ON BICYCLE") &&
+                    !activities[6].equals("IN VEHICLE") && !activities[6].equals("ON BICYCLE") &&
+                    !activities[7].equals("IN VEHICLE") && !activities[7].equals("ON BICYCLE")) {
+                return true;
+            } else if (!activities[5].equals("IN VEHICLE") && !activities[5].equals("ON BICYCLE") &&
+                    !activities[6].equals("IN VEHICLE") && !activities[6].equals("ON BICYCLE")) {
+                return true;
+            } else if (!activities[5].equals("IN VEHICLE") && !activities[5].equals("ON BICYCLE")) {
+                return true;
+            } else
+                return false;
+        }
+        else{
+            if (activities[5].equals("IN VEHICLE") || activities[5].equals("ON BICYCLE") ||
+                    activities[6].equals("IN VEHICLE") || activities[6].equals("ON BICYCLE")) {
+                return true;
+            } else if (activities[5].equals("IN VEHICLE") || activities[5].equals("ON BICYCLE")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 
-    /*@Override
-    public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
-        return Service.START_STICKY;
-    }*/
+    // questo metodo serve a controllare le prime 5 activity nella lista (ossia le più vecchie)
+    // e verificare che vadano bene secondo l'algoritmo
+    private boolean checkFirstFive(String[] activities,String event){
+        if(event.equals("departed")) {
+            for (int i = 0; i < 5; i++) {
+                if (activities[i].equals("IN VEHICLE") || activities[i].equals("ON BICYCLE")) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        else {
+            for (int i = 0; i < 5; i++) {
+                if (!activities[i].equals("IN VEHICLE") && !activities[i].equals("ON BICYCLE")) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+    }
+
+    // questo metodo serve a scegliere la location da usare per l'evento
+    // e si basa sulla prima activity interessante ossia sul primo VEHICLE o STILL
+    private int getInterestedActivity(String[] activities,String event){
+        if(event.equals("departed")){
+            for(int i = 6; i < 10; i++){
+                if(activities[i].equals("IN VEHICLE") || activities[i].equals("ON BICYCLE")){
+                    return i;
+                }
+            }
+        }
+        else{
+            for(int i = 6; i < 10; i++){
+                if(!activities[i].equals("IN VEHICLE") && !activities[i].equals("ON BICYCLE")){
+                    return i;
+                }
+            }
+        }
+        return 8;
+    }
+
 }

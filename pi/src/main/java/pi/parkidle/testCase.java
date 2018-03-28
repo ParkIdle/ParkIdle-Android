@@ -140,9 +140,9 @@ public class testCase {
                 //deve restituire 0 sei partito 0 sei arrivato
                 test.add("STILL");
                 test.add("ON FOOT");
-                test.add("STILL");
-                test.add("STILL");
-                test.add("STILL");
+                test.add("ON FOOT");
+                test.add("IN VEHICLE");
+                test.add("IN VEHICLE");
                 test.add("STILL");
                 test.add("STILL");
                 test.add("STILL");
