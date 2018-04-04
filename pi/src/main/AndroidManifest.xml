@@ -8,8 +8,8 @@
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- COMMENT THIS WHEN NOT IN TEST MODE AND YOU'RE RELEASING A APK -->
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />  <!-- COMMENT THIS WHEN NOT IN TEST MODE AND YOU'RE RELEASING A APK -->
 
     <!-- PredictIO dangerous permissions -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -43,32 +43,30 @@
             android:name="firebase_crashlytics_collection_enabled"
             android:value="false" />
         <!-- BroadcastReceiver that starts MqttService on device boot -->
-        <receiver android:name="pi.parkidle.OnBootReceiver">
+        <receiver android:name=".OnBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name="pi.parkidle.OnConnectivityChangeReceiver">
+        <receiver android:name=".OnConnectivityChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
 
         <service
-            android:name="pi.parkidle.DetectedActivitiesIntentService"
+            android:name=".DetectedActivitiesIntentService"
             android:exported="false" />
-
         <service
-            android:name="pi.parkidle.MQTTSubscribe"
+            android:name=".MQTTSubscribe"
             android:exported="false" />
         <service android:name="org.eclipse.paho.android.service.MqttService" />
-        <service android:name="pi.parkidle.MyLocationService" />
-
+        <service android:name=".MyLocationService" />
 
         <receiver android:name=".BatteryLowReceiver">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
             </intent-filter>
         </receiver>
         <!--
@@ -88,20 +86,20 @@
 
         <!-- <service android:name="org.eclipse.paho.android.service.MqttService" /> -->
 
-        <activity android:name="pi.parkidle.MainActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="com.google.android.gms.actions.SEARCH_ACTION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
-        <activity android:name="pi.parkidle.NoConnectionActivity"></activity>
+        <activity android:name=".NoConnectionActivity" />
         <activity
-            android:name="pi.parkidle.TutorialActivity"
+            android:name=".TutorialActivity"
             android:theme="@style/NoActionBar" />
-        <activity android:name="pi.parkidle.DashboardActivity" />
+        <activity android:name=".DashboardActivity" />
         <activity
-            android:name="pi.parkidle.LoginActivity"
+            android:name=".LoginActivity"
             android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -109,15 +107,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="pi.parkidle.SettingsActivity" />
-        <activity android:name="pi.parkidle.FeedBackActivity" />
-        <activity android:name="pi.parkidle.FullScreenImage" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".FeedBackActivity" />
+        <activity android:name=".FullScreenImage" />
         <activity
-            android:name="pi.parkidle.GpsDialogActivity"
+            android:name=".GpsDialogActivity"
             android:configChanges="orientation"
             android:screenOrientation="sensor"
             android:theme="@style/Theme.MyDialogTheme" />
-        <activity android:name="pi.parkidle.ChangedSettingsDialogActivity"
+        <activity
+            android:name=".ChangedSettingsDialogActivity"
             android:configChanges="orientation"
             android:screenOrientation="sensor"
             android:theme="@style/Theme.MyDialogTheme" />

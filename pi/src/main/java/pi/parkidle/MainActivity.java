@@ -605,6 +605,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             case R.id.tutorial:
                                 startTutorial();
                                 break;
+                            
 
 
                             // TODO: inserire le funzioni per tutti gli altri tasti qui
@@ -1307,6 +1308,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         Intent i = new Intent(MainActivity.this,SettingsActivity.class);
         startActivity(i);
     }
+
 
     public static Bitmap getImageBitmap(final String uri){
         Thread t = new Thread(new Runnable() {

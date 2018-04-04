@@ -104,8 +104,11 @@ public class DetectedActivitiesIntentService extends IntentService {
         int maxConfidence = 0;
         // Log each activity.
 
+
+        //entrambi a false è la versione standard/di produzione, con testmode = true e profilingmode = false parte la modalità test,
+        //con profilingmode = true e testmode = false parte la modalità di creazione file per i test
         testMode = false; //TODO: change this for Test Mode!
-        profilingMode = true; // TODO: change this for Profiling Mode!
+        profilingMode = false; // TODO: change this for Profiling Mode!
 
         if (testMode==false) {
 
